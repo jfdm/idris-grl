@@ -1,0 +1,8 @@
+package grl
+
+opts = "-p effects -p containers"
+
+modules = GRL
+        , GRL.Model
+        , GRL.Utils
+        , GRL.Eval

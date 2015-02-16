@@ -1,0 +1,3 @@
+#+TITLE: The Goal Requirements Language
+
+An implementation of the /Goal Requirements Language/ (GRL) in =Idris=.
