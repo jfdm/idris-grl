@@ -16,7 +16,7 @@ import public Effects
 import public Effect.State
 import public Effect.Exception
 
-import GRL.Types
+import GRL.Model
 
 EvalRes : Type
 EvalRes = List (GModel ELEM, EvalVal)
