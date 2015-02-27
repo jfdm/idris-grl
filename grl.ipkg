@@ -4,5 +4,7 @@ opts = "-p effects -p containers"
 
 modules = GRL
         , GRL.Model
+        , GRL.Model.Data
+        , GRL.Model.Eq
         , GRL.Utils
         , GRL.Eval
