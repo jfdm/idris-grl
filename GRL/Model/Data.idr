@@ -9,8 +9,6 @@ data Contrib = MAKES | HELPS | SOMEPOS | ZERO | SOMENEG | HURTS | BREAKS
 
 data ElemTy = MODEL | ELEM | LINK
 
-data DecompTy = AND | IOR | XOR
-
 data GModel : ElemTy -> Type where
   -- Model Instance
   GRLSpec : List (GModel ELEM) -> List (GModel LINK) -> GModel MODEL
@@ -23,18 +21,15 @@ data GModel : ElemTy -> Type where
   Impacts : Contrib -> GModel ELEM -> GModel ELEM -> GModel LINK
   Effects : Contrib -> GModel ELEM -> GModel ELEM -> GModel LINK
   -- Structure
-  Decomp : DecompTy -> GModel ELEM -> List (GModel ELEM) -> GModel LINK
+  AND : GModel ELEM -> List (GModel ELEM) -> GModel LINK
+  XOR : GModel ELEM -> List (GModel ELEM) -> GModel LINK
+  IOR : GModel ELEM -> List (GModel ELEM) -> GModel LINK
 
 -- ----------------------------------------------------------- [ Show Instance ]
 instance Show ElemTy where
   show MODEL  = "MODEL"
   show ELEM   = "ELEM"
   show LINK   = "LINK"
-
-instance Show DecompTy where
-  show AND = "AND"
-  show IOR = "IOR"
-  show XOR = "XOR"
 
 instance Show EvalVal where
   show SATISFIED = "SATISFIED"

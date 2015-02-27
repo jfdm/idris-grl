@@ -40,20 +40,6 @@ instance DecEq Contrib where
       primEq = believe_me (Refl {x})
       postulate primNotEq : x = y -> Void
 
-
-instance Eq DecompTy where
-  (==) AND AND = True
-  (==) IOR IOR = True
-  (==) XOR XOR = True
-  (==) _   _   = False
-
-instance DecEq DecompTy where
-  decEq x y = if x == y then Yes primEq else No primNotEq
-    where
-      primEq : x = y
-      primEq = believe_me (Refl {x})
-      postulate primNotEq : x = y -> Void
-
 -- @TODO Make total.
 mutual
   %assert_total
@@ -65,7 +51,9 @@ mutual
   gModelEq (Res x xe)                   (Res y ye)                    = x == y && xe == ye
   gModelEq (Impacts xc xa xb)           (Impacts yc ya yb)            = xc == yc && xa == ya && xb == yb
   gModelEq (Effects xc xa xb)           (Effects yc ya yb)            = xc == yc && xa == ya && xb == yb
-  gModelEq (Decomp xty x xs)            (Decomp yty y ys)             = xty == yty && x == y && xs == ys
+  gModelEq (AND x xs)                   (AND y ys)                    = x == y && xs == ys
+  gModelEq (XOR x xs)                   (XOR y ys)                    = x == y && xs == ys
+  gModelEq (IOR x xs)                   (IOR y ys)                    = x == y && xs == ys
   gModelEq _                            _                             = False
 
   instance Eq (GModel ty) where

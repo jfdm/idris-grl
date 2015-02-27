@@ -8,3 +8,4 @@ modules = GRL
         , GRL.Model.Eq
         , GRL.Utils
         , GRL.Eval
+        , GRL.Eval.GenGraph
