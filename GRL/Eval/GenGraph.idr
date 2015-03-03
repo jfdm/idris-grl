@@ -11,6 +11,13 @@ import GRL.Model
 ||| Links in a goal graph.
 data GLink = ALINK | ILINK | XLINK | CLINK Contrib | ELINK Contrib
 
+instance Show GLink where
+  show ALINK = "And"
+  show ILINK = "IOR"
+  show XLINK = "XOR"
+  show (CLINK c) = "Contribution " ++ show c
+  show (ELINK c) = "SideEffect " ++ show c
+
 ||| A goal graph is a graph of nodes and links...
 GGraph : Type
 GGraph = Graph (GModel ELEM) (GLink)
@@ -41,8 +48,8 @@ genLink lval ex ey = do
     otherwise           => pure Nothing
 
 genGLink : GModel LINK -> {GGEffs} Eff $ List (Maybe (LEdge GLink))
-genGLink (Impacts c a b) = pure [!(genLink (CLINK c) a b)]
-genGLink (Effects c a b) = pure [!(genLink (ELINK c) a b)]
+genGLink (Impacts c a b) = pure [!(genLink (CLINK c) b a)] -- for graph traversal
+genGLink (Effects c a b) = pure [!(genLink (ELINK c) b a)]
 genGLink (AND x ys)      = mapE (genLink ALINK x) ys
 genGLink (IOR x ys)      = mapE (genLink ILINK x) ys
 genGLink (XOR x ys)      = mapE (genLink XLINK x) ys
