@@ -50,4 +50,18 @@ instance Show Contrib where
   show HURTS   = "HURTS"
   show BREAKS  = "BREAKS"
 
+instance Show (GModel ty) where
+  show (GRLSpec es ls) = unwords ["[Model ", show es, show ls, "]\n"]
+  show (Goal t v)      = unwords ["[Goal ", show t, show v, "]"]
+  show (Task t v)      = unwords ["[Task ", show t, show v, "]"]
+  show (Soft t v)      = unwords ["[Soft ", show t, show v, "]"]
+  show (Res t v)       = unwords ["[Res ", show t, show v, "]"]
+
+  show (Impacts c a b) = unwords ["[Impacts ", show a, show c, show b, "]\n"]
+  show (Effects c a b) = unwords ["[Effects ", show a, show c, show b, "]\n"]
+
+  show (AND e es) = unwords ["[", show e, "&&", show es, "]"]
+  show (XOR e es) = unwords ["[", show e, "XOR", show es, "]"]
+  show (IOR e es) = unwords ["[", show e, "||", show es, "]"]
+
 -- --------------------------------------------------------------------- [ EOF ]
