@@ -64,23 +64,23 @@ instance Show (GModel ty) where
   show (XOR e es) = unwords ["[", show e, "XOR", show es, "]"]
   show (IOR e es) = unwords ["[", show e, "||", show es, "]"]
 
-readEvalVal : String -> Maybe EvalVal
-readEvalVal "satisfied" = Just SATISFIED
-readEvalVal "weaksatis" = Just WEAKSATIS
-readEvalVal "weakden"   = Just WEAKDEN
-readEvalVal "denied"    = Just DENIED
-readEvalVal "unknown"   = Just UNKNOWN
-readEvalVal _           = Nothing
+readEvalVal : String -> EvalVal
+readEvalVal "satisfied" = SATISFIED
+readEvalVal "weaksatis" = WEAKSATIS
+readEvalVal "weakden"   = WEAKDEN
+readEvalVal "denied"    = DENIED
+readEvalVal "unknown"   = UNKNOWN
+readEvalVal _           = UNKNOWN
 
-readContribValue : String -> Maybe Contrib
-readContribValue "makes"         = Just MAKES
-readContribValue "helps"         = Just HELPS
-readContribValue "some-positive" = Just SOMEPOS
-readContribValue "zero"          = Just ZERO
-readContribValue "some-negative" = Just SOMENEG
-readContribValue "hurts"         = Just HURTS
-readContribValue "breaks"        = Just BREAKS
-readContribValue _               = Nothing
+readContribValue : String -> Contrib
+readContribValue "makes"         = MAKES
+readContribValue "helps"         = HELPS
+readContribValue "some-positive" = SOMEPOS
+readContribValue "zero"          = ZERO
+readContribValue "some-negative" = SOMENEG
+readContribValue "hurts"         = HURTS
+readContribValue "breaks"        = BREAKS
+readContribValue _               = ZERO
 
 
 
