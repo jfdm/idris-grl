@@ -1,4 +1,7 @@
-module GRL.Model.Data
+||| Common data structures for GRL the model and edsl.
+module GRL.Common
+
+import public Decidable.Equality
 
 data Weight = HIGH | MEDIUM | LOW | NO
 
@@ -9,23 +12,7 @@ data Contrib = MAKES | HELPS | SOMEPOS | ZERO | SOMENEG | HURTS | BREAKS
 
 data ElemTy = MODEL | ELEM | LINK
 
-data GModel : ElemTy -> Type where
-  -- Model Instance
-  GRLSpec : List (GModel ELEM) -> List (GModel LINK) -> GModel MODEL
-  -- Elements
-  Goal : Maybe String -> EvalVal -> GModel ELEM
-  Soft : Maybe String -> EvalVal -> GModel ELEM
-  Task : Maybe String -> EvalVal -> GModel ELEM
-  Res  : Maybe String -> EvalVal -> GModel ELEM
-  -- Intentional
-  Impacts : Contrib -> GModel ELEM -> GModel ELEM -> GModel LINK
-  Effects : Contrib -> GModel ELEM -> GModel ELEM -> GModel LINK
-  -- Structure
-  AND : GModel ELEM -> List (GModel ELEM) -> GModel LINK
-  XOR : GModel ELEM -> List (GModel ELEM) -> GModel LINK
-  IOR : GModel ELEM -> List (GModel ELEM) -> GModel LINK
-
--- ----------------------------------------------------------- [ Show Instance ]
+-- -------------------------------------------------------------------- [ Show ]
 instance Show ElemTy where
   show MODEL  = "MODEL"
   show ELEM   = "ELEM"
@@ -50,20 +37,29 @@ instance Show Contrib where
   show HURTS   = "HURTS"
   show BREAKS  = "BREAKS"
 
-instance Show (GModel ty) where
-  show (GRLSpec es ls) = unwords ["[Model ", show es, show ls, "]\n"]
-  show (Goal t v)      = unwords ["[Goal ", show t, show v, "]"]
-  show (Task t v)      = unwords ["[Task ", show t, show v, "]"]
-  show (Soft t v)      = unwords ["[Soft ", show t, show v, "]"]
-  show (Res t v)       = unwords ["[Res ", show t, show v, "]"]
+-- ---------------------------------------------------------------------- [ Eq ]
+instance Eq EvalVal where
+  (==) SATISFIED SATISFIED = True
+  (==) WEAKSATIS WEAKSATIS = True
+  (==) WEAKDEN   WEAKDEN   = True
+  (==) DENIED    DENIED    = True
+  (==) CONFLICT  CONFLICT  = True
+  (==) UNKNOWN   UNKNOWN   = True
+  (==) NONE      NONE      = True
+  (==) UNDECIDED UNDECIDED = True
+  (==) _         _         = False
 
-  show (Impacts c a b) = unwords ["[Impacts ", show a, show c, show b, "]\n"]
-  show (Effects c a b) = unwords ["[Effects ", show a, show c, show b, "]\n"]
+instance Eq Contrib where
+  (==) MAKES   MAKES   = True
+  (==) HELPS   HELPS   = True
+  (==) SOMEPOS SOMEPOS = True
+  (==) ZERO    ZERO    = True
+  (==) SOMENEG SOMENEG = True
+  (==) HURTS   HURTS   = True
+  (==) BREAKS  BREAKS  = True
+  (==) _       _       = False
 
-  show (AND e es) = unwords ["[", show e, "&&", show es, "]"]
-  show (XOR e es) = unwords ["[", show e, "XOR", show es, "]"]
-  show (IOR e es) = unwords ["[", show e, "||", show es, "]"]
-
+-- -------------------------------------------------------------------- [ Read ]
 readEvalVal : String -> EvalVal
 readEvalVal "satisfied" = SATISFIED
 readEvalVal "weaksatis" = WEAKSATIS
@@ -83,5 +79,19 @@ readContribValue "breaks"        = BREAKS
 readContribValue _               = ZERO
 
 
+-- ------------------------------------------------------------------- [ DecEq ]
+instance DecEq EvalVal where
+  decEq x y = if x == y then Yes primEq else No primNotEq
+    where
+      primEq : x = y
+      primEq = believe_me (Refl {x})
+      postulate primNotEq : x = y -> Void
 
+
+instance DecEq Contrib where
+  decEq x y = if x == y then Yes primEq else No primNotEq
+    where
+      primEq : x = y
+      primEq = believe_me (Refl {x})
+      postulate primNotEq : x = y -> Void
 -- --------------------------------------------------------------------- [ EOF ]

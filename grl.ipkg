@@ -2,10 +2,8 @@ package grl
 
 opts = "-p effects -p containers"
 
-modules = GRL
-        , GRL.Model
-        , GRL.Model.Data
-        , GRL.Model.Eq
+modules = GRL.Common
         , GRL.Utils
+        , GRL.Model
         , GRL.Eval
         , GRL.Eval.GenGraph
