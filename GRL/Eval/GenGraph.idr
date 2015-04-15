@@ -33,13 +33,13 @@ assignNodeID = doAssign Z
     doAssign id Nil     = Nil
     doAssign id (e::es) = (e, id) :: doAssign (S id) es
 
-getID : GModel ELEM -> {GGEffs} Eff $ Maybe Nat
+getID : GModel ELEM -> Eff (Maybe Nat) GGEffs
 getID e = pure $ lookup e !get
 
 genLink : GLink
         -> GModel ELEM
         -> GModel ELEM
-        -> {GGEffs} Eff $ Maybe (LEdge GLink)
+        -> {GGEffs} Eff (Maybe (LEdge GLink))
 genLink lval ex ey = do
   x <- getID ex
   y <- getID ey
@@ -47,20 +47,20 @@ genLink lval ex ey = do
     (Just x', Just y' ) => pure $ Just (x', y', lval)
     otherwise           => pure Nothing
 
-genGLink : GModel LINK -> {GGEffs} Eff $ List (Maybe (LEdge GLink))
+genGLink : GModel LINK -> Eff (List (Maybe (LEdge GLink))) (GGEffs)
 genGLink (Impacts c a b) = pure [!(genLink (CLINK c) b a)] -- for graph traversal
 genGLink (Effects c a b) = pure [!(genLink (ELINK c) b a)]
-genGLink (AND x ys)      = mapE (genLink ALINK x) ys
-genGLink (IOR x ys)      = mapE (genLink ILINK x) ys
-genGLink (XOR x ys)      = mapE (genLink XLINK x) ys
+genGLink (AND x ys)      = mapE (\y => genLink ALINK x y) ys
+genGLink (IOR x ys)      = mapE (\y => genLink ILINK x y) ys
+genGLink (XOR x ys)      = mapE (\y => genLink XLINK x y) ys
 
-genGLinks : List (GModel LINK) -> {GGEffs} Eff $ List (LEdge GLink)
+genGLinks : List (GModel LINK) -> Eff (List (LEdge GLink)) GGEffs
 genGLinks ls = do
-  lls <- mapE genGLink ls
+  lls <- mapE (\l => genGLink l) ls
   pure $ mapMaybe id (concat lls)
 
 
-genGoalGraph : GModel MODEL -> {GGEffs} Eff GGraph
+genGoalGraph : GModel MODEL -> Eff GGraph GGEffs
 genGoalGraph (GRLSpec es ls) = do
   let es' = assignNodeID es
   put es'
