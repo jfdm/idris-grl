@@ -5,18 +5,66 @@ import public Decidable.Equality
 
 data Weight = HIGH | MEDIUM | LOW | NO
 
-data EvalVal = SATISFIED | WEAKSATIS | WEAKDEN | DENIED | CONFLICT
-             | UNKNOWN | NONE | UNDECIDED
+namespace Qualiative
+  data EvalVal : Type where
 
-data Contrib = MAKES | HELPS | SOMEPOS | ZERO | SOMENEG | HURTS | BREAKS
+    ||| The intentional element or indicator is sufficiently dissatisfied.
+    DENIED : EvalVal
 
-data ElemTy = MODEL | ELEM | LINK
+    ||| The intentional element is partially dissatisfied.
+    WEAKDEN : EvalVal
+
+    ||| The intentional element or indicator is partially satisfied.
+    WEAKSATIS : EvalVal
+
+
+    ||| The intentional element is sufficiently satisfied.
+    SATISFIED   : EvalVal
+
+    ||| There are arguments strongly in favour and strongly against
+    ||| the satisfaction of the intentional element.
+    CONFLICT : EvalVal
+
+    ||| The satisfaction level of the intentional element is unknown.
+    UNKNOWN : EvalVal
+
+    ||| The intentional element or indicator is neither satisfied nor dissatisfied.
+    NONE : EvalVal
+
+    UNDECIDED : EvalVal
+
+namespace Contributions
+  data Contrib : Type where
+    ||| The contribution is positive and sufficient.
+    MAKES    : Contrib
+    ||| The contribution is positive but not sufficient.
+    HELPS    : Contrib
+    ||| The contribution is positive, but the extent of the contribution is unknown.
+    SOMEPOS  : Contrib
+    ||| There is some contribution, but the extent and the degree (positive or negative) of the contribution is unknown.
+    UNKNOWN     : Contrib
+    ||| The contribution is negative, but the extent of the contribution is unknown.
+    SOMENEG  : Contrib
+    ||| The contribution of the contributing element is negative and sufficient.
+    BREAKS   : Contrib
+    ||| The contribution is negative but not sufficient.
+    HURTS    : Contrib
+
+
+data ElemTy = MODEL | ELEM | ILINK | SLINK
+
+data DecompTy = ANDTy | XORTy | IORTy
 
 -- -------------------------------------------------------------------- [ Show ]
 instance Show ElemTy where
   show MODEL  = "MODEL"
   show ELEM   = "ELEM"
   show LINK   = "LINK"
+
+instance Show DecompTy where
+  show ANDTy  = "ANDTy"
+  show XORTy  = "XORTy"
+  show IORTy  = "IORTy"
 
 instance Show EvalVal where
   show SATISFIED = "SATISFIED"
@@ -32,7 +80,7 @@ instance Show Contrib where
   show MAKES   = "MAKES"
   show HELPS   = "HELPS"
   show SOMEPOS = "SOMEPOS"
-  show ZERO    = "ZERO"
+  show UNKNOWN    = "UNKNOWN"
   show SOMENEG = "SOMENEG"
   show HURTS   = "HURTS"
   show BREAKS  = "BREAKS"
@@ -53,11 +101,18 @@ instance Eq Contrib where
   (==) MAKES   MAKES   = True
   (==) HELPS   HELPS   = True
   (==) SOMEPOS SOMEPOS = True
-  (==) ZERO    ZERO    = True
+  (==) UNKNOWN    UNKNOWN    = True
   (==) SOMENEG SOMENEG = True
   (==) HURTS   HURTS   = True
   (==) BREAKS  BREAKS  = True
   (==) _       _       = False
+
+
+instance Eq DecompTy where
+  (==) ANDTy ANDTy = True
+  (==) XORTy XORTy = True
+  (==) IORTy IORTy = True
+  (==) _     _     = False
 
 -- -------------------------------------------------------------------- [ Read ]
 readEvalVal : String -> EvalVal
@@ -72,11 +127,11 @@ readContribValue : String -> Contrib
 readContribValue "makes"         = MAKES
 readContribValue "helps"         = HELPS
 readContribValue "some-positive" = SOMEPOS
-readContribValue "zero"          = ZERO
+readContribValue "unknown"       = UNKNOWN
 readContribValue "some-negative" = SOMENEG
 readContribValue "hurts"         = HURTS
 readContribValue "breaks"        = BREAKS
-readContribValue _               = ZERO
+readContribValue _               = UNKNOWN
 
 
 -- ------------------------------------------------------------------- [ DecEq ]

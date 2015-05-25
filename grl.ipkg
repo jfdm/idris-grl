@@ -5,5 +5,7 @@ opts = "-p effects -p containers"
 modules = GRL.Common
         , GRL.Utils
         , GRL.Model
-        , GRL.Eval
-        , GRL.Eval.GenGraph
+ --       , GRL.Eval
+ --       , GRL.Eval.GenGraph
+ --       , GRL.Eval.Forward
+ --       , GRL.Eval.Qualitative

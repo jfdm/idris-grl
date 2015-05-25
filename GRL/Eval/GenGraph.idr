@@ -9,12 +9,14 @@ import Data.Graph.AList
 import GRL.Model
 
 ||| Links in a goal graph.
-data GLink = ALINK | ILINK | XLINK | CLINK Contrib | ELINK Contrib
+data GLink = DLINK | CLINK Contrib | ELINK Contrib
+
+data DLinkTy = ALINK | ILINK | XLINK
+
+data GElem = MkElem String (Maybe EvalVal) (Maybe DLinkTy)
 
 instance Show GLink where
-  show ALINK = "And"
-  show ILINK = "IOR"
-  show XLINK = "XOR"
+  show DLINK = "Structure"
   show (CLINK c) = "Contribution " ++ show c
   show (ELINK c) = "SideEffect " ++ show c
 
@@ -50,9 +52,9 @@ genLink lval ex ey = do
 genGLink : GModel LINK -> Eff (List (Maybe (LEdge GLink))) (GGEffs)
 genGLink (Impacts c a b) = pure [!(genLink (CLINK c) b a)] -- for graph traversal
 genGLink (Effects c a b) = pure [!(genLink (ELINK c) b a)]
-genGLink (AND x ys)      = mapE (\y => genLink ALINK x y) ys
-genGLink (IOR x ys)      = mapE (\y => genLink ILINK x y) ys
-genGLink (XOR x ys)      = mapE (\y => genLink XLINK x y) ys
+genGLink (AND x ys)      = mapE (\y => genLink DLINK x y) ys
+genGLink (IOR x ys)      = mapE (\y => genLink DLINK x y) ys
+genGLink (XOR x ys)      = mapE (\y => genLink DLINK x y) ys
 
 genGLinks : List (GModel LINK) -> Eff (List (LEdge GLink)) GGEffs
 genGLinks ls = do
