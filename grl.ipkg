@@ -6,8 +6,14 @@ modules = GRL.Utils
         , GRL.Combinator
         , GRL.Model
         , GRL.DSL
+        , GRL.Property.Common
+        , GRL.Property.Element
+--        , GRL.Property.Structure
+--        , GRL.Property.Intention
+--        , GRL.Property
         , GRL.Types.Expr
         , GRL.Types.Value
+        , GRL.Lang
  --       , GRL.Eval
  --       , GRL.Eval.GenGraph
  --       , GRL.Eval.Forward

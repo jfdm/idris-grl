@@ -8,24 +8,36 @@ import public Data.List
 import GRL.Types.Expr
 import GRL.Types.Value
 
+%access public
+
 data GoalNode : Type where
-  Goal : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Soft : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Task : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Res  : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Goal : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Soft : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Task : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Res  : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+
+private
+showNode : GRLElementTy -> Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
+showNode ty l t s d = unwords ["[", show ty, show l, t, show s, show d, "]"]
+
+instance Show GoalNode where
+  show (Goal l t s d) = showNode GOAL     l t s d
+  show (Soft l t s d) = showNode SOFT     l t s d
+  show (Task l t s d) = showNode TASK     l t s d
+  show (Res  l t s d) = showNode RESOURCE l t s d
 
 instance Eq GoalNode where
-  (==) (Goal x xs xd) (Goal y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Soft x xs xd) (Soft y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Task x xs xd) (Task y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Res  x xs xd) (Res  y ys yd) = x == y && xs == ys && xd == yd
+  (==) (Goal i x xs xd) (Goal j y ys yd) = x == y && xs == ys && xd == yd && i == j
+  (==) (Soft i x xs xd) (Soft j y ys yd) = x == y && xs == ys && xd == yd && i == j
+  (==) (Task i x xs xd) (Task j y ys yd) = x == y && xs == ys && xd == yd && i == j
+  (==) (Res  i x xs xd) (Res  j y ys yd) = x == y && xs == ys && xd == yd && i == j
   (==) _              _              = False
 
 getGoalTitle : GoalNode -> String
-getGoalTitle (Goal t _ _) = t
-getGoalTitle (Soft t _ _) = t
-getGoalTitle (Task t _ _) = t
-getGoalTitle (Res  t _ _) = t
+getGoalTitle (Goal _ t _ _) = t
+getGoalTitle (Soft _ t _ _) = t
+getGoalTitle (Task _ t _ _) = t
+getGoalTitle (Res  _ t _ _) = t
 
 data GoalEdge  : Type where
   Contribution : ContributionTy -> GoalEdge
@@ -34,10 +46,15 @@ data GoalEdge  : Type where
   Xor          : GoalEdge
   Ior          : GoalEdge
 
-record GModel where
-  constructor MkModel
-  counter : Nat
-  model : Graph (GoalNode) (GoalEdge)
+instance Show GoalEdge where
+  show (Contribution ty) = unwords ["[Contrib", show ty, "]"]
+  show (Correlation ty)  = unwords ["[Correl", show ty, "]"]
+  show And       = unwords ["[Edge IOR]"]
+  show Xor       = unwords ["[Edge XOR]"]
+  show Ior       = unwords ["[Edge AND]"]
+
+GModel : Type
+GModel = Graph (GoalNode) (GoalEdge)
 
 hasGoal : String -> GModel -> Maybe GoalNode
-hasGoal t m = hasValueBy (\(x,_) => getGoalTitle x == t) (model m)
+hasGoal t m = hasValueBy (\(x,_) => getGoalTitle x == t) m

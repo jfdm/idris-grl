@@ -4,6 +4,5 @@ An implementation of the /Goal Requirements Language/ (GRL) in =Idris=.
 
 The main imports are:
 
-+ =GRL.Model= :: Imports the data structure
-+ =GRL.Utils= :: Imports utility functions
 + =GRL.Lang=  :: Imports a EDSL for constructing GRL Models.
++ =GRL.Eval=  :: Imports the evaluation algorithms.
