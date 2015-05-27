@@ -10,93 +10,95 @@ import Data.Queue
 import Data.Stack
 
 import GRL.Model
+import GRL.Combinator
+import GRL.Model.ExprTypes
+import GRL.Model.ValueTypes
+
 -- import GRL.Eval.GenGraph
 -- import GRL.Eval.Forward
 
 namespace Amyot2010agm
 -- Service Provider
-  highPerf : GModel ELEM
+  highPerf : GRLExpr ELEM
   highPerf = soft "High Performance" Nothing
 
-  lowCost : GModel ELEM
+  lowCost : GRLExpr ELEM
   lowCost  = soft "Low Cost" Nothing
 
-  minChange : GModel ELEM
+  minChange : GRLExpr ELEM
   minChange = soft "Minimum Changes to Infrastructure" Nothing
 
-  maxHardware : GModel ELEM
-  maxHardware = soft "Maximun Hardware Utilisation" Nothing
+--   maxHardware : GRLExpr ELEM
+--   maxHardware = soft "Maximun Hardware Utilisation" Nothing
 
-  highThrough : GModel ELEM
-  highThrough = soft "High Throughput" Nothing
+--   highThrough : GRLExpr ELEM
+--   highThrough = soft "High Throughput" Nothing
 
-  minMsgEx : GModel ELEM
-  minMsgEx = soft "Minimum Message Exchange" Nothing
+--   minMsgEx : GRLExpr ELEM
+--   minMsgEx = soft "Minimum Message Exchange" Nothing
 
-  minSwitch : GModel ELEM
-  minSwitch = soft "Minimum Switch Load" Nothing
+--   minSwitch : GRLExpr ELEM
+--   minSwitch = soft "Minimum Switch Load" Nothing
 
--- System
+-- -- System
 
-  detDataLoc : GModel ELEM
-  detDataLoc = goal "Determine Data Location" Nothing
+--   detDataLoc : GRLExpr ELEM
+--   detDataLoc = goal "Determine Data Location" Nothing
 
-  dataSCP : GModel ELEM
-  dataSCP = task "Data in Service Control Point" Nothing
+--   dataSCP : GRLExpr ELEM
+--   dataSCP = task "Data in Service Control Point" Nothing
 
-  dataNewSNode : GModel ELEM
-  dataNewSNode = task "Data in New Service Node" Nothing
+--   dataNewSNode : GRLExpr ELEM
+--   dataNewSNode = task "Data in New Service Node" Nothing
 
-  installSNode : GModel ELEM
-  installSNode = task "Data in New Service Node" Nothing
+--   installSNode : GRLExpr ELEM
+--   installSNode = task "ata in New Service Node" Nothing -- chang
 
-  serviceCentralSwitch : GModel ELEM
-  serviceCentralSwitch = task "Service in Central Switch" Nothing
+--   serviceCentralSwitch : GRLExpr ELEM
+--   serviceCentralSwitch = task "Service in Central Switch" Nothing
 
-  detSLoc : GModel ELEM
-  detSLoc = goal "Determine Service Location" Nothing
+--   detSLoc : GRLExpr ELEM
+--   detSLoc = goal "Determine Service Location" Nothing
 
-  serviceInSCP : GModel ELEM
-  serviceInSCP = task "Service in Service Control Point" Nothing
+--   serviceInSCP : GRLExpr ELEM
+--   serviceInSCP = task "Service in Service Control Point" Nothing
 
-  amyotModel : GModel MODEL
-  amyotModel = with List emptyModel
-      /+/ highPerf
+  amyotModel : GModel
+  amyotModel = emptyModel /+/ highPerf  /+/ lowCost
+
       /+/ lowCost
-      /+/ minChange
-      /+/ maxHardware
-      /+/ highThrough
-      /+/ minMsgEx
-      /+/ minSwitch
-      /+/ detDataLoc
-      /+/ dataSCP
-      /+/ dataNewSNode
-      /+/ installSNode
-      /+/ serviceCentralSwitch
-      /+/ detSLoc
-      /+/ serviceInSCP
-
-      /+>/ impacts MAKES minChange lowCost
-      /+>/ effects MAKES maxHardware minChange
-      /+>/ effects MAKES dataNewSNode minChange
-      /+>/ effects MAKES dataSCP minChange
-      /+>/ impacts MAKES minMsgEx highThrough
-      /+>/ impacts MAKES minSwitch highThrough
-      /+>/ impacts SOMENEG serviceInSCP minMsgEx
-      /+>/ effects MAKES serviceInSCP minSwitch
-      /+>/ effects BREAKS serviceCentralSwitch minSwitch
-      /+>/ impacts MAKES serviceCentralSwitch minMsgEx
-      /+</ and detSLoc [serviceCentralSwitch, serviceInSCP]
-      /+</ ior detDataLoc [dataNewSNode, dataSCP]
-      /+</ and dataNewSNode [installSNode]
-      /+</ and highPerf [maxHardware, highThrough]
-
+     /+/ minChange
+      -- /+/ maxHardware
+      -- /+/ highThrough
+      -- /+/ minMsgEx
+      -- /+/ minSwitch
+      -- /+/ detDataLoc
+      -- /+/ dataSCP
+      -- /+/ dataNewSNode
+      -- /+/ installSNode
+      -- /+/ serviceCentralSwitch
+      -- /+/ detSLoc
+      -- /+/ serviceInSCP
+      -- /+/ impacts MAKES minChange lowCost
+      -- /+/ effects MAKES maxHardware minChange
+      -- /+/ effects MAKES dataNewSNode minChange
+      -- /+/ effects MAKES dataSCP minChange
+      -- /+/ impacts MAKES minMsgEx highThrough
+      -- /+/ impacts MAKES minSwitch highThrough
+      -- /+/ impacts SOMENEG serviceInSCP minMsgEx
+      -- /+/ effects MAKES serviceInSCP minSwitch
+      -- /+/ effects BREAKS serviceCentralSwitch minSwitch
+      -- /+/ impacts MAKES serviceCentralSwitch minMsgEx
+--       /+/ and detSLoc [serviceCentralSwitch, serviceInSCP]
+--       /+/ ior detSLoc [dataNewSNode, dataSCP]
+--       /+/ and dataNewSNode [installSNode]
+--       /+/ and highPerf [maxHardware, highThrough]
 
 namespace Main
-  main : IO ()
-  main = putStrLn $ show amyotModel
-    -- res <- run $ genGoalGraph amyotModel
-    -- print $ keys res
-    -- putStrLn "\n"
-    -- evalModel (keys res) res
-    -- print res
+   main : IO ()
+   main = putStrLn $ "as"
+--     -- res <- run $ genGoalGraph amyotModel
+--     -- print $ keys res
+--     -- putStrLn "\n"
+--     -- evalModel (keys res) res
+--     -- print res

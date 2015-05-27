@@ -1,72 +1,49 @@
-||| Common data structures for GRL the model and edsl.
-module GRL.Common
+module GRL.Types.Value
 
 import public Decidable.Equality
 
-data Weight = HIGH | MEDIUM | LOW | NO
+data Importance = HIGH | MEDIUM | LOW | NO
 
 namespace Qualiative
-  data EvalVal : Type where
-
+  data Satisfaction : Type where
     ||| The intentional element or indicator is sufficiently dissatisfied.
-    DENIED : EvalVal
-
+    DENIED : Satisfaction
     ||| The intentional element is partially dissatisfied.
-    WEAKDEN : EvalVal
-
+    WEAKDEN : Satisfaction
     ||| The intentional element or indicator is partially satisfied.
-    WEAKSATIS : EvalVal
-
-
+    WEAKSATIS : Satisfaction
     ||| The intentional element is sufficiently satisfied.
-    SATISFIED   : EvalVal
-
+    SATISFIED   : Satisfaction
     ||| There are arguments strongly in favour and strongly against
     ||| the satisfaction of the intentional element.
-    CONFLICT : EvalVal
-
+    CONFLICT : Satisfaction
     ||| The satisfaction level of the intentional element is unknown.
-    UNKNOWN : EvalVal
-
+    UNKNOWN : Satisfaction
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
-    NONE : EvalVal
-
-    UNDECIDED : EvalVal
+    NONE : Satisfaction
+    UNDECIDED : Satisfaction
 
 namespace Contributions
-  data Contrib : Type where
+  data ContributionTy : Type where
     ||| The contribution is positive and sufficient.
-    MAKES    : Contrib
+    MAKES : ContributionTy
     ||| The contribution is positive but not sufficient.
-    HELPS    : Contrib
+    HELPS : ContributionTy
     ||| The contribution is positive, but the extent of the contribution is unknown.
-    SOMEPOS  : Contrib
+    SOMEPOS : ContributionTy
     ||| There is some contribution, but the extent and the degree (positive or negative) of the contribution is unknown.
-    UNKNOWN     : Contrib
+    UNKNOWN : ContributionTy
     ||| The contribution is negative, but the extent of the contribution is unknown.
-    SOMENEG  : Contrib
+    SOMENEG : ContributionTy
     ||| The contribution of the contributing element is negative and sufficient.
-    BREAKS   : Contrib
+    BREAKS : ContributionTy
     ||| The contribution is negative but not sufficient.
-    HURTS    : Contrib
+    HURTS : ContributionTy
 
-
-data ElemTy = MODEL | ELEM | ILINK | SLINK
-
-data DecompTy = ANDTy | XORTy | IORTy
 
 -- -------------------------------------------------------------------- [ Show ]
-instance Show ElemTy where
-  show MODEL  = "MODEL"
-  show ELEM   = "ELEM"
-  show LINK   = "LINK"
 
-instance Show DecompTy where
-  show ANDTy  = "ANDTy"
-  show XORTy  = "XORTy"
-  show IORTy  = "IORTy"
-
-instance Show EvalVal where
+instance Show Satisfaction where
   show SATISFIED = "SATISFIED"
   show WEAKSATIS = "WEAKSATIS"
   show WEAKDEN   = "WEAKDEN"
@@ -76,7 +53,7 @@ instance Show EvalVal where
   show NONE      = "NONE"
   show UNDECIDED = "UNDECIDED"
 
-instance Show Contrib where
+instance Show ContributionTy where
   show MAKES   = "MAKES"
   show HELPS   = "HELPS"
   show SOMEPOS = "SOMEPOS"
@@ -86,7 +63,7 @@ instance Show Contrib where
   show BREAKS  = "BREAKS"
 
 -- ---------------------------------------------------------------------- [ Eq ]
-instance Eq EvalVal where
+instance Eq Satisfaction where
   (==) SATISFIED SATISFIED = True
   (==) WEAKSATIS WEAKSATIS = True
   (==) WEAKDEN   WEAKDEN   = True
@@ -97,7 +74,7 @@ instance Eq EvalVal where
   (==) UNDECIDED UNDECIDED = True
   (==) _         _         = False
 
-instance Eq Contrib where
+instance Eq ContributionTy where
   (==) MAKES   MAKES   = True
   (==) HELPS   HELPS   = True
   (==) SOMEPOS SOMEPOS = True
@@ -108,22 +85,16 @@ instance Eq Contrib where
   (==) _       _       = False
 
 
-instance Eq DecompTy where
-  (==) ANDTy ANDTy = True
-  (==) XORTy XORTy = True
-  (==) IORTy IORTy = True
-  (==) _     _     = False
-
 -- -------------------------------------------------------------------- [ Read ]
-readEvalVal : String -> EvalVal
-readEvalVal "satisfied" = SATISFIED
-readEvalVal "weaksatis" = WEAKSATIS
-readEvalVal "weakden"   = WEAKDEN
-readEvalVal "denied"    = DENIED
-readEvalVal "unknown"   = UNKNOWN
-readEvalVal _           = UNKNOWN
+readSatisfaction : String -> Satisfaction
+readSatisfaction "satisfied" = SATISFIED
+readSatisfaction "weaksatis" = WEAKSATIS
+readSatisfaction "weakden"   = WEAKDEN
+readSatisfaction "denied"    = DENIED
+readSatisfaction "unknown"   = UNKNOWN
+readSatisfaction _           = UNKNOWN
 
-readContribValue : String -> Contrib
+readContribValue : String -> ContributionTy
 readContribValue "makes"         = MAKES
 readContribValue "helps"         = HELPS
 readContribValue "some-positive" = SOMEPOS
@@ -135,7 +106,7 @@ readContribValue _               = UNKNOWN
 
 
 -- ------------------------------------------------------------------- [ DecEq ]
-instance DecEq EvalVal where
+instance DecEq Satisfaction where
   decEq x y = if x == y then Yes primEq else No primNotEq
     where
       primEq : x = y
@@ -143,7 +114,7 @@ instance DecEq EvalVal where
       postulate primNotEq : x = y -> Void
 
 
-instance DecEq Contrib where
+instance DecEq ContributionTy where
   decEq x y = if x == y then Yes primEq else No primNotEq
     where
       primEq : x = y

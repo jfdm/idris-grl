@@ -1,6 +1,6 @@
 package grlex
 
-opts = "-p effects -p containers -p grl --log 3"
+opts = "-p effects -p containers -p grl"
 
 modules = Trial
 executable = grl.exe
