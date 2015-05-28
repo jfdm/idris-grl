@@ -3,9 +3,9 @@ module GRL.Types.Expr
 
 -- ------------------------------------------------------------------- [ Types ]
 
-data GRLElementTy = GOAL | SOFT | TASK | RESOURCE
+data GRLElementTy = GOALTy | SOFTTy | TASKTy | RESOURCETy
 data GRLIntentTy  = CONTRIBUTION | CORRELATION
-data GRLStructTy  = AND | XOR | IOR
+data GRLStructTy  = ANDTy | XORTy | IORTy
 
 data GRLExprTy = ELEM
                | INTENT
@@ -14,19 +14,19 @@ data GRLExprTy = ELEM
 -- -------------------------------------------------------------------- [ Show ]
 
 instance Show GRLElementTy where
-  show GOAL     = "GOAL"
-  show SOFT     = "SOFT"
-  show TASK     = "TASK"
-  show RESOURCE = "RESOURCE"
+  show GOALTy     = "GOALTy"
+  show SOFTTy     = "SOFTTy"
+  show TASKTy     = "TASKTy"
+  show RESOURCETy = "RESOURCETy"
 
 instance Show GRLIntentTy where
   show CONTRIBUTION = "CONTRIBUTION"
   show CORRELATION  = "CORRELATION"
 
 instance Show GRLStructTy where
-  show AND  = "ANDTy"
-  show XOR  = "XORTy"
-  show IOR  = "IORTy"
+  show ANDTy  = "ANDTy"
+  show XORTy  = "XORTy"
+  show IORTy  = "IORTy"
 
 instance Show GRLExprTy where
   show ELEM   = "ELEM"
@@ -36,10 +36,10 @@ instance Show GRLExprTy where
 -- ---------------------------------------------------------------------- [ Eq ]
 
 instance Eq GRLElementTy where
-  (==) GOAL     GOAL     = True
-  (==) SOFT     SOFT     = True
-  (==) TASK     TASK     = True
-  (==) RESOURCE RESOURCE = True
+  (==) GOALTy     GOALTy     = True
+  (==) SOFTTy     SOFTTy     = True
+  (==) TASKTy     TASKTy     = True
+  (==) RESOURCETy RESOURCETy = True
   (==) _        _        = False
 
 instance Eq GRLIntentTy where
@@ -48,9 +48,9 @@ instance Eq GRLIntentTy where
   (==) _            _            = False
 
 instance Eq GRLStructTy where
-  (==) AND AND = True
-  (==) XOR XOR = True
-  (==) IOR IOR = True
+  (==) ANDTy ANDTy = True
+  (==) XORTy XORTy = True
+  (==) IORTy IORTy = True
   (==) _   _   = False
 
 instance Eq GRLExprTy where

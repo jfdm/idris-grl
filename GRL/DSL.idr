@@ -34,7 +34,7 @@ data GRLExpr : GRLExprTy -> Type where
 ||| functional requirements of the target information system.
 |||
 goal : String -> Maybe Satisfaction -> GRLExpr ELEM
-goal s e = Element GOAL s e
+goal s e = Element GOALTy s e
 
 ||| Softgoals are often used to describe qualities and
 ||| non-functional aspects such as security, robustness,
@@ -49,7 +49,7 @@ goal s e = Element GOAL s e
 ||| softgoal.
 |||
 soft : String -> Maybe Satisfaction -> GRLExpr ELEM
-soft s e = Element SOFT s e
+soft s e = Element SOFTTy s e
 
 ||| a Task specifies a particular way of doing something.
 |||
@@ -63,13 +63,13 @@ soft s e = Element SOFT s e
 ||| softgoals.
 |||
 task : String -> Maybe Satisfaction -> GRLExpr ELEM
-task s e = Element TASK s e
+task s e = Element TASKTy s e
 
 ||| A Resource is a physical or informational entity, for which the
 ||| main concern is whether it is available.
 |||
 resource : String -> Maybe Satisfaction -> GRLExpr ELEM
-resource s e = Element RESOURCE s e
+resource s e = Element RESOURCETy s e
 
 -- ------------------------------------------------ [ Intentional Declarations ]
 ||| A Contribution defines the level of impact that the
@@ -100,7 +100,7 @@ effects c a b = IntentLink CORRELATION c a b
 and : GRLExpr ELEM
    -> GRLExpr ELEM
    -> GRLExpr STRUCT
-and a bs = StructureLink AND a bs
+and a bs = StructureLink ANDTy a bs
 
 ||| The XOR Decomposition link enables the description of
 ||| alternative means of satisfying a target intentional element:
@@ -110,7 +110,7 @@ and a bs = StructureLink AND a bs
 xor : GRLExpr ELEM
    -> GRLExpr ELEM
    -> GRLExpr STRUCT
-xor a bs = StructureLink XOR a bs
+xor a bs = StructureLink XORTy a bs
 
 ||| The IOR Decomposition link enables the description of
 ||| alternative means of satisfying a target intentional element:
@@ -121,7 +121,7 @@ xor a bs = StructureLink XOR a bs
 ior : GRLExpr ELEM
    -> GRLExpr ELEM
    -> GRLExpr STRUCT
-ior a bs = StructureLink IOR a bs
+ior a bs = StructureLink IORTy a bs
 
 
 -- --------------------------------------------------------------------- [ EOF ]

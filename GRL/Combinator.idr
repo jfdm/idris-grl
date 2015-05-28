@@ -10,7 +10,7 @@ import GRL.Model
 import GRL.DSL
 import GRL.Types.Expr
 import GRL.Types.Value
-import GRL.Property
+import GRL.Property.Element
 
 %access public
 
@@ -19,33 +19,27 @@ emptyModel : GModel
 emptyModel = mkEmptyGraph
 
 -- --------------------------------------------------------------- [ Insertion ]
+%inline
 mkGoalNode : GRLExpr ELEM -> Node -> GoalNode
 mkGoalNode (Element ety t s) l =
   case ety of
-    GOAL => Goal l t s Nothing
-    SOFT => Soft l t s Nothing
-    TASK => Task l t s Nothing
-    RES  => Res  l t s Nothing
+    GOALTy => Goal l t s Nothing
+    SOFTTy => Soft l t s Nothing
+    TASKTy => Task l t s Nothing
+    RESOURCETy  => Res  l t s Nothing
 
--- -------------------------------------------------------- [ Group the Checks ]
-private
-insert : (item : GRLExpr ty)
-      -> (model : GModel)
---      -> (prf : ValidInsert ty item model)
-      -> GModel
-insert {ty=ELEM}  e g@(MkGraph i d) = addNode (mkGoalNode e i) g
-insert {ty=INTENT} i m  = m
-insert {ty=STRUCT} s m  = m
+-- addElem :  (i : GRLExpr ELEM)
+--         -> (m : GModel)
+--         -> GModel
+-- addElem i g = if (checkElem i g )
+--   then addNode (mkGoalNode i (counter g)) g
+--   else g
 
-infixl 4 /+/
-
-(/+/) : (model : GModel)
-     -> (item : GRLExpr ty)
---     -> {auto prf : ValidInsert ty item model}
-     -> GModel
-(/+/) m i with (checkInsert i m)
-  | Yes prf = insert i m
-  | No  con = m
+addElem' : (i : GRLExpr ELEM)
+        -> (m : GModel)
+        -> {auto prf : ValidElem i m }
+        -> GModel
+addElem' i g = addNode (mkGoalNode i (counter g)) g
 
 -- ---------------------------------------------------------- [ Combine Models ]
 -- private

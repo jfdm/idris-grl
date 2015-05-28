@@ -21,10 +21,10 @@ showNode : GRLElementTy -> Node -> String -> Maybe Satisfaction -> Maybe GRLStru
 showNode ty l t s d = unwords ["[", show ty, show l, t, show s, show d, "]"]
 
 instance Show GoalNode where
-  show (Goal l t s d) = showNode GOAL     l t s d
-  show (Soft l t s d) = showNode SOFT     l t s d
-  show (Task l t s d) = showNode TASK     l t s d
-  show (Res  l t s d) = showNode RESOURCE l t s d
+  show (Goal l t s d) = showNode GOALTy     l t s d
+  show (Soft l t s d) = showNode SOFTTy     l t s d
+  show (Task l t s d) = showNode TASKTy     l t s d
+  show (Res  l t s d) = showNode RESOURCETy l t s d
 
 instance Eq GoalNode where
   (==) (Goal i x xs xd) (Goal j y ys yd) = x == y && xs == ys && xd == yd && i == j
@@ -34,10 +34,10 @@ instance Eq GoalNode where
   (==) _              _              = False
 
 getGoalTitle : GoalNode -> String
-getGoalTitle (Goal _ t _ _) = t
-getGoalTitle (Soft _ t _ _) = t
-getGoalTitle (Task _ t _ _) = t
-getGoalTitle (Res  _ t _ _) = t
+getGoalTitle (Goal id t s d) = t
+getGoalTitle (Soft id t s d) = t
+getGoalTitle (Task id t s d) = t
+getGoalTitle (Res  id t s d) = t
 
 data GoalEdge  : Type where
   Contribution : ContributionTy -> GoalEdge

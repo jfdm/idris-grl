@@ -11,8 +11,9 @@ import GRL.DSL
 import GRL.Types.Expr
 import GRL.Types.Value
 
-import public GRL.Property.Common
-
+data ValidElem : GRLExpr ELEM -> GModel -> Type
+  where
+    ElemInsert : ValidElem expr model
 -- ------------------------------------------------------- [ Element Insertion ]
 -- This section details the property checks for element insertion.
 
@@ -26,10 +27,10 @@ import public GRL.Property.Common
 |||
 checkElem : (i : GRLExpr ELEM)
          -> (m : GModel)
-         -> Dec (ValidInsert ELEM i m)
-checkElem (Element ty t s) m =
-  case (hasGoal t m) of
-     False => Yes (ElemInsert)
-     True  => No  (believe_me)
+         -> Bool -- Dec (ValidElem i m)
+checkElem (Element ty t s) g =
+  case (hasGoal t g) of
+      False => True -- Yes (ElemInsert)
+      True  => False -- No  (believe_me)
 
 -- --------------------------------------------------------------------- [ EOF ]
