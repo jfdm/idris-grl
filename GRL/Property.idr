@@ -10,11 +10,12 @@ import public GRL.Property.Element
 --import public GRL.Property.Structure
 --import public GRL.Property.Intention
 
+
 checkInsert : (i : GRLExpr ty)
            -> (m : GModel)
-           -> Dec (ValidInsert ty i m)
+           -> Maybe (ValidInsert ty i m)
 checkInsert {ty=ELEM}   e m = (checkElem e m)
-checkInsert {ty=INTENT} e m = Yes (IntentInsert)
-checkInsert {ty=STRUCT} e m = Yes (StructInsert)
+checkInsert {ty=INTENT} e m = Nothing -- es (IntentInsert)
+checkInsert {ty=STRUCT} e m = Nothing -- es (StructInsert)
 
 -- --------------------------------------------------------------------- [ EOF ]

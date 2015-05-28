@@ -26,10 +26,10 @@ import public GRL.Property.Common
 |||
 checkElem : (i : GRLExpr ELEM)
          -> (m : GModel)
-         -> Dec (ValidInsert ELEM i m)
+         -> Maybe (ValidInsert ELEM i m)
 checkElem (Element ty t s) m =
   case (hasGoal t m) of
-     Nothing => Yes (ElemInsert)
-     Just n  => No  (believe_me)
+     Nothing => Just (ElemInsert)
+     Just n  => Nothing -- No  (believe_me)
 
 -- --------------------------------------------------------------------- [ EOF ]
