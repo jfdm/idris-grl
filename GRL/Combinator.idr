@@ -1,7 +1,5 @@
 module GRL.Combinator
 
-import public Decidable.Equality
-
 import public Data.AVL.Set
 import public Data.Graph.AList
 import public Data.List
@@ -15,41 +13,53 @@ import GRL.Property.Element
 %access public
 
 -- ---------------------------------------------------- [ Allowed Constructors ]
+
+||| Create an empty model
 emptyModel : GModel
 emptyModel = mkEmptyGraph
 
+-- ------------------------------------------------------------- [ Interpreter ]
+
+interpTy : GRLExprTy -> Type
+interpTy ELEM   = GoalNode
+interpTy INTENT = GoalEdge
+interpTy STRUCT = GoalEdge
+
+
+convExpr : {ty : GRLExprTy} -> GRLExpr ty -> interpTy ty
+convExpr (Element eTy t s) =
+  case eTy of
+    GOALTy      => Goal t s Nothing
+    SOFTTy      => Soft t s Nothing
+    TASKTy      => Task t s Nothing
+    RESOURCETy  => Res  t s Nothing
+convExpr (IntentLink ty cTy _ _) =
+  case ty of
+    CONTRIBUTION => Contribution cTy
+    CORRELATION  => Correlation  cTy
+convExpr (StructureLink ty _ _) =
+  case ty of
+    ANDTy => And
+    XORTy => Xor
+    IORTy => Ior
+
 -- --------------------------------------------------------------- [ Insertion ]
-%inline
-mkGoalNode : GRLExpr ELEM -> Node -> GoalNode
-mkGoalNode (Element ety t s) l =
-  case ety of
-    GOALTy => Goal l t s Nothing
-    SOFTTy => Soft l t s Nothing
-    TASKTy => Task l t s Nothing
-    RESOURCETy  => Res  l t s Nothing
 
--- addElem :  (i : GRLExpr ELEM)
---         -> (m : GModel)
---         -> GModel
--- addElem i g = if (checkElem i g )
---   then addNode (mkGoalNode i (counter g)) g
---   else g
+insertElem : (expr : GRLExpr ELEM)
+          -> (model : GModel)
+          -> GModel
+insertElem elem model =
+  let e = convExpr elem in
+    if isElemUnique' e model
+      then addNode e model
+      else model
 
-addElem' : (i : GRLExpr ELEM)
-        -> (m : GModel)
-        -> {auto prf : ValidElem i m }
-        -> GModel
-addElem' i g = addNode (mkGoalNode i (counter g)) g
-
--- ---------------------------------------------------------- [ Combine Models ]
--- private
--- insertModel : GModel MODEL
---            -> GModel MODEL
---            -> GModel MODEL
--- insertModel (GRLSpec xs ys zs) g =
---   let g'  = foldr (\e, m => insertElem e m) g xs   in
- --   let g'' = foldr (insertILink) g' ys in
---       foldr insertSLink g'' zs
-
+-- insertIntention : (expr : GRLExpr INTENT)
+--                -> (model : GModel)
+--                -> GModel
+-- insertIntention link model =
+--   let i = convExpr link in
+--     if validIntent i model
+--       then
 
 -- --------------------------------------------------------------------- [ EOF ]

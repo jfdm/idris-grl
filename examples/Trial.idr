@@ -48,22 +48,22 @@ serviceInSCP : GRLExpr ELEM
 serviceInSCP = task "Service in Service Control Point" Nothing
 
 amyotModel : GModel
-amyotModel = addElem' highPerf
-             $ addElem' highPerf
-             $ addElem' lowCost
-             $ addElem' lowCost
-             $ addElem' minChange
-             $ addElem' maxHardware
-             $ addElem' highThrough
-             $ addElem' minMsgEx
-             $ addElem' minSwitch
-             $ addElem' detDataLoc
-             $ addElem' dataSCP
-             $ addElem' dataNewSNode
-             $ addElem' installSNode
-             $ addElem' serviceCentralSwitch
-             $ addElem' detSLoc
-             $ addElem' serviceInSCP mkEmptyGraph
+amyotModel = insertElem highPerf
+             $ insertElem highPerf
+             $ insertElem lowCost
+             $ insertElem lowCost
+             $ insertElem minChange
+             $ insertElem maxHardware
+             $ insertElem highThrough
+             $ insertElem minMsgEx
+             $ insertElem minSwitch
+             $ insertElem detDataLoc
+             $ insertElem dataSCP
+             $ insertElem dataNewSNode
+             $ insertElem installSNode
+             $ insertElem serviceCentralSwitch
+             $ insertElem detSLoc
+             $ insertElem serviceInSCP mkEmptyGraph
   -- /+/ impacts MAKES minChange lowCost
   -- /+/ effects MAKES maxHardware minChange
   -- /+/ effects MAKES dataNewSNode minChange

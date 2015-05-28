@@ -7,8 +7,8 @@ modules = GRL.Utils
         , GRL.Model
         , GRL.DSL
         , GRL.Property.Element
---        , GRL.Property.Structure
---        , GRL.Property.Intention
+        , GRL.Property.Structure
+        , GRL.Property.Intention
         , GRL.Types.Expr
         , GRL.Types.Value
         , GRL.Lang

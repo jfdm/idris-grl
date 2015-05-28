@@ -11,8 +11,6 @@ import GRL.DSL
 import GRL.Types.Expr
 import GRL.Types.Value
 
-import public GRL.Property.Common
-
 -- ----------------------------------------------- [ Structural Link Insertion ]
 -- This section details the check for structural link insertion.
 --
@@ -31,7 +29,7 @@ import public GRL.Property.Common
 --   1. The link must be valid for the parent.
 --   2.
 -- 3. A parent cannot be contained by its children.
-
+{-
 ||| The Decomposition proposed is valid.
 data ValidDeComp : (src : GRLExpr ELEM)
                 -> (ty : DecompTy)
@@ -78,5 +76,5 @@ checkStruc (IOR x xs) model with (doCheckStruc IORTy x xs model)
 checkStruc (XOR x xs) model with (doCheckStruc XORTy x xs model)
     | Yes prf = Yes (StructInsert)
     | No  con = No (believe_me)
-
+-}
 -- --------------------------------------------------------------------- [ EOF ]

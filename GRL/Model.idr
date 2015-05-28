@@ -11,33 +11,33 @@ import GRL.Types.Value
 %access public
 
 data GoalNode : Type where
-  Goal : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Soft : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Task : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Res  : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Goal : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Soft : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Task : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Res  : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
 
 private
-showNode : GRLElementTy -> Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
-showNode ty l t s d = unwords ["[", show ty, show l, t, show s, show d, "]"]
+showNode : GRLElementTy -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
+showNode ty t s d = unwords ["[", show ty, t, show s, show d, "]"]
 
 instance Show GoalNode where
-  show (Goal l t s d) = showNode GOALTy     l t s d
-  show (Soft l t s d) = showNode SOFTTy     l t s d
-  show (Task l t s d) = showNode TASKTy     l t s d
-  show (Res  l t s d) = showNode RESOURCETy l t s d
+  show (Goal t s d) = showNode GOALTy     t s d
+  show (Soft t s d) = showNode SOFTTy     t s d
+  show (Task t s d) = showNode TASKTy     t s d
+  show (Res  t s d) = showNode RESOURCETy t s d
 
 instance Eq GoalNode where
-  (==) (Goal i x xs xd) (Goal j y ys yd) = x == y && xs == ys && xd == yd && i == j
-  (==) (Soft i x xs xd) (Soft j y ys yd) = x == y && xs == ys && xd == yd && i == j
-  (==) (Task i x xs xd) (Task j y ys yd) = x == y && xs == ys && xd == yd && i == j
-  (==) (Res  i x xs xd) (Res  j y ys yd) = x == y && xs == ys && xd == yd && i == j
+  (==) (Goal x xs xd) (Goal y ys yd) = x == y && xs == ys && xd == yd
+  (==) (Soft x xs xd) (Soft y ys yd) = x == y && xs == ys && xd == yd
+  (==) (Task x xs xd) (Task y ys yd) = x == y && xs == ys && xd == yd
+  (==) (Res  x xs xd) (Res  y ys yd) = x == y && xs == ys && xd == yd
   (==) _              _              = False
 
 getGoalTitle : GoalNode -> String
-getGoalTitle (Goal id t s d) = t
-getGoalTitle (Soft id t s d) = t
-getGoalTitle (Task id t s d) = t
-getGoalTitle (Res  id t s d) = t
+getGoalTitle (Goal t s d) = t
+getGoalTitle (Soft t s d) = t
+getGoalTitle (Task t s d) = t
+getGoalTitle (Res  t s d) = t
 
 data GoalEdge  : Type where
   Contribution : ContributionTy -> GoalEdge
