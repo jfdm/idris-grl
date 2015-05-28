@@ -13,9 +13,9 @@ import public GRL.Property.Element
 
 checkInsert : (i : GRLExpr ty)
            -> (m : GModel)
-           -> Maybe (ValidInsert ty i m)
+           -> Dec (ValidInsert ty i m)
 checkInsert {ty=ELEM}   e m = (checkElem e m)
-checkInsert {ty=INTENT} e m = Nothing -- es (IntentInsert)
-checkInsert {ty=STRUCT} e m = Nothing -- es (StructInsert)
+checkInsert {ty=INTENT} e m = Yes (IntentInsert)
+checkInsert {ty=STRUCT} e m = Yes (StructInsert)
 
 -- --------------------------------------------------------------------- [ EOF ]

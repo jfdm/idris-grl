@@ -11,13 +11,13 @@ import GRL.Types.Value
 %access public
 
 data GoalNode : Type where
-  Goal : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Soft : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Task : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Res  : Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Goal : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Soft : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Task : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Res  : Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
 
 private
-showNode : GRLElementTy -> Nat -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
+showNode : GRLElementTy -> Node -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
 showNode ty l t s d = unwords ["[", show ty, show l, t, show s, show d, "]"]
 
 instance Show GoalNode where
@@ -56,5 +56,5 @@ instance Show GoalEdge where
 GModel : Type
 GModel = Graph (GoalNode) (GoalEdge)
 
-hasGoal : String -> GModel -> Maybe GoalNode
-hasGoal t m = hasValueBy (\(x,_) => getGoalTitle x == t) m
+hasGoal : String -> GModel -> Bool
+hasGoal t m = hasValueUsing (\(x,_) => getGoalTitle x == t) (graph m)

@@ -19,7 +19,7 @@ emptyModel : GModel
 emptyModel = mkEmptyGraph
 
 -- --------------------------------------------------------------- [ Insertion ]
-mkGoalNode : GRLExpr ELEM -> Nat -> GoalNode
+mkGoalNode : GRLExpr ELEM -> Node -> GoalNode
 mkGoalNode (Element ety t s) l =
   case ety of
     GOAL => Goal l t s Nothing
@@ -31,19 +31,19 @@ mkGoalNode (Element ety t s) l =
 private
 insert : (item : GRLExpr ty)
       -> (model : GModel)
-      -> (prf : ValidInsert ty item model)
+--      -> (prf : ValidInsert ty item model)
       -> GModel
-insert {ty=ELEM}  e g@(MkGraph i d) prf = addNode (mkGoalNode e i) g
-insert {ty=INTENT} i m prf = m
-insert {ty=STRUCT} s m prf = m
+insert {ty=ELEM}  e g@(MkGraph i d) = addNode (mkGoalNode e i) g
+insert {ty=INTENT} i m  = m
+insert {ty=STRUCT} s m  = m
 
 infixl 4 /+/
 
 (/+/) : (model : GModel)
      -> (item : GRLExpr ty)
-     -> {auto prf : ValidInsert ty item model}
+--     -> {auto prf : ValidInsert ty item model}
      -> GModel
-(/+/) m i {prf} = insert i m prf
+(/+/) m i = insert i m
 
 -- ---------------------------------------------------------- [ Combine Models ]
 -- private

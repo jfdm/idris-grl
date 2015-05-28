@@ -10,7 +10,7 @@ modules = GRL.Utils
         , GRL.Property.Element
 --        , GRL.Property.Structure
 --        , GRL.Property.Intention
---        , GRL.Property
+        , GRL.Property
         , GRL.Types.Expr
         , GRL.Types.Value
         , GRL.Lang
