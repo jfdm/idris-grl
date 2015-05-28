@@ -43,7 +43,9 @@ infixl 4 /+/
      -> (item : GRLExpr ty)
 --     -> {auto prf : ValidInsert ty item model}
      -> GModel
-(/+/) m i = insert i m
+(/+/) m i with (checkInsert i m)
+  | Yes prf = insert i m
+  | No  con = m
 
 -- ---------------------------------------------------------- [ Combine Models ]
 -- private
