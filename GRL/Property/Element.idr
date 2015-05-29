@@ -27,7 +27,6 @@ data IsUniqueElem : GoalNode -> GModel -> Type
     IsUnique : IsUniqueElem node model
 
 
-
 ||| Check to see if the element is unique.
 |||
 isElemUnique : (node : GoalNode)
@@ -45,8 +44,7 @@ isElemUnique' : (node : GoalNode)
              -> (model : GModel)
              -> Bool
 isElemUnique' n m with (isElemUnique n m)
-  | Yes _ = True
-  | No  _ = False
-
+  | Yes prf = True
+  | No  con = False
 
 -- --------------------------------------------------------------------- [ EOF ]

@@ -18,7 +18,7 @@ data GRLExpr : GRLExprTy -> Type where
 
   StructureLink : (ty : GRLStructTy)
                -> GRLExpr ELEM
-               -> GRLExpr ELEM
+               -> List (GRLExpr ELEM)
                -> GRLExpr STRUCT
 
 -- ---------------------------------------------------- [ Element Declarations ]
@@ -98,7 +98,7 @@ effects c a b = IntentLink CORRELATION c a b
 ||| the target intentional element to be satisfied.
 |||
 and : GRLExpr ELEM
-   -> GRLExpr ELEM
+   -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
 and a bs = StructureLink ANDTy a bs
 
@@ -108,7 +108,7 @@ and a bs = StructureLink ANDTy a bs
 ||| sub-intentional elements is necessary to achieve the target.
 |||
 xor : GRLExpr ELEM
-   -> GRLExpr ELEM
+   -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
 xor a bs = StructureLink XORTy a bs
 
@@ -119,7 +119,7 @@ xor a bs = StructureLink XORTy a bs
 ||| but many sub-intentional elements can be satisfied.
 |||
 ior : GRLExpr ELEM
-   -> GRLExpr ELEM
+   -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
 ior a bs = StructureLink IORTy a bs
 

@@ -48,36 +48,35 @@ serviceInSCP : GRLExpr ELEM
 serviceInSCP = task "Service in Service Control Point" Nothing
 
 amyotModel : GModel
-amyotModel = insertElem highPerf
-             $ insertElem highPerf
-             $ insertElem lowCost
-             $ insertElem lowCost
-             $ insertElem minChange
-             $ insertElem maxHardware
-             $ insertElem highThrough
-             $ insertElem minMsgEx
-             $ insertElem minSwitch
-             $ insertElem detDataLoc
-             $ insertElem dataSCP
-             $ insertElem dataNewSNode
-             $ insertElem installSNode
-             $ insertElem serviceCentralSwitch
-             $ insertElem detSLoc
-             $ insertElem serviceInSCP mkEmptyGraph
-  -- /+/ impacts MAKES minChange lowCost
-  -- /+/ effects MAKES maxHardware minChange
-  -- /+/ effects MAKES dataNewSNode minChange
-  -- /+/ effects MAKES dataSCP minChange
-  -- /+/ impacts MAKES minMsgEx highThrough
-  -- /+/ impacts MAKES minSwitch highThrough
-  -- /+/ impacts SOMENEG serviceInSCP minMsgEx
-  -- /+/ effects MAKES serviceInSCP minSwitch
-  -- /+/ effects BREAKS serviceCentralSwitch minSwitch
-  -- /+/ impacts MAKES serviceCentralSwitch minMsgEx
-  -- /+/ and detSLoc [serviceCentralSwitch, serviceInSCP]
-  -- /+/ ior detSLoc [dataNewSNode, dataSCP]
-  -- /+/ and dataNewSNode [installSNode]
-  -- /+/ and highPerf [maxHardware, highThrough]
+amyotModel = emptyModel
+    \+\ highPerf
+    -- \+\ lowCost
+    -- \+\ minChange
+    -- \+\ maxHardware
+    -- \+\ highThrough
+    -- \+\ minMsgEx
+    -- \+\ minSwitch
+    -- \+\ detDataLoc
+    -- \+\ dataSCP
+    -- \+\ dataNewSNode
+    -- \+\ installSNode
+    -- \+\ serviceCentralSwitch
+    -- \+\ detSLoc
+    -- \+\ serviceInSCP
+    -- \->\ impacts MAKES minChange lowCost
+    -- \->\ effects MAKES maxHardware minChange
+    -- \->\ effects MAKES dataNewSNode minChange
+    -- \->\ effects MAKES dataSCP minChange
+    -- \->\ impacts MAKES minMsgEx highThrough
+    -- \->\ impacts MAKES minSwitch highThrough
+    -- \->\ impacts SOMENEG serviceInSCP minMsgEx
+    -- \->\ effects MAKES serviceInSCP minSwitch
+    -- \->\ effects BREAKS serviceCentralSwitch minSwitch
+    -- \->\ impacts MAKES serviceCentralSwitch minMsgEx
+    -- \<-\ and detSLoc [serviceCentralSwitch, serviceInSCP]
+    -- \<-\ ior detSLoc [dataNewSNode, dataSCP]
+    -- \<-\ and dataNewSNode [installSNode]
+    -- \<-\ and highPerf [maxHardware, highThrough]
 
 namespace Main
    main : IO ()
