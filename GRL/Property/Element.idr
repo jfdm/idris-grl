@@ -16,34 +16,44 @@ import public Data.AVL.Set
 import public Data.Graph.AList
 import public Data.List
 
+import GRL.DSL
 import GRL.Model
 import GRL.Types.Expr
 import GRL.Types.Value
 
 -- ------------------------------------------------------- [ Element Insertion ]
 
-data IsUniqueElem : GoalNode -> GModel -> Type
+data ValidGoal : GRLExpr ELEM -> GModel -> Type
   where
-    IsUnique : IsUniqueElem node model
+    OkayGoal : (n : GRLExpr ELEM)
+            -> (m : GModel)
+            -> ValidGoal n m
 
 
 ||| Check to see if the element is unique.
 |||
-isElemUnique : (node : GoalNode)
+isElemUnique : (node : GRLExpr ELEM)
             -> (model : GModel)
-            -> Dec (IsUniqueElem node model)
-isElemUnique n m =
-  case (hasGoal (getGoalTitle n) m) of
-    False => Yes (IsUnique)
+            -> Dec (ValidGoal node model)
+isElemUnique (Element ty t s) m =
+  case (hasGoal t m) of
+    False => Yes (OkayGoal (Element ty t s) m)
     True  => No  (believe_me)
 
 
+checkElemDec : (e : GRLExpr ELEM)
+            -> (m : GModel)
+            -> Dec (ValidGoal e m)
+checkElemDec elem model with (isElemUnique (elem) model)
+  | Yes prf = Yes prf
+  | No  con = No  con
+
 ||| Check to see if the element is unique.
 |||
-isElemUnique' : (node : GoalNode)
+checkElemBool : (node : GRLExpr ELEM)
              -> (model : GModel)
              -> Bool
-isElemUnique' n m with (isElemUnique n m)
+checkElemBool n m with (checkElemDec n m)
   | Yes prf = True
   | No  con = False
 

@@ -50,7 +50,7 @@ serviceInSCP = task "Service in Service Control Point" Nothing
 amyotModel : GModel
 amyotModel = emptyModel
     \+\ highPerf
-    -- \+\ lowCost
+    \+\ lowCost
     -- \+\ minChange
     -- \+\ maxHardware
     -- \+\ highThrough
@@ -81,8 +81,9 @@ amyotModel = emptyModel
 namespace Main
    main : IO ()
    main = do
-     printLn amyotModel
-     printLn $ hasGoal "Service in Service Control Point" amyotModel
+     printLn "AA"
+     -- printLn amyotModel
+     -- printLn $ hasGoal "Service in Service Control Point" amyotModel
 
 --     -- res <- run $ genGoalGraph amyotModel
 --     -- print $ keys res
