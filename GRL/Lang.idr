@@ -5,6 +5,7 @@ import public GRL.Types.Value
 import public GRL.Model
 import public GRL.DSL
 import public GRL.Property.Element
+import public GRL.Property.Intention
 import public GRL.Combinator
 
 

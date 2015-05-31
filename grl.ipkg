@@ -2,8 +2,7 @@ package grl
 
 opts = "-p effects -p containers"
 
-modules = GRL.Utils
-        , GRL.Combinator
+modules = GRL.Combinator
         , GRL.Model
         , GRL.DSL
         , GRL.Property.Element

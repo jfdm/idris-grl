@@ -1,9 +1,19 @@
+||| This section details the check for structural link insertion.
+|||
+||| Correctness/Soundess Properties of a Structural Link
+|||
+||| 1. The src and destination must not be the same.
+||| 2. A node can only be decomposed once.
+|||   1. The link must be valid for the parent.
+|||   2.
+||| 3. A parent cannot be contained by its children.
+|||
 module GRL.Property.Structure
 
 import public Decidable.Equality
 
 import public Data.AVL.Set
-import public Data.Graph.AList
+import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
@@ -12,69 +22,40 @@ import GRL.Types.Expr
 import GRL.Types.Value
 
 -- ----------------------------------------------- [ Structural Link Insertion ]
--- This section details the check for structural link insertion.
---
 
--- data ValidStruc : (GModel ELEM)
---                -> List (GModel ELEM)
---                -> GModel MODEL
---                -> Type
---   where
---     ValidStrucLink : ValidStruc src dsts model
-
--- Correctness/Soundess Properties of a Structural Link
---
--- 1. The src and destination must not be the same.
--- 2. A node can only be decomposed once.
---   1. The link must be valid for the parent.
---   2.
--- 3. A parent cannot be contained by its children.
-{-
-||| The Decomposition proposed is valid.
-data ValidDeComp : (src : GRLExpr ELEM)
-                -> (ty : DecompTy)
-                -> Type
+allDiff : (src : GRLExpr ELEM)
+       -> (ds  : List (GRLExpr ELEM))
+       -> Bool
+allDiff src ds = diffDSTs && noLoopBack
   where
-    SameDeCompTy : ValidDeComp src ty
-    SetDeCompTy  : ValidDeComp src ty
+    diffDSTs : Bool
+    diffDSTs = not $ and [ eqGRLExpr x y | x <- ds, y <- ds]
 
-private
-checkStructTy : (src : GModel ELEM)
-             -> (ty : DecompTy)
-             -> Dec (ValidDeComp src ty)
-checkStructTy src ty =
-  case (getElemDTy src) of
-    Nothing  => Yes (SetDeCompTy)
-    Just ty' => case ty' == ty of
-      True  => Yes (SameDeCompTy)
-      False => No  (believe_me)
+    noLoopBack : Bool
+    noLoopBack = not $ and $ map (\x => eqGRLExpr x src) ds
 
-private
-doCheckStruc : (sTy : DecompTy)
-            -> (src : GModel ELEM)
-            -> (dests : List (GModel ELEM))
-            -> (model : GModel MODEL)
-            -> Dec (ValidStruc src dests model)
-doCheckStruc ty src dests (GRLSpec es _ ss) with (List.isElem src dests) -- (Check 1)
-    | Yes con = No (believe_me)
-    | No  prf with (checkStructTy src ty)
-      | No  con' = No (believe_me)
-      | Yes prf' = Yes (ValidStrucLink)
+validNodes : List (GRLExpr ELEM)
+          -> GModel
+          -> Bool
+validNodes ns m = and $ map (\n => isValid n m) ns
+  where
+    isValid : GRLExpr ELEM -> GModel -> Bool
+    isValid (Element ty t s) m = hasGoal t m
 
+validDTy : GRLExpr ELEM -> GModel -> Bool
+validDTy (Element ty t s) m = True
 
+validLink : GRLExpr ELEM -> List (GRLExpr ELEM) -> GModel -> Bool
+validLink sec ds m = True
 
-private
-checkStruc : (item : GModel SLINK)
-          -> (model : GModel MODEL)
-          -> Dec (ValidInsert SLINK item model)
-checkStruc (AND x xs) model with (doCheckStruc ANDTy x xs model)
-    | Yes prf = Yes (StructInsert)
-    | No  con = No (believe_me)
-checkStruc (IOR x xs) model with (doCheckStruc IORTy x xs model)
-    | Yes prf = Yes (StructInsert)
-    | No  con = No (believe_me)
-checkStruc (XOR x xs) model with (doCheckStruc XORTy x xs model)
-    | Yes prf = Yes (StructInsert)
-    | No  con = No (believe_me)
--}
+%hint
+checkStructBool : (link : GRLExpr STRUCT)
+               -> (model : GModel)
+               -> Bool
+checkStructBool (StructureLink ty src ds) m =
+       allDiff src ds
+    && validNodes (src :: ds) m
+    && validDTy src m
+    && validLink src ds m
+
 -- --------------------------------------------------------------------- [ EOF ]

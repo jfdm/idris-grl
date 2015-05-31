@@ -51,32 +51,32 @@ amyotModel : GModel
 amyotModel = emptyModel
     \+\ highPerf
     \+\ lowCost
-    -- \+\ minChange
-    -- \+\ maxHardware
-    -- \+\ highThrough
-    -- \+\ minMsgEx
-    -- \+\ minSwitch
-    -- \+\ detDataLoc
-    -- \+\ dataSCP
-    -- \+\ dataNewSNode
-    -- \+\ installSNode
-    -- \+\ serviceCentralSwitch
-    -- \+\ detSLoc
-    -- \+\ serviceInSCP
-    -- \->\ impacts MAKES minChange lowCost
-    -- \->\ effects MAKES maxHardware minChange
-    -- \->\ effects MAKES dataNewSNode minChange
-    -- \->\ effects MAKES dataSCP minChange
-    -- \->\ impacts MAKES minMsgEx highThrough
-    -- \->\ impacts MAKES minSwitch highThrough
-    -- \->\ impacts SOMENEG serviceInSCP minMsgEx
-    -- \->\ effects MAKES serviceInSCP minSwitch
-    -- \->\ effects BREAKS serviceCentralSwitch minSwitch
-    -- \->\ impacts MAKES serviceCentralSwitch minMsgEx
-    -- \<-\ and detSLoc [serviceCentralSwitch, serviceInSCP]
-    -- \<-\ ior detSLoc [dataNewSNode, dataSCP]
-    -- \<-\ and dataNewSNode [installSNode]
-    -- \<-\ and highPerf [maxHardware, highThrough]
+    \+\ minChange
+    \+\ maxHardware
+    \+\ highThrough
+    \+\ minMsgEx
+    \+\ minSwitch
+    \+\ detDataLoc
+    \+\ dataSCP
+    \+\ dataNewSNode
+    \+\ installSNode
+    \+\ serviceCentralSwitch
+    \+\ detSLoc
+    \+\ serviceInSCP
+    \->\ impacts MAKES minChange lowCost
+    \->\ effects MAKES maxHardware minChange
+    \->\ effects MAKES dataNewSNode minChange
+    \->\ effects MAKES dataSCP minChange
+    \->\ impacts MAKES minMsgEx highThrough
+    \->\ impacts MAKES minSwitch highThrough
+    \->\ impacts SOMENEG serviceInSCP minMsgEx
+    \->\ effects MAKES serviceInSCP minSwitch
+    \->\ effects BREAKS serviceCentralSwitch minSwitch
+    \->\ impacts MAKES serviceCentralSwitch minMsgEx
+    \<-\ and detSLoc [serviceCentralSwitch, serviceInSCP]
+    \<-\ ior detSLoc [dataNewSNode, dataSCP]
+    \<-\ and dataNewSNode [installSNode]
+    \<-\ and highPerf [maxHardware, highThrough]
 
 namespace Main
    main : IO ()

@@ -2,7 +2,6 @@ module GRL.Model
 
 import public Data.AVL.Set
 import public Data.AVL.Graph
-import public Data.SigmaList
 import public Data.List
 
 import GRL.Types.Expr

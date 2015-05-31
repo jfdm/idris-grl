@@ -1,7 +1,7 @@
 module GRL.Combinator
 
 import public Data.AVL.Set
-import public Data.Graph.AList
+import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
@@ -9,6 +9,8 @@ import GRL.DSL
 import GRL.Types.Expr
 import GRL.Types.Value
 import GRL.Property.Element
+import GRL.Property.Intention
+import GRL.Property.Structure
 
 %access public
 
@@ -51,34 +53,45 @@ private
 insertElem : GRLExpr ELEM -> GModel -> GModel
 insertElem elem model = addNode (convExpr elem) model
 
-infixl 5 \+\
+infixl 1 \+\
 
 (\+\) : GModel -> GRLExpr ELEM -> GModel
-(\+\) model elem with (checkElemDec elem model)
-  | Yes prf = insertElem elem model
-  | No  con = model
+(\+\) model elem =
+  case checkElemBool elem model of
+    True  => insertElem elem model
+    False => model
+
+-- case (checkElemDec elem model) of
+--   Yes prf => insertElem elem model
+--   No  con => model
 
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
 insertIntention : GRLExpr INTENT -> GModel -> GModel
-insertIntention link@(IntentLink _ _ x y) model =
-  let i = convExpr link in
+insertIntention (IntentLink a b x y) model =
+    let i = convExpr (IntentLink a b x y) in
     addValueEdge (convExpr y, convExpr x, Just i) model
 
-infixl 4 \->\
+infixl 1 \->\
 
 (\->\) : GModel -> GRLExpr INTENT -> GModel
-(\->\) m i = insertIntention i m
+(\->\) m i =
+  case (checkIntentBool i m) of
+    True  => insertIntention i m
+    False => m
 
 private
 insertStructure : GRLExpr STRUCT -> GModel ->  GModel
-insertStructure link@(StructureLink _ x ys) model =
-  let i = convExpr link in
+insertStructure (StructureLink a x ys) model =
+  let i = convExpr (StructureLink a x ys) in
     foldl (\m, y => addValueEdge (convExpr x, convExpr y, Just i) m) model ys
 
-infixl 4 \<-\
+infixl 1 \<-\
 
-(\<-\) : GModel -> GRLExpr STRUCT -> GModel
-(\<-\) m i = insertStructure i m
+(\<-\) : (m : GModel) -> (e : GRLExpr STRUCT) -> GModel
+(\<-\) model i =
+  case (checkStructBool i model) of
+    True  => insertStructure i model
+    False => model
 -- --------------------------------------------------------------------- [ EOF ]

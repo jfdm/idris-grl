@@ -13,7 +13,7 @@ module GRL.Property.Element
 import public Decidable.Equality
 
 import public Data.AVL.Set
-import public Data.Graph.AList
+import public Data.AVL.Graph
 import public Data.List
 
 import GRL.DSL
@@ -21,6 +21,7 @@ import GRL.Model
 import GRL.Types.Expr
 import GRL.Types.Value
 
+%access public
 -- ------------------------------------------------------- [ Element Insertion ]
 
 data ValidGoal : GRLExpr ELEM -> GModel -> Type
@@ -34,27 +35,29 @@ data ValidGoal : GRLExpr ELEM -> GModel -> Type
 |||
 isElemUnique : (node : GRLExpr ELEM)
             -> (model : GModel)
-            -> Dec (ValidGoal node model)
-isElemUnique (Element ty t s) m =
-  case (hasGoal t m) of
-    False => Yes (OkayGoal (Element ty t s) m)
-    True  => No  (believe_me)
+            -> Bool
+isElemUnique (Element ty t s) m = not $ hasGoal t m
+  -- case (hasGoal t m) of
+  --   False => Yes (OkayGoal (Element ty t s) m)
+  --   True  => No  (believe_me)
 
 
-checkElemDec : (e : GRLExpr ELEM)
-            -> (m : GModel)
-            -> Dec (ValidGoal e m)
-checkElemDec elem model with (isElemUnique (elem) model)
-  | Yes prf = Yes prf
-  | No  con = No  con
+-- checkElemDec : (e : GRLExpr ELEM)
+--             -> (m : GModel)
+--             -> Dec (ValidGoal e m)
+-- checkElemDec elem model with (isElemUnique (elem) model)
+--   | Yes prf = Yes prf
+--   | No  con = No  con
 
 ||| Check to see if the element is unique.
 |||
+%hint
 checkElemBool : (node : GRLExpr ELEM)
              -> (model : GModel)
              -> Bool
-checkElemBool n m with (checkElemDec n m)
-  | Yes prf = True
-  | No  con = False
+checkElemBool n m = isElemUnique n m
+-- with (checkElemDec n m)
+--   | Yes prf = True
+--   | No  con = False
 
 -- --------------------------------------------------------------------- [ EOF ]
