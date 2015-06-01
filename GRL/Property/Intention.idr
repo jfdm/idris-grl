@@ -14,38 +14,37 @@ import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
-import GRL.DSL
-import GRL.Types.Expr
-import GRL.Types.Value
+import GRL.IR
+import GRL.Common
 
 %access public
 
 -- ---------------------------------------------- [ Intentional Link Insertion ]
-data ValidIntent : GRLExpr INTENT -> GModel -> Type
+data ValidIntent : GrlIR INTENT -> GModel -> Type
   where
-    OkayIntent : (i : GRLExpr INTENT)
+    OkayIntent : (i : GrlIR INTENT)
               -> (m : GModel)
               -> ValidIntent i m
 
-examineLink : GRLExpr INTENT -> Bool
+examineLink : GrlIR INTENT -> Bool
 examineLink (IntentLink cTy c x y) = case (y) of
    (Element ty n s) => case ty of
         RESOURCETy => False
-        otherwise  => not $ eqGRLExpr x y
+        otherwise  => not $ eqGrlIR x y
 
-inModel : GRLExpr ELEM -> GModel -> Bool
+inModel : GrlIR ELEM -> GModel -> Bool
 inModel (Element ty n s) m = hasGoal n m
 
-validLink : (i : GRLExpr INTENT) -> (m : GModel) -> Bool
+validLink : (i : GrlIR INTENT) -> (m : GModel) -> Bool
 validLink (IntentLink cTy ty x y) m = (inModel x m) && (inModel y m)
 
--- checkIntentDec : (link : GRLExpr INTENT)
+-- checkIntentDec : (link : GrlIR INTENT)
 --               -> (model : GModel)
 --               -> Dec (ValidIntent link model)
 -- checkIntentDec l m = validLink l m
 
 %hint
-checkIntentBool : (link : GRLExpr INTENT)
+checkIntentBool : (link : GrlIR INTENT)
               -> (model : GModel)
               -> Bool
 checkIntentBool l m = validLink l m && examineLink l

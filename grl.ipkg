@@ -2,15 +2,14 @@ package grl
 
 opts = "-p effects -p containers"
 
-modules = GRL.Combinator
+modules = GRL.Common
+        , GRL.IR
         , GRL.Model
-        , GRL.DSL
+        , GRL.Builder
         , GRL.Property.Element
         , GRL.Property.Structure
         , GRL.Property.Intention
-        , GRL.Types.Expr
-        , GRL.Types.Value
-        , GRL.Lang
+        , GRL.Lang.Default
  --       , GRL.Eval
  --       , GRL.Eval.Forward
  --       , GRL.Eval.Qualitative

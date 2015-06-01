@@ -1,6 +1,8 @@
-module GRL.Types.Value
+module GRL.Common
 
 import public Decidable.Equality
+
+data Decomposition  = ANDTy | XORTy | IORTy
 
 data Importance = HIGH | MEDIUM | LOW | NO
 
@@ -41,7 +43,59 @@ namespace Contributions
     HURTS : ContributionTy
 
 
+-- ------------------------------------------------------------------- [ Types ]
+
+data GRLElementTy = GOALTy | SOFTTy | TASKTy | RESOURCETy
+
+data GRLIntentTy  = CONTRIBUTION | CORRELATION
+
+data GrlIRTy = ELEM
+               | INTENT
+               | STRUCT
+
 -- -------------------------------------------------------------------- [ Show ]
+
+instance Show GRLElementTy where
+  show GOALTy     = "GOALTy"
+  show SOFTTy     = "SOFTTy"
+  show TASKTy     = "TASKTy"
+  show RESOURCETy = "RESOURCETy"
+
+instance Show GRLIntentTy where
+  show CONTRIBUTION = "CONTRIBUTION"
+  show CORRELATION  = "CORRELATION"
+
+instance Show GrlIRTy where
+  show ELEM   = "ELEM"
+  show INTENT = "INTENT"
+  show STRUCT = "STRUCT"
+
+-- ---------------------------------------------------------------------- [ Eq ]
+
+instance Eq GRLElementTy where
+  (==) GOALTy     GOALTy     = True
+  (==) SOFTTy     SOFTTy     = True
+  (==) TASKTy     TASKTy     = True
+  (==) RESOURCETy RESOURCETy = True
+  (==) _        _        = False
+
+instance Eq GRLIntentTy where
+  (==) CONTRIBUTION CONTRIBUTION = True
+  (==) CORRELATION  CORRELATION  = True
+  (==) _            _            = False
+
+instance Eq GrlIRTy where
+  (==) ELEM   ELEM   = True
+  (==) INTENT INTENT = True
+  (==) STRUCT STRUCT = True
+  (==) _      _      = False
+
+-- -------------------------------------------------------------------- [ Show ]
+
+instance Show Decomposition where
+  show ANDTy  = "ANDTy"
+  show XORTy  = "XORTy"
+  show IORTy  = "IORTy"
 
 instance Show Satisfaction where
   show SATISFIED = "SATISFIED"
@@ -63,6 +117,12 @@ instance Show ContributionTy where
   show BREAKS  = "BREAKS"
 
 -- ---------------------------------------------------------------------- [ Eq ]
+instance Eq Decomposition where
+  (==) ANDTy ANDTy = True
+  (==) XORTy XORTy = True
+  (==) IORTy IORTy = True
+  (==) _   _   = False
+
 instance Eq Satisfaction where
   (==) SATISFIED SATISFIED = True
   (==) WEAKSATIS WEAKSATIS = True

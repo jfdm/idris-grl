@@ -1,13 +1,15 @@
-module GRL.Combinator
+||| A generic builder for Goal Graphs.
+|||
+||| This module defines a 'compiler' that transforms the GRL IR into the Goal Graph.
+module GRL.Builder
 
 import public Data.AVL.Set
 import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
-import GRL.DSL
-import GRL.Types.Expr
-import GRL.Types.Value
+import GRL.IR
+import GRL.Common
 import GRL.Property.Element
 import GRL.Property.Intention
 import GRL.Property.Structure
@@ -23,13 +25,13 @@ emptyModel = mkEmptyGraph
 -- ------------------------------------------------------------- [ Interpreter ]
 
 |||  Interpt the types from the DSL.
-interpTy : GRLExprTy -> Type
+interpTy : GrlIRTy -> Type
 interpTy ELEM   = GoalNode
 interpTy INTENT = GoalEdge
 interpTy STRUCT = GoalEdge
 
 ||| Convert expressions from the DSL to Nodes or Labels
-convExpr : {ty : GRLExprTy} -> GRLExpr ty -> interpTy ty
+convExpr : {ty : GrlIRTy} -> GrlIR ty -> interpTy ty
 convExpr (Element eTy t s) =
   case eTy of
     GOALTy      => Goal t s Nothing
@@ -50,21 +52,24 @@ convExpr (StructureLink ty _ _) =
 
 ||| Perform the insertion of elements into the model.
 private
-insertElem : GRLExpr ELEM -> GModel -> GModel
+insertElem : GrlIR ELEM -> GModel -> GModel
 insertElem elem model = addNode (convExpr elem) model
 
 infixl 5 \+\
 
-(\+\) : GModel -> GRLExpr ELEM -> GModel
+(\+\) : GRL expr => GModel -> expr ELEM -> GModel
 (\+\) model elem =
-  if checkElemBool elem model
-    then insertElem elem model
-    else model
+    if checkElemBool e' model
+      then insertElem e' model
+      else model
+  where
+    e' : GrlIR ELEM
+    e' = mkGoal elem
 
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
-insertIntention : GRLExpr INTENT -> GModel -> GModel
+insertIntention : GrlIR INTENT -> GModel -> GModel
 insertIntention (IntentLink a b x y) model =
   addValueEdge (convExpr y, convExpr x, Just i) model
     where
@@ -74,14 +79,17 @@ insertIntention (IntentLink a b x y) model =
 
 infixl 5 \->\
 
-(\->\) : GModel -> GRLExpr INTENT -> GModel
+(\->\) : GRL expr => GModel -> expr INTENT -> GModel
 (\->\) m i =
-  if (checkIntentBool i m)
-    then insertIntention i m
-    else m
+    if (checkIntentBool l m)
+      then insertIntention l m
+      else m
+  where
+    l : GrlIR INTENT
+    l = mkIntent i
 
 private
-insertStructure : GRLExpr STRUCT -> GModel ->  GModel
+insertStructure : GrlIR STRUCT -> GModel ->  GModel
 insertStructure (StructureLink ty x@(Element _ t _) ys) model =
   let i = convExpr (StructureLink ty x ys) in
     foldl (\m, y => addValueEdge (convExpr x, convExpr y, Just i) m) model ys
@@ -90,9 +98,12 @@ insertStructure (StructureLink ty x@(Element _ t _) ys) model =
 
 infixl 5 \<-\
 
-(\<-\) : (GModel) -> (GRLExpr STRUCT) -> GModel
+(\<-\) : GRL expr => GModel -> expr STRUCT -> GModel
 (\<-\) model i =
-  if (checkStructBool i model)
-    then insertStructure i model
-    else model
+    if (checkStructBool s model)
+      then insertStructure s model
+      else model
+  where
+    s : GrlIR STRUCT
+    s = mkStruct i
 -- --------------------------------------------------------------------- [ EOF ]

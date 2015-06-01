@@ -16,17 +16,16 @@ import public Data.AVL.Set
 import public Data.AVL.Graph
 import public Data.List
 
-import GRL.DSL
 import GRL.Model
-import GRL.Types.Expr
-import GRL.Types.Value
+import GRL.IR
+import GRL.Common
 
 %access public
 -- ------------------------------------------------------- [ Element Insertion ]
 
 ||| Check to see if the element is unique.
 |||
-isElemUnique : (node : GRLExpr ELEM)
+isElemUnique : (node : GrlIR ELEM)
             -> (model : GModel)
             -> Bool
 isElemUnique (Element ty t s) m = not $ hasGoal t m
@@ -34,7 +33,7 @@ isElemUnique (Element ty t s) m = not $ hasGoal t m
 ||| Check to see if the element is unique.
 |||
 %hint
-checkElemBool : (node : GRLExpr ELEM)
+checkElemBool : (node : GrlIR ELEM)
              -> (model : GModel)
              -> Bool
 checkElemBool n m = isElemUnique n m

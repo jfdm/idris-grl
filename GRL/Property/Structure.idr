@@ -16,36 +16,35 @@ import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
-import GRL.DSL
-import GRL.Types.Expr
-import GRL.Types.Value
+import GRL.IR
+import GRL.Common
 
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
 ||| No loops and all different children.
-allDiff : (src : GRLExpr ELEM)
-       -> (ds  : List (GRLExpr ELEM))
+allDiff : (src : GrlIR ELEM)
+       -> (ds  : List (GrlIR ELEM))
        -> Bool
 allDiff src ds = diffDSTs && noLoopBack
   where
     diffDSTs : Bool
-    diffDSTs = not $ and [ eqGRLExpr x y | x <- ds, y <- ds]
+    diffDSTs = not $ and [ eqGrlIR x y | x <- ds, y <- ds]
 
     noLoopBack : Bool
-    noLoopBack = not $ and $ map (\x => eqGRLExpr x src) ds
+    noLoopBack = not $ and $ map (\x => eqGrlIR x src) ds
 
 ||| Nodes are all valid nodes
-validNodes : List (GRLExpr ELEM)
+validNodes : List (GrlIR ELEM)
           -> GModel
           -> Bool
 validNodes ns m = and $ map (\n => isValid n m) ns
   where
-    isValid : GRLExpr ELEM -> GModel -> Bool
+    isValid : GrlIR ELEM -> GModel -> Bool
     isValid (Element ty t s) m = hasGoal t m
 
 ||| The node is free to be decomposed, or has been decomposed and are
 ||| adding the same decomposition.
-validDTy : GRLExpr ELEM -> GRLStructTy -> GModel -> Bool
+validDTy : GrlIR ELEM -> Decomposition -> GModel -> Bool
 validDTy (Element ty t s) dty m =
   case getGoalByTitle t m of
     Nothing => True
@@ -54,7 +53,7 @@ validDTy (Element ty t s) dty m =
       Just a  => a == dty
 
 %hint
-checkStructBool : (link : GRLExpr STRUCT)
+checkStructBool : (link : GrlIR STRUCT)
                -> (model : GModel)
                -> Bool
 checkStructBool (StructureLink ty src ds) m =

@@ -1,51 +1,51 @@
 module Trial
 
-import GRL.Lang
+import GRL.Lang.Default
 
 -- Service Provider
-highPerf : GRLExpr ELEM
-highPerf = soft "High Performance" Nothing
+highPerf : GoalLang ELEM
+highPerf = Soft "High Performance" Nothing
 
-lowCost : GRLExpr ELEM
-lowCost  = soft "Low Cost" Nothing
+lowCost : GoalLang ELEM
+lowCost  = Soft "Low Cost" Nothing
 
-minChange : GRLExpr ELEM
-minChange = soft "Minimum Changes to Infrastructure" Nothing
+minChange : GoalLang ELEM
+minChange = Soft "Minimum Changes to Infrastructure" Nothing
 
-maxHardware : GRLExpr ELEM
-maxHardware = soft "Maximun Hardware Utilisation" Nothing
+maxHardware : GoalLang ELEM
+maxHardware = Soft "Maximun Hardware Utilisation" Nothing
 
-highThrough : GRLExpr ELEM
-highThrough = soft "High Throughput" Nothing
+highThrough : GoalLang ELEM
+highThrough = Soft "High Throughput" Nothing
 
-minMsgEx : GRLExpr ELEM
-minMsgEx = soft "Minimum Message Exchange" Nothing
+minMsgEx : GoalLang ELEM
+minMsgEx = Soft "Minimum Message Exchange" Nothing
 
-minSwitch : GRLExpr ELEM
-minSwitch = soft "Minimum Switch Load" Nothing
+minSwitch : GoalLang ELEM
+minSwitch = Soft "Minimum Switch Load" Nothing
 
 -- System
 
-detDataLoc : GRLExpr ELEM
-detDataLoc = goal "Determine Data Location" Nothing
+detDataLoc : GoalLang ELEM
+detDataLoc = Goal "Determine Data Location" Nothing
 
-dataSCP : GRLExpr ELEM
-dataSCP = task "Data in Service Control Point" Nothing
+dataSCP : GoalLang ELEM
+dataSCP = Task "Data in Service Control Point" Nothing
 
-dataNewSNode : GRLExpr ELEM
-dataNewSNode = task "Data in New Service Node" Nothing
+dataNewSNode : GoalLang ELEM
+dataNewSNode = Task "Data in New Service Node" Nothing
 
-installSNode : GRLExpr ELEM
-installSNode = task "ata in New Service Node" Nothing -- chang
+installSNode : GoalLang ELEM
+installSNode = Task "ata in New Service Node" Nothing -- chang
 
-serviceCentralSwitch : GRLExpr ELEM
-serviceCentralSwitch = task "Service in Central Switch" Nothing
+serviceCentralSwitch : GoalLang ELEM
+serviceCentralSwitch = Task "Service in Central Switch" Nothing
 
-detSLoc : GRLExpr ELEM
-detSLoc = goal "Determine Service Location" Nothing
+detSLoc : GoalLang ELEM
+detSLoc = Goal "Determine Service Location" Nothing
 
-serviceInSCP : GRLExpr ELEM
-serviceInSCP = task "Service in Service Control Point" Nothing
+serviceInSCP : GoalLang ELEM
+serviceInSCP = Task "Service in Service Control Point" Nothing
 
 amyotModel : GModel
 amyotModel = emptyModel
@@ -66,20 +66,20 @@ amyotModel = emptyModel
 
 amyotModel' : GModel
 amyotModel' = amyotModel
-    \->\ impacts MAKES minChange lowCost
-    \->\ effects MAKES maxHardware minChange
-    \->\ effects MAKES dataNewSNode minChange
-    \->\ effects MAKES dataSCP minChange
-    \->\ impacts MAKES minMsgEx highThrough
-    \->\ impacts MAKES minSwitch highThrough
-    \->\ impacts SOMENEG serviceInSCP minMsgEx
-    \->\ effects MAKES serviceInSCP minSwitch
-    \->\ effects BREAKS serviceCentralSwitch minSwitch
-    \->\ impacts MAKES serviceCentralSwitch minMsgEx
-    \<-\ with List hasAnd detSLoc (the (List (GRLExpr ELEM)) [serviceCentralSwitch, serviceInSCP])
-    \<-\ with List hasIor detSLoc (the (List (GRLExpr ELEM)) [dataNewSNode, dataSCP])
-    \<-\ with List hasAnd dataNewSNode (the (List (GRLExpr ELEM)) [installSNode])
-    \<-\ with List hasAnd highPerf (the (List (GRLExpr ELEM)) [maxHardware, highThrough])
+    \->\ Impacts MAKES minChange lowCost
+    \->\ Effects MAKES maxHardware minChange
+    \->\ Effects MAKES dataNewSNode minChange
+    \->\ Effects MAKES dataSCP minChange
+    \->\ Impacts MAKES minMsgEx highThrough
+    \->\ Impacts MAKES minSwitch highThrough
+    \->\ Impacts SOMENEG serviceInSCP minMsgEx
+    \->\ Effects MAKES serviceInSCP minSwitch
+    \->\ Effects BREAKS serviceCentralSwitch minSwitch
+    \->\ Impacts MAKES serviceCentralSwitch minMsgEx
+    \<-\ HasAnd detSLoc      [serviceCentralSwitch, serviceInSCP]
+    \<-\ HasIor detSLoc      [dataNewSNode, dataSCP]
+    \<-\ HasAnd dataNewSNode [installSNode]
+    \<-\ HasAnd highPerf     [maxHardware, highThrough]
 
 namespace Main
    main : IO ()

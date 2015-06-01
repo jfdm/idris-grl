@@ -1,30 +1,29 @@
-
+||| The GRL Model as  Goal Graph
 module GRL.Model
 
 import public Data.AVL.Set
 import public Data.AVL.Graph
 import public Data.List
 
-import GRL.Types.Common
-import GRL.Types.Value
+import GRL.Common
 
 %access public
 
 data GoalNode : Type where
-  Goal : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Soft : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Task : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
-  Res  : String -> Maybe Satisfaction -> Maybe GRLStructTy -> GoalNode
+  Goal : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
+  Soft : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
+  Task : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
+  Res  : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
 
 private
-showNode : GRLElementTy -> String -> Maybe Satisfaction -> Maybe GRLStructTy -> String
+showNode : String -> String -> Maybe Satisfaction -> Maybe Decomposition -> String
 showNode ty t s d = unwords ["[", show ty, t, show s, show d, "]"]
 
 instance Show GoalNode where
-  show (Goal t s d) = showNode GOALTy     t s d
-  show (Soft t s d) = showNode SOFTTy     t s d
-  show (Task t s d) = showNode TASKTy     t s d
-  show (Res  t s d) = showNode RESOURCETy t s d
+  show (Goal t s d) = showNode "GOALTy" t s d
+  show (Soft t s d) = showNode "SOFTTy" t s d
+  show (Task t s d) = showNode "TASKTy" t s d
+  show (Res  t s d) = showNode "RESOURCETy" t s d
 
 instance Eq GoalNode where
   (==) (Goal x xs xd) (Goal y ys yd) = x == y && xs == ys && xd == yd
@@ -56,7 +55,7 @@ getGoalTitle (Soft t s d) = t
 getGoalTitle (Task t s d) = t
 getGoalTitle (Res  t s d) = t
 
-getGoalDecomp : GoalNode -> Maybe GRLStructTy
+getGoalDecomp : GoalNode -> Maybe Decomposition
 getGoalDecomp (Goal t s d) = d
 getGoalDecomp (Soft t s d) = d
 getGoalDecomp (Task t s d) = d
