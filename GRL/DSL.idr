@@ -97,20 +97,20 @@ effects c a b = IntentLink CORRELATION c a b
 ||| links. All of the source intentional elements are necessary for
 ||| the target intentional element to be satisfied.
 |||
-and : GRLExpr ELEM
+hasAnd : GRLExpr ELEM
    -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
-and a bs = StructureLink ANDTy a bs
+hasAnd a bs = StructureLink ANDTy a bs
 
 ||| The XOR Decomposition link enables the description of
 ||| alternative means of satisfying a target intentional element:
 ||| Mutually exclusive. The satisfaction of one and only one of the
 ||| sub-intentional elements is necessary to achieve the target.
 |||
-xor : GRLExpr ELEM
+hasXor : GRLExpr ELEM
    -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
-xor a bs = StructureLink XORTy a bs
+hasXor a bs = StructureLink XORTy a bs
 
 ||| The IOR Decomposition link enables the description of
 ||| alternative means of satisfying a target intentional element:
@@ -118,10 +118,10 @@ xor a bs = StructureLink XORTy a bs
 ||| sub-intentional elements is sufficient to achieve the target,
 ||| but many sub-intentional elements can be satisfied.
 |||
-ior : GRLExpr ELEM
+hasIor : GRLExpr ELEM
    -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
-ior a bs = StructureLink IORTy a bs
+hasIor a bs = StructureLink IORTy a bs
 
 partial
 eqGRLExpr : GRLExpr a -> GRLExpr b -> Bool
