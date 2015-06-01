@@ -1,25 +1,11 @@
-module GRL.DSL
+module GRL.Lang.Default
 
-import GRL.Types.Expr
-import GRL.Types.Value
+import public GRL.Types.Value
+import public GRL.Model
 
--- ---------------------------------------------------------- [ ADT Definition ]
-data GRLExpr : GRLExprTy -> Type where
-  Element : (ty : GRLElementTy)
-          -> String
-          -> Maybe Satisfaction
-          -> GRLExpr ELEM
-
-  IntentLink : (ty : GRLIntentTy)
-           -> ContributionTy
-           -> GRLExpr ELEM
-           -> GRLExpr ELEM
-           -> GRLExpr INTENT
-
-  StructureLink : (ty : GRLStructTy)
-               -> GRLExpr ELEM
-               -> List (GRLExpr ELEM)
-               -> GRLExpr STRUCT
+import public GRL.Combinator
+import public GRL.Lang.ADT
+import public GRL.Types.Value
 
 -- ---------------------------------------------------- [ Element Declarations ]
 ||| A (hard) Goal is a condition or state of affairs in the
@@ -122,20 +108,5 @@ hasIor : GRLExpr ELEM
    -> List (GRLExpr ELEM)
    -> GRLExpr STRUCT
 hasIor a bs = StructureLink IORTy a bs
-
-partial
-eqGRLExpr : GRLExpr a -> GRLExpr b -> Bool
-eqGRLExpr (Element xty x sx) (Element yty y sy) =
-    xty == yty && x == y && sx == sy
-eqGRLExpr (IntentLink xty xc xa xb) (IntentLink yty yc ya yb) =
-    xty == yty && xc == yc && eqGRLExpr xa ya && eqGRLExpr xb yb
-eqGRLExpr (StructureLink xty xa (xbs)) (StructureLink yty ya (ybs)) =
-      xty == yty && eqGRLExpr xa ya && eqGRLExprList xbs ybs
-    where
-      eqGRLExprList : List (GRLExpr ELEM) -> List (GRLExpr ELEM) -> Bool
-      eqGRLExprList Nil Nil = True
-      eqGRLExprList Nil ys  = False
-      eqGRLExprList (x::xs) (y::ys) = eqGRLExpr x y && assert_smaller (eqGRLExprList xs ys) (eqGRLExprList xs ys)
-eqGRLExpr _ _ = False
 
 -- --------------------------------------------------------------------- [ EOF ]

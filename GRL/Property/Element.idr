@@ -24,30 +24,12 @@ import GRL.Types.Value
 %access public
 -- ------------------------------------------------------- [ Element Insertion ]
 
-data ValidGoal : GRLExpr ELEM -> GModel -> Type
-  where
-    OkayGoal : (n : GRLExpr ELEM)
-            -> (m : GModel)
-            -> ValidGoal n m
-
-
 ||| Check to see if the element is unique.
 |||
 isElemUnique : (node : GRLExpr ELEM)
             -> (model : GModel)
             -> Bool
 isElemUnique (Element ty t s) m = not $ hasGoal t m
-  -- case (hasGoal t m) of
-  --   False => Yes (OkayGoal (Element ty t s) m)
-  --   True  => No  (believe_me)
-
-
--- checkElemDec : (e : GRLExpr ELEM)
---             -> (m : GModel)
---             -> Dec (ValidGoal e m)
--- checkElemDec elem model with (isElemUnique (elem) model)
---   | Yes prf = Yes prf
---   | No  con = No  con
 
 ||| Check to see if the element is unique.
 |||
@@ -56,8 +38,5 @@ checkElemBool : (node : GRLExpr ELEM)
              -> (model : GModel)
              -> Bool
 checkElemBool n m = isElemUnique n m
--- with (checkElemDec n m)
---   | Yes prf = True
---   | No  con = False
 
 -- --------------------------------------------------------------------- [ EOF ]

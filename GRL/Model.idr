@@ -1,10 +1,11 @@
+
 module GRL.Model
 
 import public Data.AVL.Set
 import public Data.AVL.Graph
 import public Data.List
 
-import GRL.Types.Expr
+import GRL.Types.Common
 import GRL.Types.Value
 
 %access public
@@ -32,12 +33,6 @@ instance Eq GoalNode where
   (==) (Res  x xs xd) (Res  y ys yd) = x == y && xs == ys && xd == yd
   (==) _              _              = False
 
-getGoalTitle : GoalNode -> String
-getGoalTitle (Goal t s d) = t
-getGoalTitle (Soft t s d) = t
-getGoalTitle (Task t s d) = t
-getGoalTitle (Res  t s d) = t
-
 data GoalEdge  : Type where
   Contribution : ContributionTy -> GoalEdge
   Correlation  : ContributionTy -> GoalEdge
@@ -54,6 +49,27 @@ instance Show GoalEdge where
 
 GModel : Type
 GModel = Graph (GoalNode) (GoalEdge)
+
+getGoalTitle : GoalNode -> String
+getGoalTitle (Goal t s d) = t
+getGoalTitle (Soft t s d) = t
+getGoalTitle (Task t s d) = t
+getGoalTitle (Res  t s d) = t
+
+getGoalDecomp : GoalNode -> Maybe GRLStructTy
+getGoalDecomp (Goal t s d) = d
+getGoalDecomp (Soft t s d) = d
+getGoalDecomp (Task t s d) = d
+getGoalDecomp (Res  t s d) = d
+
+getGoalSatis : GoalNode -> Maybe Satisfaction
+getGoalSatis (Goal t s d) = s
+getGoalSatis (Soft t s d) = s
+getGoalSatis (Task t s d) = s
+getGoalSatis (Res  t s d) = s
+
+getGoalByTitle : String -> GModel -> Maybe GoalNode
+getGoalByTitle t g = getValueUsing (\x => getGoalTitle x == t) g
 
 hasGoal : String -> GModel -> Bool
 hasGoal t m = hasValueUsing (\(x,_) => getGoalTitle x == t) (graph m)

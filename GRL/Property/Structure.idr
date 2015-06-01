@@ -4,9 +4,8 @@
 |||
 ||| 1. The src and destination must not be the same.
 ||| 2. A node can only be decomposed once.
-|||   1. The link must be valid for the parent.
-|||   2.
-||| 3. A parent cannot be contained by its children.
+||| 3. The decomposition type must be valid for the parent.
+||| 4. A parent cannot be contained by its children.
 |||
 module GRL.Property.Structure
 
@@ -23,6 +22,7 @@ import GRL.Types.Value
 
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
+||| No loops and all different children.
 allDiff : (src : GRLExpr ELEM)
        -> (ds  : List (GRLExpr ELEM))
        -> Bool
@@ -34,6 +34,7 @@ allDiff src ds = diffDSTs && noLoopBack
     noLoopBack : Bool
     noLoopBack = not $ and $ map (\x => eqGRLExpr x src) ds
 
+||| Nodes are all valid nodes
 validNodes : List (GRLExpr ELEM)
           -> GModel
           -> Bool
@@ -42,11 +43,15 @@ validNodes ns m = and $ map (\n => isValid n m) ns
     isValid : GRLExpr ELEM -> GModel -> Bool
     isValid (Element ty t s) m = hasGoal t m
 
-validDTy : GRLExpr ELEM -> GModel -> Bool
-validDTy (Element ty t s) m = True
-
-validLink : GRLExpr ELEM -> List (GRLExpr ELEM) -> GModel -> Bool
-validLink sec ds m = True
+||| The node is free to be decomposed, or has been decomposed and are
+||| adding the same decomposition.
+validDTy : GRLExpr ELEM -> GRLStructTy -> GModel -> Bool
+validDTy (Element ty t s) dty m =
+  case getGoalByTitle t m of
+    Nothing => True
+    Just n  => case getGoalDecomp n of
+      Nothing => True
+      Just a  => a == dty
 
 %hint
 checkStructBool : (link : GRLExpr STRUCT)
@@ -55,7 +60,6 @@ checkStructBool : (link : GRLExpr STRUCT)
 checkStructBool (StructureLink ty src ds) m =
        allDiff src ds
     && validNodes (src :: ds) m
-    && validDTy src m
-    && validLink src ds m
+    && validDTy src ty m
 
 -- --------------------------------------------------------------------- [ EOF ]

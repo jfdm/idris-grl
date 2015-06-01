@@ -1,5 +1,4 @@
-||| Definition of the types for the DSL Expressions.
-module GRL.Types.Expr
+module DSL.Lang.AST
 
 -- ------------------------------------------------------------------- [ Types ]
 
@@ -58,5 +57,39 @@ instance Eq GRLExprTy where
   (==) INTENT INTENT = True
   (==) STRUCT STRUCT = True
   (==) _      _      = False
+
+
+-- ---------------------------------------------------------- [ ADT Definition ]
+data GRLExpr : GRLExprTy -> Type where
+  Element : (ty : GRLElementTy)
+          -> String
+          -> Maybe Satisfaction
+          -> GRLExpr ELEM
+
+  IntentLink : (ty : GRLIntentTy)
+           -> ContributionTy
+           -> GRLExpr ELEM
+           -> GRLExpr ELEM
+           -> GRLExpr INTENT
+
+  StructureLink : (ty : GRLStructTy)
+               -> GRLExpr ELEM
+               -> List (GRLExpr ELEM)
+               -> GRLExpr STRUCT
+
+partial
+eqGRLExpr : GRLExpr a -> GRLExpr b -> Bool
+eqGRLExpr (Element xty x sx) (Element yty y sy) =
+    xty == yty && x == y && sx == sy
+eqGRLExpr (IntentLink xty xc xa xb) (IntentLink yty yc ya yb) =
+    xty == yty && xc == yc && eqGRLExpr xa ya && eqGRLExpr xb yb
+eqGRLExpr (StructureLink xty xa (xbs)) (StructureLink yty ya (ybs)) =
+      xty == yty && eqGRLExpr xa ya && eqGRLExprList xbs ybs
+    where
+      eqGRLExprList : List (GRLExpr ELEM) -> List (GRLExpr ELEM) -> Bool
+      eqGRLExprList Nil Nil = True
+      eqGRLExprList Nil ys  = False
+      eqGRLExprList (x::xs) (y::ys) = eqGRLExpr x y && assert_smaller (eqGRLExprList xs ys) (eqGRLExprList xs ys)
+eqGRLExpr _ _ = False
 
 -- --------------------------------------------------------------------- [ EOF ]

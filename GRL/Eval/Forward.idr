@@ -5,22 +5,19 @@ import Effect.State
 import Effect.StdIO
 
 import Data.AVL.Dict
-import Data.Graph.AList
+import Data.AVL.Graph
+
 import Data.Queue
 import Data.Stack
 
+import GRL.Types.Value
 import GRL.Model
-import GRL.Eval.GenGraph
-import GRL.Utils
 
 import GRL.Eval.Qualitative
 
 %access public
 
 -- ----------------------------------------------------- [ Forward Propagation ]
-
--- data GLink = ALINK | ILINK | XLINK | CLINK Contrib | ELINK Contrib
--- GGraph = Graph (GModel ELEM) (GLink)
 
 ||| The effects used in a BFS.
 MEvalEffs : List EFFECT

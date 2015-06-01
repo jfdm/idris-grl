@@ -53,45 +53,46 @@ private
 insertElem : GRLExpr ELEM -> GModel -> GModel
 insertElem elem model = addNode (convExpr elem) model
 
-infixl 1 \+\
+infixl 5 \+\
 
 (\+\) : GModel -> GRLExpr ELEM -> GModel
 (\+\) model elem =
-  case checkElemBool elem model of
-    True  => insertElem elem model
-    False => model
-
--- case (checkElemDec elem model) of
---   Yes prf => insertElem elem model
---   No  con => model
+  if checkElemBool elem model
+    then insertElem elem model
+    else model
 
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
 insertIntention : GRLExpr INTENT -> GModel -> GModel
 insertIntention (IntentLink a b x y) model =
-    let i = convExpr (IntentLink a b x y) in
-    addValueEdge (convExpr y, convExpr x, Just i) model
+  addValueEdge (convExpr y, convExpr x, Just i) model
+    where
+      i : GoalEdge
+      i = convExpr (IntentLink a b x y)
 
-infixl 1 \->\
+
+infixl 5 \->\
 
 (\->\) : GModel -> GRLExpr INTENT -> GModel
 (\->\) m i =
-  case (checkIntentBool i m) of
-    True  => insertIntention i m
-    False => m
+  if (checkIntentBool i m)
+    then insertIntention i m
+    else m
 
 private
 insertStructure : GRLExpr STRUCT -> GModel ->  GModel
-insertStructure (StructureLink a x ys) model =
-  let i = convExpr (StructureLink a x ys) in
+insertStructure (StructureLink ty x@(Element _ t _) ys) model =
+  let i = convExpr (StructureLink ty x ys) in
     foldl (\m, y => addValueEdge (convExpr x, convExpr y, Just i) m) model ys
 
-infixl 1 \<-\
 
-(\<-\) : (m : GModel) -> (e : GRLExpr STRUCT) -> GModel
+
+infixl 5 \<-\
+
+(\<-\) : (GModel) -> (GRLExpr STRUCT) -> GModel
 (\<-\) model i =
-  case (checkStructBool i model) of
-    True  => insertStructure i model
-    False => model
+  if (checkStructBool i model)
+    then insertStructure i model
+    else model
 -- --------------------------------------------------------------------- [ EOF ]

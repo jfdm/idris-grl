@@ -12,6 +12,5 @@ modules = GRL.Combinator
         , GRL.Types.Value
         , GRL.Lang
  --       , GRL.Eval
- --       , GRL.Eval.GenGraph
  --       , GRL.Eval.Forward
  --       , GRL.Eval.Qualitative

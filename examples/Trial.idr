@@ -63,6 +63,9 @@ amyotModel = emptyModel
     \+\ serviceCentralSwitch
     \+\ detSLoc
     \+\ serviceInSCP
+
+amyotModel' : GModel
+amyotModel' = amyotModel
     \->\ impacts MAKES minChange lowCost
     \->\ effects MAKES maxHardware minChange
     \->\ effects MAKES dataNewSNode minChange
@@ -73,20 +76,20 @@ amyotModel = emptyModel
     \->\ effects MAKES serviceInSCP minSwitch
     \->\ effects BREAKS serviceCentralSwitch minSwitch
     \->\ impacts MAKES serviceCentralSwitch minMsgEx
-    \<-\ and detSLoc [serviceCentralSwitch, serviceInSCP]
-    \<-\ ior detSLoc [dataNewSNode, dataSCP]
-    \<-\ and dataNewSNode [installSNode]
-    \<-\ and highPerf [maxHardware, highThrough]
+    \<-\ with List hasAnd detSLoc (the (List (GRLExpr ELEM)) [serviceCentralSwitch, serviceInSCP])
+    \<-\ with List hasIor detSLoc (the (List (GRLExpr ELEM)) [dataNewSNode, dataSCP])
+    \<-\ with List hasAnd dataNewSNode (the (List (GRLExpr ELEM)) [installSNode])
+    \<-\ with List hasAnd highPerf (the (List (GRLExpr ELEM)) [maxHardware, highThrough])
 
 namespace Main
    main : IO ()
    main = do
      printLn "AA"
-     -- printLn amyotModel
-     -- printLn $ hasGoal "Service in Service Control Point" amyotModel
+     printLn amyotModel
+     printLn $ hasGoal "Service in Service Control Point" amyotModel
 
---     -- res <- run $ genGoalGraph amyotModel
---     -- print $ keys res
---     -- putStrLn "\n"
---     -- evalModel (keys res) res
---     -- print res
+     -- res <- run $ genGoalGraph amyotModel
+     printLn $ (keys . graph) amyotModel
+     putStrLn "\n"
+     -- evalModel (keys res) res
+     -- print res
