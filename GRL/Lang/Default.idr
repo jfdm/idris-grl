@@ -1,3 +1,4 @@
+||| The original unabulterated version of the GRL.
 module GRL.Lang.Default
 
 import public GRL.Common
@@ -5,7 +6,7 @@ import public GRL.IR
 import public GRL.Model
 import public GRL.Builder
 
-
+||| The original unabulterated version of the GRL.
 data GoalLang : GrlIRTy -> Type where
     ||| A (hard) Goal is a condition or state of affairs in the
     ||| world that the stakeholders would like to achieve.

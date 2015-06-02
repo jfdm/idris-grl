@@ -1,5 +1,3 @@
-||| A generic builder for Goal Graphs.
-|||
 ||| This module defines a 'compiler' that transforms the GRL IR into the Goal Graph.
 module GRL.Builder
 
@@ -24,13 +22,13 @@ emptyModel = mkEmptyGraph
 
 -- ------------------------------------------------------------- [ Interpreter ]
 
-|||  Interpt the types from the DSL.
+|||  Interpt the IR types to get Goal Graph Types.
 interpTy : GrlIRTy -> Type
 interpTy ELEM   = GoalNode
 interpTy INTENT = GoalEdge
 interpTy STRUCT = GoalEdge
 
-||| Convert expressions from the DSL to Nodes or Labels
+||| Convert expressions from the IR to Goal Graph objects.
 convExpr : {ty : GrlIRTy} -> GrlIR ty -> interpTy ty
 convExpr (Element eTy t s) =
   case eTy of
@@ -56,7 +54,7 @@ insertElem : GrlIR ELEM -> GModel -> GModel
 insertElem elem model = addNode (convExpr elem) model
 
 infixl 5 \+\
-
+||| Add elemeents to the model.
 (\+\) : GRL expr => GModel -> expr ELEM -> GModel
 (\+\) model elem =
     if checkElemBool e' model
@@ -79,6 +77,7 @@ insertIntention (IntentLink a b x y) model =
 
 infixl 5 \->\
 
+||| Add an intention declaration to the model.
 (\->\) : GRL expr => GModel -> expr INTENT -> GModel
 (\->\) m i =
     if (checkIntentBool l m)
@@ -88,6 +87,8 @@ infixl 5 \->\
     l : GrlIR INTENT
     l = mkIntent i
 
+-- --------------------------------------------------------------- [ Structure ]
+||| Do structure insertion.
 private
 insertStructure : GrlIR STRUCT -> GModel ->  GModel
 insertStructure (StructureLink ty x@(Element _ t _) ys) model =
@@ -98,6 +99,7 @@ insertStructure (StructureLink ty x@(Element _ t _) ys) model =
 
 infixl 5 \<-\
 
+||| Add a structure declaration to the model
 (\<-\) : GRL expr => GModel -> expr STRUCT -> GModel
 (\<-\) model i =
     if (checkStructBool s model)

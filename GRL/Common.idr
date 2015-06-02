@@ -1,3 +1,4 @@
+||| Common enumerated types used.
 module GRL.Common
 
 import public Decidable.Equality

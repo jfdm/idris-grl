@@ -1,9 +1,12 @@
-||| The Internal Representation.
+||| The intermediate representation for GRL-Derived Languages.
 module DSL.IR
 
 import GRL.Common
 
--- ---------------------------------------------------------- [ ADT Definition ]
+-- ---------------------------------------------------------- [ AST Definition ]
+
+||| An IR to aid in converting DSL language constructs into Goal Graph
+||| objects.
 data GrlIR : GrlIRTy -> Type where
   Element : (ty : GRLElementTy)
           -> String
@@ -37,6 +40,10 @@ eqGrlIR (StructureLink xty xa (xbs)) (StructureLink yty ya (ybs)) =
 eqGrlIR _ _ = False
 
 
+||| The GRL Class for allowing DSL designers to instruct the Goal
+||| Graph builder how to convert expressions in the DSL to the IR.
+|||
+||| @a The DSL which is indexed by `GrlIRTy` type.
 class GRL (a : GrlIRTy -> Type) where
   mkGoal   : a ELEM   -> GrlIR ELEM
   mkIntent : a INTENT -> GrlIR INTENT
