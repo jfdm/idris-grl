@@ -37,8 +37,8 @@ data GLang : GLangTy -> GrlIRTy -> Type where
        -> {auto prf : ValidDecomp xty yty}
        -> GLang S STRUCT
 
-syntax [a] "~" [c] "~>" [b] = MkImpact c a b
-syntax [a] "&=" [b]         = MkAnd a b
+syntax [a] "~~>" [b] "|" [c] = MkImpact c a b
+syntax [a] "&=" [b]          = MkAnd a b
 
 GOAL : Type
 GOAL = GLang (E GOALTy) ELEM

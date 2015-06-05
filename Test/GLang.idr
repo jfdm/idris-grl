@@ -17,12 +17,12 @@ bar = MkTask "asasas" Nothing
 
 amyotModel : GModel
 amyotModel = emptyModel
-    \+\ highPerf
-    \+\ lowCost
-    \+\ foobar
-    \+\ bar
-    \->\ (bar ~ MAKES ~> lowCost)
-    \<-\ (highPerf &= lowCost)
+    \= highPerf
+    \= lowCost
+    \= foobar
+    \= bar
+    \= (bar ~~> lowCost | MAKES)
+    \= (highPerf &= lowCost)
 
 ppRes : Show a => List (a) -> IO ()
 ppRes Nil     = printLn ""
