@@ -4,85 +4,83 @@ import GRL.Lang.Default
 import GRL.Eval
 
 -- Service Provider
-highPerf : GoalLang ELEM
-highPerf = Soft "High Performance" Nothing
+highPerf : SOFT
+highPerf = MkSoft "High Performance" Nothing
 
-lowCost : GoalLang ELEM
-lowCost  = Soft "Low Cost" Nothing
+lowCost : SOFT
+lowCost  = MkSoft "Low Cost" Nothing
 
-minChange : GoalLang ELEM
-minChange = Soft "Minimum Changes to Infrastructure" Nothing
+minChange : SOFT
+minChange = MkSoft "Minimum Changes to Infrastructure" Nothing
 
-maxHardware : GoalLang ELEM
-maxHardware = Soft "Maximun Hardware Utilisation" (Just WEAKSATIS)
+maxHardware : SOFT
+maxHardware = MkSoft "Maximun Hardware Utilisation" (Just WEAKSATIS)
 
-highThrough : GoalLang ELEM
-highThrough = Soft "High Throughput" Nothing
+highThrough : SOFT
+highThrough = MkSoft "High Throughput" Nothing
 
-minMsgEx : GoalLang ELEM
-minMsgEx = Soft "Minimum Message Exchange" Nothing
+minMsgEx : SOFT
+minMsgEx = MkSoft "Minimum Message Exchange" Nothing
 
-minSwitch : GoalLang ELEM
-minSwitch = Soft "Minimum Switch Load" Nothing
+minSwitch : SOFT
+minSwitch = MkSoft "Minimum Switch Load" Nothing
 
 -- System
 
-detDataLoc : GoalLang ELEM
-detDataLoc = Goal "Determine Data Location" Nothing
+detDataLoc : GOAL
+detDataLoc = MkGoal "Determine Data Location" Nothing
 
-dataSCP : GoalLang ELEM
-dataSCP = Task "Data in Service Control Point" (Just SATISFIED)
+dataSCP : TASK
+dataSCP = MkTask "Data in Service Control Point" (Just SATISFIED)
 
-dataNewSNode : GoalLang ELEM
-dataNewSNode = Task "Data in New Service Node" Nothing
+dataNewSNode : TASK
+dataNewSNode = MkTask "Data in New Service Node" Nothing
 
-installSNode : GoalLang ELEM
-installSNode = Task "Install Service Node" Nothing -- chang
+installSNode : TASK
+installSNode = MkTask "Install Service Node" Nothing -- chang
 
-serviceCentralSwitch : GoalLang ELEM
-serviceCentralSwitch = Task "Service in Central Switch" Nothing
+serviceCentralSwitch : TASK
+serviceCentralSwitch = MkTask "Service in Central Switch" Nothing
 
-detSLoc : GoalLang ELEM
-detSLoc = Goal "Determine Service Location" Nothing
+detSLoc : GOAL
+detSLoc = MkGoal "Determine Service Location" Nothing
 
-serviceInSCP : GoalLang ELEM
-serviceInSCP = Task "Service in Service Control Point" (Just SATISFIED)
+serviceInSCP : TASK
+serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 
 amyotModel : GModel
 amyotModel = emptyModel
-    \+\ highPerf
-    \+\ lowCost
-    \+\ minChange
-    \+\ maxHardware
-    \+\ highThrough
-    \+\ minMsgEx
-    \+\ minSwitch
-    \+\ detDataLoc
-    \+\ dataSCP
-    \+\ dataNewSNode
-    \+\ installSNode
-    \+\ serviceCentralSwitch
-    \+\ detSLoc
-    \+\ serviceInSCP
+    \= highPerf
+    \= lowCost
+    \= minChange
+    \= maxHardware
+    \= highThrough
+    \= minMsgEx
+    \= minSwitch
+    \= detDataLoc
+    \= dataSCP
+    \= dataNewSNode
+    \= installSNode
+    \= serviceCentralSwitch
+    \= detSLoc
+    \= serviceInSCP
+    \= (minChange    ==> lowCost   | MAKES)
+    \= (maxHardware  ~~> minChange | MAKES)
+    \= (dataNewSNode ~~> minChange | MAKES)
+    \= (dataSCP      ~~> minChange | MAKES)
+    \= (minMsgEx     ==> highThrough | MAKES)
+    \= (minSwitch    ==> highThrough | MAKES)
+    \= (serviceInSCP ==> minMsgEx | SOMENEG)
+    \= (serviceInSCP         ~~> minSwitch | MAKES)
+    \= (serviceCentralSwitch ~~> minSwitch | BREAK)
+    \= (serviceCentralSwitch ==> minMsgEx  | MAKES)
+    \= (detSLoc      &= [serviceCentralSwitch, serviceInSCP])
+    \= (detSLoc      |= [dataNewSNode, dataSCP])
+    \= (dataNewSNode |= [installSNode])
+    \= (highPerf     |= [maxHardware, highThrough])
 
-amyotModel' : GModel
-amyotModel' = amyotModel
-    \->\ Impacts MAKES minChange lowCost
-    \->\ Effects MAKES maxHardware minChange
-    \->\ Effects MAKES dataNewSNode minChange
-    \->\ Effects MAKES dataSCP minChange
-    \->\ Impacts MAKES minMsgEx highThrough
-    \->\ Impacts MAKES minSwitch highThrough
-    \->\ Impacts SOMENEG serviceInSCP minMsgEx
-    \->\ Effects MAKES serviceInSCP minSwitch
-    \->\ Effects BREAK serviceCentralSwitch minSwitch
-    \->\ Impacts MAKES serviceCentralSwitch minMsgEx
-    \<-\ HasAnd detSLoc      [serviceCentralSwitch, serviceInSCP]
-    \<-\ HasIor detSLoc      [dataNewSNode, dataSCP]
-    \<-\ HasAnd dataNewSNode [installSNode]
-    \<-\ HasAnd highPerf     [maxHardware, highThrough]
-
-
+buildStrategy : Strategy
+buildStrategy = [(detSLoc,SATISFIED)]
 
 ppRes : Show a => List (a) -> IO ()
 ppRes Nil     = printLn ""
@@ -107,4 +105,5 @@ runTest = do
 
     True  => do
       ppGraph amyotModel'
-      ppRes $ evalModel amyotModel'
+      let (s,o) = deployStrategy amyotModel'
+      ppRes $ evalModel s

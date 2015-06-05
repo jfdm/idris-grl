@@ -19,7 +19,7 @@ data GoalLang : GrlIRTy -> Type where
     ||| the target system should achieve and generally describes the
     ||| functional requirements of the target information system.
     |||
-    Goal : String -> Maybe Satisfaction -> GoalLang ELEM
+    MkGoal : String -> Maybe Satisfaction -> GoalLang ELEM
 
     ||| Softgoals are often used to describe qualities and
     ||| non-functional aspects such as security, robustness,
@@ -33,7 +33,7 @@ data GoalLang : GrlIRTy -> Type where
     ||| state of affairs in fact achieves sufficiently the stated
     ||| softgoal.
     |||
-    Soft : String -> Maybe Satisfaction -> GoalLang ELEM
+    MkSoft : String -> Maybe Satisfaction -> GoalLang ELEM
 
     ||| a Task specifies a particular way of doing something.
     |||
@@ -46,24 +46,24 @@ data GoalLang : GrlIRTy -> Type where
     ||| target system to meet the needs stated in the goals and
     ||| softgoals.
     |||
-    Task : String -> Maybe Satisfaction -> GoalLang ELEM
+    MkTask : String -> Maybe Satisfaction -> GoalLang ELEM
 
     ||| A Resource is a physical or informational entity, for which the
     ||| main concern is whether it is available.
     |||
-    Resource : String -> Maybe Satisfaction -> GoalLang ELEM
+    MkResource : String -> Maybe Satisfaction -> GoalLang ELEM
 
     ||| A Contribution defines the level of impact that the
     ||| satisfaction of a source intentional element or indicator has on
     ||| the satisfaction of a destination intentional element.
-    Impacts : ContributionTy
-            -> GoalLang ELEM
-            -> GoalLang ELEM
-            -> GoalLang INTENT
+    MkImpacts : ContributionTy
+             -> GoalLang ELEM
+             -> GoalLang ELEM
+             -> GoalLang INTENT
 
     |||  A correlation link emphasizes side-effects between intentional
     ||| elements in different categories or actor definitions.
-    Effects : ContributionTy
+    MkEffects : ContributionTy
             -> GoalLang ELEM
             -> GoalLang ELEM
             -> GoalLang INTENT
@@ -75,7 +75,7 @@ data GoalLang : GrlIRTy -> Type where
     ||| links. All of the source intentional elements are necessary for
     ||| the target intentional element to be satisfied.
     |||
-    HasAnd : GoalLang ELEM
+    MkAnd : GoalLang ELEM
           -> List (GoalLang ELEM)
           -> GoalLang STRUCT
 
@@ -84,7 +84,7 @@ data GoalLang : GrlIRTy -> Type where
     ||| Mutually exclusive. The satisfaction of one and only one of the
     ||| sub-intentional elements is necessary to achieve the target.
     |||
-    HasXor : GoalLang ELEM
+    MkXor : GoalLang ELEM
          -> List (GoalLang ELEM)
          -> GoalLang STRUCT
 
@@ -94,21 +94,42 @@ data GoalLang : GrlIRTy -> Type where
     ||| sub-intentional elements is sufficient to achieve the target,
     ||| but many sub-intentional elements can be satisfied.
     |||
-    HasIor : GoalLang ELEM
-          -> List (GoalLang ELEM)
-          -> GoalLang STRUCT
+    MkIor : GoalLang ELEM
+         -> List (GoalLang ELEM)
+         -> GoalLang STRUCT
+
+
+GOAL : Type
+GOAL = GoalLang ELEM
+
+SOFT : Type
+SOFT = GoalLang ELEM
+
+TASK : Type
+TASK = GoalLang ELEM
+
+RES : Type
+RES = GoalLang ELEM
+
+
+syntax [a] "==>" [b] "|" [c] = MkImpacts c a b
+syntax [a] "~~>" [b] "|" [c] = MkEffects c a b
+syntax [a] "&=" [b] = MkAnd a b
+syntax [a] "X=" [b] = MkXor a b
+syntax [a] "|=" [b] = MkIor a b
+
 
 instance GRL GoalLang where
-    mkGoal (Goal     s e) = Element GOALTy s e
-    mkGoal (Soft     s e) = Element SOFTTy s e
-    mkGoal (Task     s e) = Element TASKTy s e
-    mkGoal (Resource s e) = Element RESOURCETy s e
+    mkGoal (MkGoal     s e) = Element GOALTy s e
+    mkGoal (MkSoft     s e) = Element SOFTTy s e
+    mkGoal (MkTask     s e) = Element TASKTy s e
+    mkGoal (MkResource s e) = Element RESOURCETy s e
 
-    mkIntent (Impacts c a b) = IntentLink CONTRIBUTION c (mkGoal a) (mkGoal b)
-    mkIntent (Effects c a b) = IntentLink CORRELATION  c (mkGoal a) (mkGoal b)
+    mkIntent (MkImpacts c a b) = IntentLink CONTRIBUTION c (mkGoal a) (mkGoal b)
+    mkIntent (MkEffects c a b) = IntentLink CORRELATION  c (mkGoal a) (mkGoal b)
 
-    mkStruct (HasAnd a bs) = StructureLink ANDTy (mkGoal a) (map (mkGoal) bs)
-    mkStruct (HasXor a bs) = StructureLink XORTy (mkGoal a) (map (mkGoal) bs)
-    mkStruct (HasIor a bs) = StructureLink IORTy (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkAnd a bs) = StructureLink ANDTy (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkXor a bs) = StructureLink XORTy (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkIor a bs) = StructureLink IORTy (mkGoal a) (map (mkGoal) bs)
 
 -- --------------------------------------------------------------------- [ EOF ]

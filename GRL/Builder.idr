@@ -110,4 +110,14 @@ infixl 5 \<-\
   where
     s : GrlIR STRUCT
     s = mkStruct i
+
+infixl 3 \=
+
+(\=) : GRL expr => {ty : GrlIRTy} -> GModel -> expr ty -> GModel
+(\=) {ty} m i =
+  case ty of
+    ELEM   => (\+\)  m i
+    INTENT => (\->\) m i
+    STRUCT => (\<-\) m i
+
 -- --------------------------------------------------------------------- [ EOF ]
