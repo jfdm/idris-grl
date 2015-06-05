@@ -3,7 +3,7 @@ module GRL.Common
 
 import public Decidable.Equality
 
-data Decomposition  = ANDTy | XORTy | IORTy
+data Decomposition  = ANDTy | XORTy | IORTy | NOTTy
 
 data Importance = HIGH | MEDIUM | LOW | NO
 
@@ -39,7 +39,7 @@ namespace Contributions
     ||| The contribution is negative, but the extent of the contribution is unknown.
     SOMENEG : ContributionTy
     ||| The contribution of the contributing element is negative and sufficient.
-    BREAKS : ContributionTy
+    BREAK : ContributionTy
     ||| The contribution is negative but not sufficient.
     HURTS : ContributionTy
 
@@ -97,6 +97,7 @@ instance Show Decomposition where
   show ANDTy  = "ANDTy"
   show XORTy  = "XORTy"
   show IORTy  = "IORTy"
+  show NOTTy  = "NOTTy"
 
 instance Show Satisfaction where
   show SATISFIED = "SATISFIED"
@@ -112,16 +113,17 @@ instance Show ContributionTy where
   show MAKES   = "MAKES"
   show HELPS   = "HELPS"
   show SOMEPOS = "SOMEPOS"
-  show UNKNOWN    = "UNKNOWN"
+  show UNKNOWN = "UNKNOWN"
   show SOMENEG = "SOMENEG"
   show HURTS   = "HURTS"
-  show BREAKS  = "BREAKS"
+  show BREAK   = "BREAKS"
 
 -- ---------------------------------------------------------------------- [ Eq ]
 instance Eq Decomposition where
   (==) ANDTy ANDTy = True
   (==) XORTy XORTy = True
   (==) IORTy IORTy = True
+  (==) NOTTy NOTTy = True
   (==) _   _   = False
 
 instance Eq Satisfaction where
@@ -139,10 +141,10 @@ instance Eq ContributionTy where
   (==) MAKES   MAKES   = True
   (==) HELPS   HELPS   = True
   (==) SOMEPOS SOMEPOS = True
-  (==) UNKNOWN    UNKNOWN    = True
+  (==) UNKNOWN UNKNOWN = True
   (==) SOMENEG SOMENEG = True
   (==) HURTS   HURTS   = True
-  (==) BREAKS  BREAKS  = True
+  (==) BREAK   BREAK   = True
   (==) _       _       = False
 
 
@@ -162,7 +164,7 @@ readContribValue "some-positive" = SOMEPOS
 readContribValue "unknown"       = UNKNOWN
 readContribValue "some-negative" = SOMENEG
 readContribValue "hurts"         = HURTS
-readContribValue "breaks"        = BREAKS
+readContribValue "breaks"        = BREAK
 readContribValue _               = UNKNOWN
 
 

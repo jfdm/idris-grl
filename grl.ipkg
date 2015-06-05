@@ -10,6 +10,12 @@ modules = GRL.Common
         , GRL.Property.Structure
         , GRL.Property.Intention
         , GRL.Lang.Default
- --       , GRL.Eval
- --       , GRL.Eval.Forward
- --       , GRL.Eval.Qualitative
+
+        , GRL.Eval
+        , GRL.Eval.Forward
+        , GRL.Eval.Qualitative
+        , GRL.Eval.Strategy
+
+        , Test.Amyot
+
+tests = Test.Amyot.runTest

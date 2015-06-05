@@ -1,8 +1,7 @@
 ||| This module defines a 'compiler' that transforms the GRL IR into the Goal Graph.
 module GRL.Builder
 
-import public Data.AVL.Set
-import public Data.AVL.Graph
+import public Data.AVL.Dependent.Graph
 import public Data.List
 
 import GRL.Model
@@ -11,6 +10,8 @@ import GRL.Common
 import GRL.Property.Element
 import GRL.Property.Intention
 import GRL.Property.Structure
+
+import Debug.Trace
 
 %access public
 
@@ -30,21 +31,12 @@ interpTy STRUCT = GoalEdge
 
 ||| Convert expressions from the IR to Goal Graph objects.
 convExpr : {ty : GrlIRTy} -> GrlIR ty -> interpTy ty
-convExpr (Element eTy t s) =
-  case eTy of
-    GOALTy      => Goal t s Nothing
-    SOFTTy      => Soft t s Nothing
-    TASKTy      => Task t s Nothing
-    RESOURCETy  => Res  t s Nothing
+convExpr (Element eTy t s)       = GNode eTy t s NOTTy
 convExpr (IntentLink ty cTy _ _) =
   case ty of
     CONTRIBUTION => Contribution cTy
     CORRELATION  => Correlation  cTy
-convExpr (StructureLink ty _ _) =
-  case ty of
-    ANDTy => And
-    XORTy => Xor
-    IORTy => Ior
+convExpr (StructureLink _ _ _) = Decomp
 
 -- --------------------------------------------------------------- [ Insertion ]
 
@@ -64,16 +56,23 @@ infixl 5 \+\
     e' : GrlIR ELEM
     e' = mkGoal elem
 
+-- ------------------------------------------------------------------- [ Links ]
+private
+insertLink : GrlIR ELEM -> GrlIR ELEM -> Maybe GoalEdge -> GModel -> GModel
+insertLink (Element _ x _) (Element _ y _) i m =
+  case getGoalByTitle x m of
+    Nothing  => m
+    Just xID =>
+      case getGoalByTitle y m of
+        Nothing  => m
+        Just yID => addValueEdge (xID, yID, i) m
+
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
 insertIntention : GrlIR INTENT -> GModel -> GModel
-insertIntention (IntentLink a b x y) model =
-  addValueEdge (convExpr y, convExpr x, Just i) model
-    where
-      i : GoalEdge
-      i = convExpr (IntentLink a b x y)
-
+insertIntention l@(IntentLink ty val x y) model =
+  insertLink y x (Just $ convExpr l) model
 
 infixl 5 \->\
 
@@ -91,10 +90,13 @@ infixl 5 \->\
 ||| Do structure insertion.
 private
 insertStructure : GrlIR STRUCT -> GModel ->  GModel
-insertStructure (StructureLink ty x@(Element _ t _) ys) model =
-  let i = convExpr (StructureLink ty x ys) in
-    foldl (\m, y => addValueEdge (convExpr x, convExpr y, Just i) m) model ys
-
+insertStructure l@(StructureLink ty x ys) model =
+    updateGoalNode (\n => getIrTitle x == gTitle n)
+                   (\x => record {dTy = ty} x)
+                   (model' model l)
+  where
+    model' : GModel -> GrlIR STRUCT -> GModel
+    model' mo l = foldl (\m, y => insertLink x y (Just $ convExpr l) m) mo ys
 
 
 infixl 5 \<-\

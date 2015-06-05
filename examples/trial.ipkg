@@ -1,7 +1,0 @@
-package grlex
-
-opts = "-p containers -p grl"
-
-modules = Trial
-executable = grl.exe
-main = Trial

@@ -5,85 +5,72 @@ import public Effects
 import public Effect.State
 import public Effect.Exception
 
+
+import GRL.Common
 import GRL.Model
 
 %access public
 
-private
-andCompare : EvalVal -> EvalVal -> Ordering
-andCompare SATISFIED SATISFIED = EQ
-andCompare WEAKSATIS WEAKSATIS = EQ
-andCompare WEAKDEN   WEAKDEN   = EQ
-andCompare DENIED    DENIED    = EQ
-andCompare CONFLICT  CONFLICT  = EQ
-andCompare UNKNOWN   UNKNOWN   = EQ
-andCompare NONE      NONE      = EQ
-andCompare UNDECIDED UNDECIDED = EQ
-andCompare DENIED    _         = LT
-andCompare _         DENIED    = GT
-andCompare CONFLICT  UNDECIDED = EQ
-andCompare UNDECIDED CONFLICT  = EQ
-andCompare CONFLICT  _         = LT
-andCompare _         CONFLICT  = GT
-andCompare UNDECIDED _         = LT
-andCompare _         UNDECIDED = GT
-andCompare WEAKDEN   _         = LT
-andCompare _         WEAKDEN   = GT
-andCompare NONE      _         = LT
-andCompare _         NONE      = GT
-andCompare WEAKSATIS _         = LT
-andCompare _         WEAKSATIS = GT
-andCompare SATISFIED _         = GT
-andCompare _         SATISFIED = LT
+instance [andSat] Ord Satisfaction where
+   compare SATISFIED SATISFIED = EQ
+   compare WEAKSATIS WEAKSATIS = EQ
+   compare WEAKDEN   WEAKDEN   = EQ
+   compare DENIED    DENIED    = EQ
+   compare CONFLICT  CONFLICT  = EQ
+   compare UNKNOWN   UNKNOWN   = EQ
+   compare NONE      NONE      = EQ
+   compare UNDECIDED UNDECIDED = EQ
+   compare DENIED    _         = LT
+   compare _         DENIED    = GT
+   compare CONFLICT  UNDECIDED = EQ
+   compare UNDECIDED CONFLICT  = EQ
+   compare CONFLICT  _         = LT
+   compare _         CONFLICT  = GT
+   compare UNDECIDED _         = LT
+   compare _         UNDECIDED = GT
+   compare WEAKDEN   _         = LT
+   compare _         WEAKDEN   = GT
+   compare NONE      _         = LT
+   compare _         NONE      = GT
+   compare WEAKSATIS _         = LT
+   compare _         WEAKSATIS = GT
+   compare SATISFIED _         = GT
+   compare _         SATISFIED = LT
 
-getDecompAnd : List EvalVal -> EvalVal
-getDecompAnd [e]     = e
-getDecompAnd (e::es) = doCompare e es
- where
-  doCompare : EvalVal -> List EvalVal -> EvalVal
-  doCompare e  Nil     = e
-  doCompare e' (e::es) = case andCompare e' e of
-    LT => doCompare e' es
-    GT => doCompare e es
-    EQ => doCompare e es
+getDecompAnd : List Satisfaction -> Satisfaction
+getDecompAnd ss = foldl (\olds,s => min @{andSat} s olds) SATISFIED ss
 
-private
-orCompare : EvalVal -> EvalVal -> Ordering
-orCompare SATISFIED SATISFIED = EQ
-orCompare WEAKSATIS WEAKSATIS = EQ
-orCompare WEAKDEN   WEAKDEN   = EQ
-orCompare DENIED    DENIED    = EQ
-orCompare CONFLICT  CONFLICT  = EQ
-orCompare UNKNOWN   UNKNOWN   = EQ
-orCompare NONE      NONE      = EQ
-orCompare UNDECIDED UNDECIDED = EQ
-orCompare DENIED    _         = LT
-orCompare _         DENIED    = GT
-orCompare WEAKDEN   _         = LT
-orCompare _         WEAKDEN   = GT
-orCompare NONE      _         = LT
-orCompare _         NONE      = GT
-orCompare WEAKSATIS _         = LT
-orCompare _         WEAKSATIS = GT
-orCompare CONFLICT  UNDECIDED = EQ
-orCompare UNDECIDED CONFLICT  = EQ
-orCompare CONFLICT  _         = LT
-orCompare _         CONFLICT  = GT
-orCompare UNDECIDED _         = LT
-orCompare _         UNDECIDED = GT
-orCompare SATISFIED _         = GT
-orCompare _         SATISFIED = LT
+instance [orSat] Ord Satisfaction where
+    compare SATISFIED SATISFIED = EQ
+    compare WEAKSATIS WEAKSATIS = EQ
+    compare WEAKDEN   WEAKDEN   = EQ
+    compare DENIED    DENIED    = EQ
+    compare CONFLICT  CONFLICT  = EQ
+    compare UNKNOWN   UNKNOWN   = EQ
+    compare NONE      NONE      = EQ
+    compare UNDECIDED UNDECIDED = EQ
+    compare DENIED    _         = LT
+    compare _         DENIED    = GT
+    compare WEAKDEN   _         = LT
+    compare _         WEAKDEN   = GT
+    compare NONE      _         = LT
+    compare _         NONE      = GT
+    compare WEAKSATIS _         = LT
+    compare _         WEAKSATIS = GT
+    compare CONFLICT  UNDECIDED = EQ
+    compare UNDECIDED CONFLICT  = EQ
+    compare CONFLICT  _         = LT
+    compare _         CONFLICT  = GT
+    compare UNDECIDED _         = LT
+    compare _         UNDECIDED = GT
+    compare SATISFIED _         = GT
+    compare _         SATISFIED = LT
 
-getDecompOR : List EvalVal -> EvalVal
-getDecompOR [e]     = e
-getDecompOR (e::es) = doCompare e es
- where
-  doCompare : EvalVal -> List EvalVal -> EvalVal
-  doCompare e  Nil     = e
-  doCompare e' (e::es) = case andCompare e' e of
-    LT => doCompare e es
-    GT => doCompare e' es
-    EQ => doCompare e es
+getDecompIOR : List Satisfaction -> Satisfaction
+getDecompIOR ss = foldl (\olds,s => min @{orSat} s olds) SATISFIED ss
+
+getDecompXOR : List Satisfaction -> Satisfaction
+getDecompXOR ss = foldl (\olds,s => max @{orSat} s olds) DENIED ss
 
 record ContribCount where
   constructor MkCCount
@@ -93,74 +80,78 @@ record ContribCount where
   noDenied : Nat
   noUndec  : Nat
 
+defCCount : ContribCount
+defCCount = MkCCount Z Z Z Z Z
+
 ||| Implementation of `AdjustContributionCounters`
-adJustCount : ContribCount -> EvalVal -> ContribCount
-adJustCount cnt SATISFIED = record {noSatis = (S (noSatis cnt))} cnt
-adJustCount cnt WEAKSATIS = record {noWeakS = (S (noWeakS cnt))} cnt
-adJustCount cnt WEAKDEN   = record {noWeakD = (S (noWeakD cnt))} cnt
-adJustCount cnt UNDECIDED = record {noUndec = (S (noUndec cnt))} cnt
-adJustCount cnt _         = cnt
+adJustCount : Satisfaction -> ContribCount -> ContribCount
+adJustCount SATISFIED cnt = record {noSatis = (S (noSatis cnt))} cnt
+adJustCount WEAKSATIS cnt = record {noWeakS = (S (noWeakS cnt))} cnt
+adJustCount WEAKDEN   cnt = record {noWeakD = (S (noWeakD cnt))} cnt
+adJustCount UNDECIDED cnt = record {noUndec = (S (noUndec cnt))} cnt
+adJustCount _         cnt = cnt
 
 ||| Implementation of `AdjustContributionCounters` for a list of values.
-adjustCounts : List EvalVal -> ContribCount
-adjustCounts es = foldl adJustCount (MkCCount 0 0 0 0 0) es
+adjustCounts : List Satisfaction -> ContribCount
+adjustCounts es = foldl (flip $ adJustCount) defCCount es
 
 ||| Implementation of the `WeightedContribution` look up table.
-%inline
-weightedContribution : EvalVal -> Contrib -> EvalVal
-weightedContribution  DENIED    MAKE    = DENIED
-weightedContribution  DENIED    HELP    = WEAKDEN
-weightedContribution  DENIED    SOMEPOS = WEAKDEN
-weightedContribution  DENIED    ZERO    = NONE
-weightedContribution  DENIED    SOMENEG = WEAKSATIS
-weightedContribution  DENIED    HURT    = WEAKSATIS
-weightedContribution  DENIED    BREAK   = SATISFIED
-weightedContribution  WEAKDEN   MAKE    = WEAKDEN
-weightedContribution  WEAKDEN   HELP    = WEAKDEN
-weightedContribution  WEAKDEN   SOMEPOS = WEAKDEN
-weightedContribution  WEAKDEN   ZERO    = NONE
-weightedContribution  WEAKDEN   SOMENEG = WEAKSATIS
-weightedContribution  WEAKDEN   HURT    = WEAKSATIS
-weightedContribution  WEAKDEN   BREAK   = WEAKSATIS
-weightedContribution  WEAKSATIS MAKE    = WEAKSATIS
-weightedContribution  WEAKSATIS HELP    = WEAKSATIS
-weightedContribution  WEAKSATIS SOMEPOS = WEAKSATIS
-weightedContribution  WEAKSATIS ZERO    = NONE
-weightedContribution  WEAKSATIS SOMENEG = WEAKDEN
-weightedContribution  WEAKSATIS HURT    = WEAKDEN
-weightedContribution  WEAKSATIS BREAK   = WEAKDEN
-weightedContribution  SATISFIED MAKE    = SATISFIED
-weightedContribution  SATISFIED HELP    = WEAKSATIS
-weightedContribution  SATISFIED SOMEPOS = WEAKSATIS
-weightedContribution  SATISFIED ZERO    = NONE
-weightedContribution  SATISFIED SOMENEG = WEAKDEN
-weightedContribution  SATISFIED HURT    = WEAKDEN
-weightedContribution  SATISFIED BREAK   = DENIED
-weightedContribution  CONFLICT  MAKE    = UNDECIDED
-weightedContribution  CONFLICT  HELP    = UNDECIDED
-weightedContribution  CONFLICT  SOMEPOS = UNDECIDED
-weightedContribution  CONFLICT  ZERO    = UNDECIDED
-weightedContribution  CONFLICT  SOMENEG = UNDECIDED
-weightedContribution  CONFLICT  HURT    = UNDECIDED
-weightedContribution  CONFLICT  BREAK   = UNDECIDED
-weightedContribution  UNDECIDED MAKE    = UNDECIDED
-weightedContribution  UNDECIDED HELP    = UNDECIDED
-weightedContribution  UNDECIDED SOMEPOS = UNDECIDED
-weightedContribution  UNDECIDED ZERO    = UNDECIDED
-weightedContribution  UNDECIDED SOMENEG = UNDECIDED
-weightedContribution  UNDECIDED HURT    = UNDECIDED
-weightedContribution  UNDECIDED BREAK   = UNDECIDED
-weightedContribution  NONE      MAKE    = NONE
-weightedContribution  NONE      HELP    = NONE
-weightedContribution  NONE      SOMEPOS = NONE
-weightedContribution  NONE      ZERO    = NONE
-weightedContribution  NONE      SOMENEG = NONE
-weightedContribution  NONE      HURT    = NONE
-weightedContribution  NONE      BREAK   = NONE
+weightedContrib : Satisfaction -> ContributionTy -> Satisfaction
+weightedContrib  DENIED    MAKE    = DENIED
+weightedContrib  DENIED    HELPS   = WEAKDEN
+weightedContrib  DENIED    SOMEPOS = WEAKDEN
+weightedContrib  DENIED    ZERO    = NONE
+weightedContrib  DENIED    SOMENEG = WEAKSATIS
+weightedContrib  DENIED    HURT    = WEAKSATIS
+weightedContrib  DENIED    BREAK   = SATISFIED
+weightedContrib  WEAKDEN   MAKE    = WEAKDEN
+weightedContrib  WEAKDEN   HELPS   = WEAKDEN
+weightedContrib  WEAKDEN   SOMEPOS = WEAKDEN
+weightedContrib  WEAKDEN   ZERO    = NONE
+weightedContrib  WEAKDEN   SOMENEG = WEAKSATIS
+weightedContrib  WEAKDEN   HURT    = WEAKSATIS
+weightedContrib  WEAKDEN   BREAK   = WEAKSATIS
+weightedContrib  WEAKSATIS MAKE    = WEAKSATIS
+weightedContrib  WEAKSATIS HELPS    = WEAKSATIS
+weightedContrib  WEAKSATIS SOMEPOS = WEAKSATIS
+weightedContrib  WEAKSATIS ZERO    = NONE
+weightedContrib  WEAKSATIS SOMENEG = WEAKDEN
+weightedContrib  WEAKSATIS HURT    = WEAKDEN
+weightedContrib  WEAKSATIS BREAK   = WEAKDEN
+weightedContrib  SATISFIED MAKE    = SATISFIED
+weightedContrib  SATISFIED HELPS   = WEAKSATIS
+weightedContrib  SATISFIED SOMEPOS = WEAKSATIS
+weightedContrib  SATISFIED ZERO    = NONE
+weightedContrib  SATISFIED SOMENEG = WEAKDEN
+weightedContrib  SATISFIED HURT    = WEAKDEN
+weightedContrib  SATISFIED BREAK   = DENIED
+weightedContrib  CONFLICT  MAKE    = UNDECIDED
+weightedContrib  CONFLICT  HELPS   = UNDECIDED
+weightedContrib  CONFLICT  SOMEPOS = UNDECIDED
+weightedContrib  CONFLICT  ZERO    = UNDECIDED
+weightedContrib  CONFLICT  SOMENEG = UNDECIDED
+weightedContrib  CONFLICT  HURT    = UNDECIDED
+weightedContrib  CONFLICT  BREAK   = UNDECIDED
+weightedContrib  UNDECIDED MAKE    = UNDECIDED
+weightedContrib  UNDECIDED HELPS   = UNDECIDED
+weightedContrib  UNDECIDED SOMEPOS = UNDECIDED
+weightedContrib  UNDECIDED ZERO    = UNDECIDED
+weightedContrib  UNDECIDED SOMENEG = UNDECIDED
+weightedContrib  UNDECIDED HURT    = UNDECIDED
+weightedContrib  UNDECIDED BREAK   = UNDECIDED
+weightedContrib  NONE      MAKE    = NONE
+weightedContrib  NONE      HELPS   = NONE
+weightedContrib  NONE      SOMEPOS = NONE
+weightedContrib  NONE      ZERO    = NONE
+weightedContrib  NONE      SOMENEG = NONE
+weightedContrib  NONE      HURT    = NONE
+weightedContrib  NONE      BREAK   = NONE
+weightedContrib  _         _       = NONE
+
 
 ||| Implementation of the `CompareSatisfiedAndDenied`  resolution
-compareSatAndDen : ContribCount -> EvalVal
-compareSatAndDen (MkCCount ns _ _ nd _) =
+cmpSatAndDen : ContribCount -> Satisfaction
+cmpSatAndDen (MkCCount ns _ _ nd _) =
   if ns > 0 && nd > 0
     then CONFLICT
     else if ns > 0 && nd == 0
@@ -170,26 +161,26 @@ compareSatAndDen (MkCCount ns _ _ nd _) =
         else NONE
 
 ||| Implementation of the `CompareWSandWD` function
-compareWSandWD : ContribCount -> EvalVal
-compareWSandWD (MkCCount _ nws nwd _ _) =
+cmpWSandWD : ContribCount -> Satisfaction
+cmpWSandWD (MkCCount _ nws nwd _ _) =
   if nws > nwd
     then WEAKSATIS
     else if nwd > nws
       then WEAKDEN
       else NONE
 
-||| Implementation of the `CombineContributions` function
+||| Implementation of the `CombineContributionutions` function
 %inline
-combineContrib : EvalVal -> EvalVal -> EvalVal
-combineContrib WEAKDEN   DENIED    = DENIED
-combineContrib WEAKDEN   SATISFIED = WEAKSATIS
-combineContrib WEAKDEN   CONFLICT  = CONFLICT
-combineContrib WEAKDEN   NONE      = WEAKDEN
-combineContrib WEAKSATIS DENIED    = WEAKDEN
-combineContrib WEAKSATIS SATISFIED = SATISFIED
-combineContrib WEAKSATIS CONFLICT  = CONFLICT
-combineContrib WEAKSATIS NONE      = WEAKSATIS
-combineContrib NONE      DENIED    = DENIED
-combineContrib NONE      SATISFIED = SATISFIED
-combineContrib NONE      CONFLICT  = CONFLICT
-combineContrib NONE      NONE      = NONE
+combineContribs : Satisfaction -> Satisfaction -> Satisfaction
+combineContribs WEAKDEN   DENIED    = DENIED
+combineContribs WEAKDEN   SATISFIED = WEAKSATIS
+combineContribs WEAKDEN   CONFLICT  = CONFLICT
+combineContribs WEAKDEN   NONE      = WEAKDEN
+combineContribs WEAKSATIS DENIED    = WEAKDEN
+combineContribs WEAKSATIS SATISFIED = SATISFIED
+combineContribs WEAKSATIS CONFLICT  = CONFLICT
+combineContribs WEAKSATIS NONE      = WEAKSATIS
+combineContribs NONE      DENIED    = DENIED
+combineContribs NONE      SATISFIED = SATISFIED
+combineContribs NONE      CONFLICT  = CONFLICT
+combineContribs NONE      NONE      = NONE

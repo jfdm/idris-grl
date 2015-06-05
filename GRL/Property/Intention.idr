@@ -10,12 +10,14 @@ module GRL.Property.Intention
 
 import public Decidable.Equality
 
-import public Data.AVL.Graph
+import public Data.AVL.Dependent.Graph
 import public Data.List
 
 import GRL.Model
 import GRL.IR
 import GRL.Common
+
+import Debug.Trace
 
 %access public
 
@@ -37,11 +39,6 @@ inModel (Element ty n s) m = hasGoal n m
 
 validLink : (i : GrlIR INTENT) -> (m : GModel) -> Bool
 validLink (IntentLink cTy ty x y) m = (inModel x m) && (inModel y m)
-
--- checkIntentDec : (link : GrlIR INTENT)
---               -> (model : GModel)
---               -> Dec (ValidIntent link model)
--- checkIntentDec l m = validLink l m
 
 %hint
 checkIntentBool : (link : GrlIR INTENT)

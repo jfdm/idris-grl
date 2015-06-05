@@ -1,6 +1,7 @@
-module Trial
+module Test.Amyot
 
 import GRL.Lang.Default
+import GRL.Eval
 
 -- Service Provider
 highPerf : GoalLang ELEM
@@ -13,7 +14,7 @@ minChange : GoalLang ELEM
 minChange = Soft "Minimum Changes to Infrastructure" Nothing
 
 maxHardware : GoalLang ELEM
-maxHardware = Soft "Maximun Hardware Utilisation" Nothing
+maxHardware = Soft "Maximun Hardware Utilisation" (Just WEAKSATIS)
 
 highThrough : GoalLang ELEM
 highThrough = Soft "High Throughput" Nothing
@@ -30,13 +31,13 @@ detDataLoc : GoalLang ELEM
 detDataLoc = Goal "Determine Data Location" Nothing
 
 dataSCP : GoalLang ELEM
-dataSCP = Task "Data in Service Control Point" Nothing
+dataSCP = Task "Data in Service Control Point" (Just SATISFIED)
 
 dataNewSNode : GoalLang ELEM
 dataNewSNode = Task "Data in New Service Node" Nothing
 
 installSNode : GoalLang ELEM
-installSNode = Task "ata in New Service Node" Nothing -- chang
+installSNode = Task "Install Service Node" Nothing -- chang
 
 serviceCentralSwitch : GoalLang ELEM
 serviceCentralSwitch = Task "Service in Central Switch" Nothing
@@ -45,7 +46,7 @@ detSLoc : GoalLang ELEM
 detSLoc = Goal "Determine Service Location" Nothing
 
 serviceInSCP : GoalLang ELEM
-serviceInSCP = Task "Service in Service Control Point" Nothing
+serviceInSCP = Task "Service in Service Control Point" (Just SATISFIED)
 
 amyotModel : GModel
 amyotModel = emptyModel
@@ -74,22 +75,36 @@ amyotModel' = amyotModel
     \->\ Impacts MAKES minSwitch highThrough
     \->\ Impacts SOMENEG serviceInSCP minMsgEx
     \->\ Effects MAKES serviceInSCP minSwitch
-    \->\ Effects BREAKS serviceCentralSwitch minSwitch
+    \->\ Effects BREAK serviceCentralSwitch minSwitch
     \->\ Impacts MAKES serviceCentralSwitch minMsgEx
     \<-\ HasAnd detSLoc      [serviceCentralSwitch, serviceInSCP]
     \<-\ HasIor detSLoc      [dataNewSNode, dataSCP]
     \<-\ HasAnd dataNewSNode [installSNode]
     \<-\ HasAnd highPerf     [maxHardware, highThrough]
 
-namespace Main
-   main : IO ()
-   main = do
-     printLn "AA"
-     printLn amyotModel
-     printLn $ hasGoal "Service in Service Control Point" amyotModel
 
-     -- res <- run $ genGoalGraph amyotModel
-     printLn $ (keys . graph) amyotModel
-     putStrLn "\n"
-     -- evalModel (keys res) res
-     -- print res
+
+ppRes : Show a => List (a) -> IO ()
+ppRes Nil     = printLn ""
+ppRes (x::xs) = do
+  printLn x
+  ppRes xs
+
+ppGraph : GModel -> IO ()
+ppGraph g = do
+  ppRes (vertices g)
+  ppRes (edges g)
+
+runTest : IO ()
+runTest = do
+  printLn "AA"
+
+  case validInit amyotModel' of
+    False => do
+      putStrLn "Wrongly init'd model."
+      ppGraph amyotModel'
+--      printLn amyotModel'
+
+    True  => do
+      ppGraph amyotModel'
+      ppRes $ evalModel amyotModel'

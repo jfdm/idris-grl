@@ -1,74 +1,78 @@
 ||| The GRL Model as  Goal Graph
 module GRL.Model
 
-import public Data.AVL.Set
-import public Data.AVL.Graph
+import public Data.AVL.Dependent.Graph
 import public Data.List
 
 import GRL.Common
 
+import Debug.Trace
+
 %access public
 
-data GoalNode : Type where
-  Goal : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
-  Soft : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
-  Task : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
-  Res  : String -> Maybe Satisfaction -> Maybe Decomposition -> GoalNode
-
-private
-showNode : String -> String -> Maybe Satisfaction -> Maybe Decomposition -> String
-showNode ty t s d = unwords ["[", show ty, t, show s, show d, "]"]
+record GoalNode where
+  constructor GNode
+  nTy : GRLElementTy
+  gTitle : String
+  sValue : Maybe Satisfaction
+  dTy : Decomposition
 
 instance Show GoalNode where
-  show (Goal t s d) = showNode "GOALTy" t s d
-  show (Soft t s d) = showNode "SOFTTy" t s d
-  show (Task t s d) = showNode "TASKTy" t s d
-  show (Res  t s d) = showNode "RESOURCETy" t s d
+  show (GNode ty n s d) = unwords ["[GNode", show ty, n, show s, show d, "]"]
 
 instance Eq GoalNode where
-  (==) (Goal x xs xd) (Goal y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Soft x xs xd) (Soft y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Task x xs xd) (Task y ys yd) = x == y && xs == ys && xd == yd
-  (==) (Res  x xs xd) (Res  y ys yd) = x == y && xs == ys && xd == yd
-  (==) _              _              = False
+  (==) (GNode xty x xs xd) (GNode yty y ys yd) =
+      xty == yty &&
+      x   == y   &&
+      xs  == ys  &&
+      xd  == yd
 
 data GoalEdge  : Type where
   Contribution : ContributionTy -> GoalEdge
   Correlation  : ContributionTy -> GoalEdge
-  And          : GoalEdge
-  Xor          : GoalEdge
-  Ior          : GoalEdge
+  Decomp       : GoalEdge
 
 instance Show GoalEdge where
   show (Contribution ty) = unwords ["[Contrib", show ty, "]"]
   show (Correlation ty)  = unwords ["[Correl", show ty, "]"]
-  show And       = unwords ["[Edge IOR]"]
-  show Xor       = unwords ["[Edge XOR]"]
-  show Ior       = unwords ["[Edge AND]"]
+  show Decomp            = unwords ["[Decomp]"]
+
+instance Eq GoalEdge where
+  (==) (Contribution x) (Contribution y) = x == y
+  (==) (Correlation x)  (Correlation y)  = x == y
+  (==) Decomp           Decomp           = True
+  (==) _                _                = False
 
 GModel : Type
 GModel = Graph (GoalNode) (GoalEdge)
 
-getGoalTitle : GoalNode -> String
-getGoalTitle (Goal t s d) = t
-getGoalTitle (Soft t s d) = t
-getGoalTitle (Task t s d) = t
-getGoalTitle (Res  t s d) = t
+isDeCompEdge : Maybe GoalEdge -> Bool
+isDeCompEdge (Just Decomp) = True
+isDeCompEdge _             = False
 
-getGoalDecomp : GoalNode -> Maybe Decomposition
-getGoalDecomp (Goal t s d) = d
-getGoalDecomp (Soft t s d) = d
-getGoalDecomp (Task t s d) = d
-getGoalDecomp (Res  t s d) = d
+isContribEdge : Maybe GoalEdge -> Bool
+isContribEdge (Just (Contribution y)) = True
+isContribEdge _                       = False
 
-getGoalSatis : GoalNode -> Maybe Satisfaction
-getGoalSatis (Goal t s d) = s
-getGoalSatis (Soft t s d) = s
-getGoalSatis (Task t s d) = s
-getGoalSatis (Res  t s d) = s
+isCorrelEdge : Maybe GoalEdge -> Bool
+isCorrelEdge (Just (Correlation y)) = True
+isCorrelEdge _                      = False
 
 getGoalByTitle : String -> GModel -> Maybe GoalNode
-getGoalByTitle t g = getValueUsing (\x => getGoalTitle x == t) g
+getGoalByTitle t g = getValueUsing (\x => gTitle x == t) g
+
+getGoalByTitle' : GoalNode -> GModel -> Maybe GoalNode
+getGoalByTitle' t g = getGoalByTitle (gTitle t) g
 
 hasGoal : String -> GModel -> Bool
-hasGoal t m = hasValueUsing (\(x,_) => getGoalTitle x == t) (graph m)
+hasGoal t m = hasValueUsing (\(x,_) => gTitle x == t) (graph m)
+
+
+updateGoalNode : (sfunc : GoalNode -> Bool)
+              -> (ufunc : GoalNode -> GoalNode)
+              -> (model : GModel)
+              -> GModel
+updateGoalNode f u m =
+    case getValueUsing f m of
+      Nothing  => m
+      Just val => updateNodeValueUsing val u m

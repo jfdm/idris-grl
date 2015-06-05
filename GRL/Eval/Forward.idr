@@ -1,16 +1,13 @@
-module GRL.Eval.Forward
+ module GRL.Eval.Forward
 
 import Effects
 import Effect.State
-import Effect.StdIO
 
-import Data.AVL.Dict
-import Data.AVL.Graph
-
-import Data.Queue
+import Data.AVL.Dependent.Dict
+import Data.AVL.Dependent.Graph
 import Data.Stack
 
-import GRL.Types.Value
+import GRL.Common
 import GRL.Model
 
 import GRL.Eval.Qualitative
@@ -21,86 +18,131 @@ import GRL.Eval.Qualitative
 
 ||| The effects used in a BFS.
 MEvalEffs : List EFFECT
-MEvalEffs = [ 'next ::: STATE (Queue Node)
-            , 'seen ::: STATE (List Node)
-            , 'res  ::: STATE (List (GModel ELEM, EvalVal))
-            , STDIO]
-
-{-
-1. Get Children
-2. Extract decomposition
-3. Fold them using specific compare for decomposition
-  + AND minimum value presented
-  + IOR maximum value set
-    + Conflict replaced with Undecided
-  + XOR maximum is propogated with warning
-4. return result
--}
-calcDecomp : Node -> GGraph -> Eff EvalVal MEvalEffs
-calcDecomp nval g = do
-  let es = getEdges nval g
-
-
-{-
-
--}
-calcContrib : Node -> GGraph -> EvalVal -> Eff EvalVal MEvalEffs
-calcContrib nval g dval = do
-
-evalElem : GModel ELEM -> GGraph  -> Eff EvalVal MEvalEffs
-evalElem e g do
-  decompValue  <- calcDecomp e
-  contribValue <- calcContrib e decompValue
-  pure contribValue
+MEvalEffs = [ 'next ::: STATE (Stack NodeID)
+            , 'seen ::: STATE (List NodeID)]
 
 private
-doModelEval : GGraph -> Eff () MEvalEffs
-doModelEval g = do
-    q <- 'next :- get
-    case popQ q of
-      Nothing => pure () -- Stop if all nodes have been traversed
-      Just (curr, newQ) => do
-        'next :- put newQ
+getSat' : NodeID -> GModel -> Satisfaction
+getSat' id g =
+  case getValueByID id g of
+    Nothing => NONE
+    Just v  => case sValue v of
+      Nothing => NONE
+      Just s  => s
 
-        -- Do the thing we need to do
-        printLn curr
+calcDecomp : NodeID -> GModel -> Eff (Satisfaction) MEvalEffs
+calcDecomp id g = do
+    case getValueByID id g of
+      Nothing => pure NONE
+      Just val =>
+        case dTy val of
+          NOTTy => pure NONE
+          dval  => do
+            let cedges   = getEdgesByID id g
+            let children = map fst $ filter (\x => isDeCompEdge $ snd x) cedges
+            let csat     = map (\x => getSat' x g) children
+            let res = case dval of
+                      ANDTy => getDecompAnd csat
+                      XORTy => getDecompXOR csat
+                      IORTy => getDecompIOR csat
+            pure res
 
-        case getValue curr g of
-          Nothing  => doModelEval g
-          Just val => do
-            case isInit val of
-              Just
-              Nothing => do
-        -- Can we eval
 
-        -- Move On
-        let es = getSuccs curr g
-        doMoves es
+private
+calcWeightedContrib : DemiEdge GoalEdge -> GModel -> Satisfaction
+calcWeightedContrib (id, Nothing) _ = NONE
+calcWeightedContrib (id, Just e)  g with (e)
+  | Contribution x = weightedContrib (getSat' id g) x
+  | Correlation  x = weightedContrib (getSat' id g) x -- TODO separate?
+  | otherwise      = NONE
+calcWeightedContrib _             _  = NONE
 
-        -- Repeat
-        doModelEval g
-  where
-    doMove : Node -> Eff () MEvalEffs
-    doMove n = do
-      visited <- 'seen :- get
-      case List.elem n visited of
-        True => pure ()
-        False => do
-          'seen :- update (\xs => [n] ++ xs)
-          'next :- update (\xs => pushQ n xs)
+calcContrib : Satisfaction -> NodeID -> GModel -> Eff Satisfaction MEvalEffs
+calcContrib dval id g = do
+   let cedges = getEdgesByID id g
+   let wsat   = map (\e => calcWeightedContrib e g) cedges
+   let count' = adjustCounts (dval::wsat)
+   if not (noUndec count' > 0)
+     then pure UNDECIDED
+     else pure $ combineContribs (cmpSatAndDen count') (cmpWSandWD count')
 
-    doMoves : Maybe (List Node) -> Eff () MEvalEffs
-    doMoves Nothing    = pure ()
-    doMoves (Just Nil) = pure ()
-    doMoves (Just (e::es)) = do
-      doMove e
-      doMoves (Just es)
+evalElem : NodeID -> GModel -> Eff Satisfaction MEvalEffs
+evalElem e g = do
+  decompValue  <- calcDecomp e g
+  contribValue <- calcContrib decompValue e g
+  pure contribValue
 
-evalModel : List Nat -> GGraph -> IO ()
-evalModel ns g = runInit [ 'next := pushQThings ns mkQueue
-                         , 'seen := List.Nil
-                         , 'res := List.Nil
-                         , ()
-                         ] $ doModelEval g
 
+MInitEffs : List EFFECT
+MInitEffs = [ 'next ::: STATE (Stack NodeID)
+            , 'seen ::: STATE (List NodeID)
+            , 'init ::: STATE Bool]
+private
+doinitValid : GModel -> Eff () MInitEffs
+doinitValid g = do
+  s <- 'next :- get
+  case popS' s of
+    Nothing           => pure ()
+    Just (curr, newS) => do
+      'next :- put newS
+      vs <- 'seen :- get
+      if elem curr vs
+        then doinitValid g
+        else do
+          let val = fromMaybe (GNode GOALTy "" Nothing NOTTy) $ getValueByID curr g
+          let ns = map fst $ getEdgesByID curr g
+
+          'init :- update (\x => if isCons ns
+                    then x
+                    else x && isJust (sValue val))
+
+          'seen :- update (\xs => [curr] ++ xs)
+          'next :- update (\xs => pushSThings ns s)
+          doinitValid g
+
+private
+doEval : GModel -> Eff GModel MEvalEffs
+doEval g = do
+  s <- 'next :- get
+  case popS' s of
+    Nothing           => pure g
+    Just (curr, newS) => do
+      'next :- put newS
+      vs <- 'seen :- get
+      if elem curr vs
+        then doEval g
+        else do
+          case getEdgesByID curr g of
+            Nil => do
+              'seen :- update (\xs => [curr] ++ xs)
+              doEval g
+            ns  => do
+              let childIDs = map fst ns
+              let children = catMaybes $ map (\x => getValueByID x g) childIDs
+              let allSat   = and $ map (\x => isJust (sValue x)) children
+              case allSat of
+                True => do
+                  eval <- evalElem curr g
+                  let newG = updateNodeValueByIDUsing curr (\x => record {sValue = Just eval} x) g
+                  'seen :- update (\xs => [curr] ++ xs)
+                  doEval newG
+                False => do
+                  'next :- update (\xs => pushSThings childIDs s)
+                  doEval g
+
+validInit : GModel -> Bool
+validInit g = with Effects runPureInit
+    [ 'next := pushSThings (verticesID g) mkStack
+    , 'seen := List.Nil
+    , 'init := True] $ (do
+        doinitValid g
+        res <- ('init :- get)
+        pure res)
+
+evalModel : GModel -> List (GoalNode)
+evalModel g = with Effects runPureInit
+    [ 'next := pushSThings (verticesID g) mkStack
+    , 'seen := List.Nil] $ do
+        newG <- doEval g
+        pure $ (vertices newG)
 -- --------------------------------------------------------------------- [ EOF ]

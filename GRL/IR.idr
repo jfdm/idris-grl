@@ -24,6 +24,15 @@ data GrlIR : GrlIRTy -> Type where
                -> List (GrlIR ELEM)
                -> GrlIR STRUCT
 
+
+getIrTitle : GrlIR ELEM -> String
+getIrTitle (Element ty t s) = t
+
+instance Show (GrlIR ty) where
+  show (Element ty t ms) = unwords ["[Element", show ty, show t, show ms,"]"]
+  show (IntentLink ty cty a b) = unwords ["[Intent", show ty, show cty, show a, show b, "]"]
+  show (StructureLink ty x ys) = unwords ["[Structure", show ty, show x, show ys, "]"]
+
 partial
 eqGrlIR : GrlIR a -> GrlIR b -> Bool
 eqGrlIR (Element xty x sx) (Element yty y sy) =
