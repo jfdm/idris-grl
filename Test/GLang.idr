@@ -1,4 +1,4 @@
-module Test.Amyot
+module Test.GLang
 
 import GRL.Lang.GLang
 import GRL.Eval
