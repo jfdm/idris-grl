@@ -41,20 +41,11 @@ convExpr (StructureLink _ _ _) = Decomp
 -- --------------------------------------------------------------- [ Insertion ]
 
 ||| Perform the insertion of elements into the model.
-private
-insertElem : GrlIR ELEM -> GModel -> GModel
-insertElem elem model = addNode (convExpr elem) model
-
-infixl 5 \+\
-||| Add elemeents to the model.
-(\+\) : GRL expr => GModel -> expr ELEM -> GModel
-(\+\) model elem =
-    if checkElemBool e' model
-      then insertElem e' model
-      else model
-  where
-    e' : GrlIR ELEM
-    e' = mkGoal elem
+insertElem : GRL ex => (e : ex ELEM)
+                    -> (m : GModel)
+                    -> {auto prf : checkElemBool (mkGoal e) m = True}
+                    -> GModel
+insertElem elem model = addNode (convExpr $ mkGoal elem) model
 
 -- ------------------------------------------------------------------- [ Links ]
 private
@@ -70,54 +61,35 @@ insertLink (Element _ x _) (Element _ y _) i m =
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
-insertIntention : GrlIR INTENT -> GModel -> GModel
-insertIntention l@(IntentLink ty val x y) model =
-  insertLink y x (Just $ convExpr l) model
-
-infixl 5 \->\
-
-||| Add an intention declaration to the model.
-(\->\) : GRL expr => GModel -> expr INTENT -> GModel
-(\->\) m i =
-    if (checkIntentBool l m)
-      then insertIntention l m
-      else m
-  where
-    l : GrlIR INTENT
-    l = mkIntent i
+insertIntent : GRL ex => (i : ex INTENT)
+                      -> (m : GModel)
+                      -> {auto prf : checkIntentBool (mkIntent i) m = True}
+                      -> GModel
+insertIntent l@(IntentLink ty val x y) model =
+  insertLink y x (Just $ (convExpr . mkIntent) l) model
 
 -- --------------------------------------------------------------- [ Structure ]
 ||| Do structure insertion.
 private
-insertStructure : GrlIR STRUCT -> GModel ->  GModel
-insertStructure l@(StructureLink ty x ys) model =
+insertStruct : GRL ex => (s : ex STRUCT)
+                      -> (m : GModel)
+                      -> {auto prf : checkStructBool (mkStruct s) m = True}
+                      -> GModel
+insertStruct l@(StructureLink ty x ys) model =
     updateGoalNode (\n => getIrTitle x == gTitle n)
                    (\x => record {dTy = ty} x)
                    (model' model l)
   where
     model' : GModel -> GrlIR STRUCT -> GModel
-    model' mo l = foldl (\m, y => insertLink x y (Just $ convExpr l) m) mo ys
-
-
-infixl 5 \<-\
-
-||| Add a structure declaration to the model
-(\<-\) : GRL expr => GModel -> expr STRUCT -> GModel
-(\<-\) model i =
-    if (checkStructBool s model)
-      then insertStructure s model
-      else model
-  where
-    s : GrlIR STRUCT
-    s = mkStruct i
+    model' mo l = foldl (\m, y => insertLink x y (Just $ (convExpr . mkStruct) l) m) mo ys
 
 infixl 3 \=
 
 (\=) : GRL expr => {ty : GrlIRTy} -> GModel -> expr ty -> GModel
 (\=) {ty} m i =
   case ty of
-    ELEM   => (\+\)  m i
-    INTENT => (\->\) m i
-    STRUCT => (\<-\) m i
+    ELEM   => insertElem i m
+    INTENT => insertIntent i m
+    STRUCT => insertStruct i m
 
 -- --------------------------------------------------------------------- [ EOF ]

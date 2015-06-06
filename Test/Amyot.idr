@@ -51,6 +51,7 @@ serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 amyotModel : GModel
 amyotModel = emptyModel
     \= highPerf
+    \= highPerf
     \= lowCost
     \= minChange
     \= maxHardware
@@ -97,13 +98,13 @@ runTest : IO ()
 runTest = do
   printLn "AA"
 
-  case validInit amyotModel' of
+  case validInit amyotModel of
     False => do
       putStrLn "Wrongly init'd model."
-      ppGraph amyotModel'
+      ppGraph amyotModel
 --      printLn amyotModel'
 
     True  => do
-      ppGraph amyotModel'
-      let (s,o) = deployStrategy amyotModel'
+      ppGraph amyotModel
+      let (s,o) = deployStrategy amyotModel
       ppRes $ evalModel s
