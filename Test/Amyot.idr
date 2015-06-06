@@ -53,6 +53,7 @@ serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 amyotModel : GModel
 amyotModel = emptyModel
     \= highPerf
+    \= highPerf
     \= lowCost
     \= minChange
     \= maxHardware

@@ -30,9 +30,9 @@ getIrTitle : GrlIR ELEM -> String
 getIrTitle (Element ty t s) = t
 
 instance Show (GrlIR ty) where
-  show (Element ty t ms) = unwords ["[Element", show ty, show t, show ms,"]"]
-  show (IntentLink ty cty a b) = unwords ["[Intent", show ty, show cty, show a, show b, "]"]
-  show (StructureLink ty x ys) = unwords ["[Structure", show ty, show x, show ys, "]"]
+  show (Element ty t ms) = with List unwords ["[Element", show ty, show t, show ms,"]"]
+  show (IntentLink ty cty a b) = with List unwords ["[Intent", show ty, show cty, show a, show b, "]"]
+  show (StructureLink ty x ys) = with List unwords ["[Structure", show ty, show x, show ys, "]"]
 
 partial
 eqGrlIR : GrlIR a -> GrlIR b -> Bool

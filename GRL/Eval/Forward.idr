@@ -49,13 +49,12 @@ calcDecomp id g = do
 
 
 private
+%inline
 calcWeightedContrib : DemiEdge GoalEdge -> GModel -> Satisfaction
-calcWeightedContrib (id, Nothing) _ = NONE
-calcWeightedContrib (id, Just e)  g with (e)
-  | Contribution x = weightedContrib (getSat' id g) x
-  | Correlation  x = weightedContrib (getSat' id g) x -- TODO separate?
-  | otherwise      = NONE
-calcWeightedContrib _             _  = NONE
+calcWeightedContrib (id, Nothing)                _ = NONE
+calcWeightedContrib (id, Just (Contribution x))  g = weightedContrib (getSat' id g) x
+calcWeightedContrib (id, Just (Correlation  x))  g = weightedContrib (getSat' id g) x
+calcWeightedContrib _                            _ = NONE
 
 calcContrib : Satisfaction -> NodeID -> GModel -> Eff Satisfaction MEvalEffs
 calcContrib dval id g = do

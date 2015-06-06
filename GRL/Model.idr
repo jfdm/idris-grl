@@ -18,7 +18,7 @@ record GoalNode where
   dTy : Decomposition
 
 instance Show GoalNode where
-  show (GNode ty n s d) = unwords ["[GNode", show ty, n, show s, show d, "]"]
+  show (GNode ty n s d) = with List unwords ["[GNode", show ty, n, show s, show d, "]"]
 
 instance Eq GoalNode where
   (==) (GNode xty x xs xd) (GNode yty y ys yd) =
@@ -33,9 +33,9 @@ data GoalEdge  : Type where
   Decomp       : GoalEdge
 
 instance Show GoalEdge where
-  show (Contribution ty) = unwords ["[Contrib", show ty, "]"]
-  show (Correlation ty)  = unwords ["[Correl", show ty, "]"]
-  show Decomp            = unwords ["[Decomp]"]
+  show (Contribution ty) = with List unwords ["[Contrib", show ty, "]"]
+  show (Correlation ty)  = with List unwords ["[Correl", show ty, "]"]
+  show Decomp            = with List unwords ["[Decomp]"]
 
 instance Eq GoalEdge where
   (==) (Contribution x) (Contribution y) = x == y

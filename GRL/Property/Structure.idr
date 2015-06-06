@@ -24,15 +24,15 @@ import GRL.Common
 allDiff : (src : GrlIR ELEM)
        -> (ds  : List (GrlIR ELEM))
        -> Bool
-allDiff src ds = diffDSTs && noLoopBack
+allDiff src ds = diffDSTs ds && noLoopBack src ds
   where
-    diffDSTs : Bool
-    diffDSTs = if length ds == 1
-                 then True
-                 else not $ and [ eqGrlIR x y | x <- ds, y <- ds]
+    diffDSTs : List (GrlIR ELEM) -> Bool
+    diffDSTs xs = if length xs == 1
+                   then True
+                   else not $ and [ eqGrlIR x y | x <- xs, y <- xs]
 
-    noLoopBack : Bool
-    noLoopBack = not $ and $ map (\x => eqGrlIR x src) ds
+    noLoopBack : GrlIR ELEM -> List (GrlIR ELEM) -> Bool
+    noLoopBack y xs = not $ and $ map (\x => eqGrlIR x y) xs
 
 ||| Nodes are all valid nodes
 validNodes : List (GrlIR ELEM)

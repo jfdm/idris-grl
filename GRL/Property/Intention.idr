@@ -23,10 +23,8 @@ import Debug.Trace
 
 -- ---------------------------------------------- [ Intentional Link Insertion ]
 examineLink : GrlIR INTENT -> Bool
-examineLink (IntentLink cTy c x y) = case (y) of
-   (Element ty n s) => case ty of
-        RESOURCETy => False
-        otherwise  => not $ eqGrlIR x y
+examineLink (IntentLink cTy c x (Element RESOURCETy n s)) = False
+examineLink (IntentLink cTy c x y)                        = not $ eqGrlIR x y
 
 inModel : GrlIR ELEM -> GModel -> Bool
 inModel (Element ty n s) m = hasGoal n m

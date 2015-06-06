@@ -11,7 +11,7 @@ import GRL.Property.Element
 import GRL.Property.Intention
 import GRL.Property.Structure
 
-import Debug.Trace
+import Debug.Error
 
 %access public
 
@@ -31,11 +31,9 @@ interpTy STRUCT = GoalEdge
 
 ||| Convert expressions from the IR to Goal Graph objects.
 convExpr : {ty : GrlIRTy} -> GrlIR ty -> interpTy ty
-convExpr (Element eTy t s)       = GNode eTy t s NOTTy
-convExpr (IntentLink ty cTy _ _) =
-  case ty of
-    CONTRIBUTION => Contribution cTy
-    CORRELATION  => Correlation  cTy
+convExpr (Element eTy t s)                 = GNode eTy t s NOTTy
+convExpr (IntentLink CONTRIBUTION cTy _ _) = Contribution cTy
+convExpr (IntentLink CORRELATION  cTy _ _) = Correlation  cTy
 convExpr (StructureLink _ _ _) = Decomp
 
 -- --------------------------------------------------------------- [ Insertion ]
@@ -89,41 +87,50 @@ insertStruct l@(StructureLink ty x ys) model p =
 wildMk : GRL ex => {ty : GrlIRTy}
                 -> (e : ex ty)
                 -> GrlIR ty
-wildMk {ty} decl =
-    case ty of
-      ELEM   => mkGoal decl
-      INTENT => mkIntent decl
-      STRUCT => mkStruct decl
+wildMk {ty=ELEM}   decl = mkGoal decl
+wildMk {ty=INTENT} decl = mkIntent decl
+wildMk {ty=STRUCT} decl = mkStruct decl
 
-public
-checkAdd : GRL ex => {ty : GrlIRTy}
-                  -> (e : ex ty)
-                  -> (m : GModel)
-                  -> Maybe (ValidInsert (wildMk e) m)
-checkAdd el mo {ty} =
-  case ty of
-    ELEM   => if checkElemBool (mkGoal el) mo
-                then (Just IsValidInsert)
-                else Nothing
-    INTENT => if checkIntentBool (mkIntent el) mo
-                then (Just IsValidInsert)
-                else Nothing
-    STRUCT => if checkStructBool (mkStruct el) mo
-                then (Just IsValidInsert)
-                else Nothing
+-- public
+-- checkAdd : GRL ex => {ty : GrlIRTy}
+--                   -> (e : ex ty)
+--                   -> (m : GModel)
+--                   -> Maybe (ValidInsert (wildMk e) m)
+-- checkAdd decl model {ty=ELEM} =
+--     if checkElemBool (mkGoal decl) model
+--       then (Just IsValidInsert)
+--       else Nothing
+-- checkAdd decl model {ty=INTENT} =
+--     if checkIntentBool (mkIntent decl) model
+--       then (Just IsValidInsert)
+--       else Nothing
+-- checkAdd decl model {ty=INTENT} =
+--     if checkStructBool (mkStruct decl) model
+--       then (Just IsValidInsert)
+--       else Nothing
+
 
 infixl 4 \=
 
 (\=) : GRL expr => {ty : GrlIRTy}
                 -> (m : GModel)
                 -> (d : expr ty)
-                -> {res : ValidInsert (wildMk d) m}
-                -> {auto prf : checkAdd d m = Just res}
+                -- -> {res : ValidInsert (wildMk d) m}
+                -- -> {auto prf : checkAdd d m = Just res}
                 -> GModel
-(\=) {ty} mod dec {res} =
-    case ty of
-      ELEM   => insertElem   dec mod res
-      INTENT => insertIntent dec mod res
-      STRUCT => insertStruct dec mod res
+(\=) {ty=ELEM}   model decl =
+    if checkElemBool (mkGoal decl) model
+      then (insertElem decl model IsValidInsert)
+      else error "Bad Element"
+
+(\=) {ty=INTENT} model decl =
+    if checkIntentBool (mkIntent decl) model
+      then (insertIntent decl model IsValidInsert)
+      else error "Bad Intent"
+
+(\=) {ty=STRUCT} mod dec =
+    if checkStructBool (mkStruct dec) mod
+      then (insertStruct dec mod IsValidInsert)
+      else error "Bad Structure"
 
 -- --------------------------------------------------------------------- [ EOF ]
