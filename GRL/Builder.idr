@@ -41,6 +41,7 @@ convExpr (StructureLink _ _ _) = Decomp
 -- --------------------------------------------------------------- [ Insertion ]
 
 ||| Perform the insertion of elements into the model.
+private
 insertElem : GRL ex => (e : ex ELEM)
                     -> (m : GModel)
                     -> {auto prf : checkElemBool (mkGoal e) m = True}
@@ -78,10 +79,10 @@ insertStruct : GRL ex => (s : ex STRUCT)
 insertStruct l@(StructureLink ty x ys) model =
     updateGoalNode (\n => getIrTitle x == gTitle n)
                    (\x => record {dTy = ty} x)
-                   (model' model l)
+                   (doInsert l model)
   where
-    model' : GModel -> GrlIR STRUCT -> GModel
-    model' mo l = foldl (\m, y => insertLink x y (Just $ (convExpr . mkStruct) l) m) mo ys
+    doInsert : GrlIR STRUCT -> GModel -> GModel
+    doInsert l mo = foldl (\m, y => insertLink x y (Just $ (convExpr . mkStruct) l) m) mo ys
 
 infixl 3 \=
 
