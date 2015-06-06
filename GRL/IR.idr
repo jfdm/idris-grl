@@ -3,6 +3,7 @@ module DSL.IR
 
 import GRL.Common
 
+%access public
 -- ---------------------------------------------------------- [ AST Definition ]
 
 ||| An IR to aid in converting DSL language constructs into Goal Graph

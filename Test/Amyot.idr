@@ -3,6 +3,8 @@ module Test.Amyot
 import GRL.Lang.Default
 import GRL.Eval
 
+import Debug.Trace
+
 -- Service Provider
 highPerf : SOFT
 highPerf = MkSoft "High Performance" Nothing
@@ -51,7 +53,6 @@ serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 amyotModel : GModel
 amyotModel = emptyModel
     \= highPerf
-    \= highPerf
     \= lowCost
     \= minChange
     \= maxHardware
@@ -80,8 +81,8 @@ amyotModel = emptyModel
     \= (dataNewSNode |= [installSNode])
     \= (highPerf     |= [maxHardware, highThrough])
 
-buildStrategy : Strategy
-buildStrategy = [(detSLoc,SATISFIED)]
+myFirstStrategy : Strategy
+myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
 
 ppRes : Show a => List (a) -> IO ()
 ppRes Nil     = printLn ""
@@ -106,5 +107,5 @@ runTest = do
 
     True  => do
       ppGraph amyotModel
-      let (s,o) = deployStrategy amyotModel
+      let (s,o) = deployStrategy amyotModel myFirstStrategy
       ppRes $ evalModel s

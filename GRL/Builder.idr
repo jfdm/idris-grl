@@ -39,14 +39,16 @@ convExpr (IntentLink ty cTy _ _) =
 convExpr (StructureLink _ _ _) = Decomp
 
 -- --------------------------------------------------------------- [ Insertion ]
+data ValidInsert : {ty : GrlIRTy} -> GrlIR ty -> GModel -> Type where
+  IsValidInsert : ValidInsert decl model
 
 ||| Perform the insertion of elements into the model.
 private
 insertElem : GRL ex => (e : ex ELEM)
                     -> (m : GModel)
-                    -> {auto prf : checkElemBool (mkGoal e) m = True}
+                    -> (prf : ValidInsert (mkGoal e) m)
                     -> GModel
-insertElem elem model = addNode (convExpr $ mkGoal elem) model
+insertElem elem model p = addNode (convExpr $ mkGoal elem) model
 
 -- ------------------------------------------------------------------- [ Links ]
 private
@@ -64,9 +66,9 @@ insertLink (Element _ x _) (Element _ y _) i m =
 private
 insertIntent : GRL ex => (i : ex INTENT)
                       -> (m : GModel)
-                      -> {auto prf : checkIntentBool (mkIntent i) m = True}
+                      -> (prf : ValidInsert (mkIntent i) m)
                       -> GModel
-insertIntent l@(IntentLink ty val x y) model =
+insertIntent l@(IntentLink ty val x y) model p =
   insertLink y x (Just $ (convExpr . mkIntent) l) model
 
 -- --------------------------------------------------------------- [ Structure ]
@@ -74,9 +76,9 @@ insertIntent l@(IntentLink ty val x y) model =
 private
 insertStruct : GRL ex => (s : ex STRUCT)
                       -> (m : GModel)
-                      -> {auto prf : checkStructBool (mkStruct s) m = True}
+                      -> (prf : ValidInsert (mkStruct s) m)
                       -> GModel
-insertStruct l@(StructureLink ty x ys) model =
+insertStruct l@(StructureLink ty x ys) model p =
     updateGoalNode (\n => getIrTitle x == gTitle n)
                    (\x => record {dTy = ty} x)
                    (doInsert l model)
@@ -84,13 +86,44 @@ insertStruct l@(StructureLink ty x ys) model =
     doInsert : GrlIR STRUCT -> GModel -> GModel
     doInsert l mo = foldl (\m, y => insertLink x y (Just $ (convExpr . mkStruct) l) m) mo ys
 
-infixl 3 \=
+wildMk : GRL ex => {ty : GrlIRTy}
+                -> (e : ex ty)
+                -> GrlIR ty
+wildMk {ty} decl =
+    case ty of
+      ELEM   => mkGoal decl
+      INTENT => mkIntent decl
+      STRUCT => mkStruct decl
 
-(\=) : GRL expr => {ty : GrlIRTy} -> GModel -> expr ty -> GModel
-(\=) {ty} m i =
+public
+checkAdd : GRL ex => {ty : GrlIRTy}
+                  -> (e : ex ty)
+                  -> (m : GModel)
+                  -> Maybe (ValidInsert (wildMk e) m)
+checkAdd el mo {ty} =
   case ty of
-    ELEM   => insertElem i m
-    INTENT => insertIntent i m
-    STRUCT => insertStruct i m
+    ELEM   => if checkElemBool (mkGoal el) mo
+                then (Just IsValidInsert)
+                else Nothing
+    INTENT => if checkIntentBool (mkIntent el) mo
+                then (Just IsValidInsert)
+                else Nothing
+    STRUCT => if checkStructBool (mkStruct el) mo
+                then (Just IsValidInsert)
+                else Nothing
+
+infixl 4 \=
+
+(\=) : GRL expr => {ty : GrlIRTy}
+                -> (m : GModel)
+                -> (d : expr ty)
+                -> {res : ValidInsert (wildMk d) m}
+                -> {auto prf : checkAdd d m = Just res}
+                -> GModel
+(\=) {ty} mod dec {res} =
+    case ty of
+      ELEM   => insertElem   dec mod res
+      INTENT => insertIntent dec mod res
+      STRUCT => insertStruct dec mod res
 
 -- --------------------------------------------------------------------- [ EOF ]

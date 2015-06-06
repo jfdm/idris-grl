@@ -22,12 +22,6 @@ import Debug.Trace
 %access public
 
 -- ---------------------------------------------- [ Intentional Link Insertion ]
-data ValidIntent : GrlIR INTENT -> GModel -> Type
-  where
-    OkayIntent : (i : GrlIR INTENT)
-              -> (m : GModel)
-              -> ValidIntent i m
-
 examineLink : GrlIR INTENT -> Bool
 examineLink (IntentLink cTy c x y) = case (y) of
    (Element ty n s) => case ty of

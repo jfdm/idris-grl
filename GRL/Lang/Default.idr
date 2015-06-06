@@ -6,6 +6,8 @@ import public GRL.IR
 import public GRL.Model
 import public GRL.Builder
 
+%access public
+
 ||| The original unabulterated version of the GRL.
 data GoalLang : GrlIRTy -> Type where
     ||| A (hard) Goal is a condition or state of affairs in the
