@@ -11,7 +11,7 @@ import GRL.Model
 
 %access public
 
-instance [andSat] Ord Satisfaction where
+instance [andSat] Ord SValue where
    compare SATISFIED SATISFIED = EQ
    compare WEAKSATIS WEAKSATIS = EQ
    compare WEAKDEN   WEAKDEN   = EQ
@@ -37,10 +37,10 @@ instance [andSat] Ord Satisfaction where
    compare SATISFIED _         = GT
    compare _         SATISFIED = LT
 
-getDecompAnd : List Satisfaction -> Satisfaction
+getDecompAnd : List SValue -> SValue
 getDecompAnd ss = foldl (\olds,s => min @{andSat} s olds) SATISFIED ss
 
-instance [orSat] Ord Satisfaction where
+instance [orSat] Ord SValue where
     compare SATISFIED SATISFIED = EQ
     compare WEAKSATIS WEAKSATIS = EQ
     compare WEAKDEN   WEAKDEN   = EQ
@@ -66,10 +66,10 @@ instance [orSat] Ord Satisfaction where
     compare SATISFIED _         = GT
     compare _         SATISFIED = LT
 
-getDecompIOR : List Satisfaction -> Satisfaction
+getDecompIOR : List SValue -> SValue
 getDecompIOR ss = foldl (\olds,s => min @{orSat} s olds) SATISFIED ss
 
-getDecompXOR : List Satisfaction -> Satisfaction
+getDecompXOR : List SValue -> SValue
 getDecompXOR ss = foldl (\olds,s => max @{orSat} s olds) DENIED ss
 
 record ContribCount where
@@ -84,7 +84,7 @@ defCCount : ContribCount
 defCCount = MkCCount Z Z Z Z Z
 
 ||| Implementation of `AdjustContributionCounters`
-adJustCount : Satisfaction -> ContribCount -> ContribCount
+adJustCount : SValue -> ContribCount -> ContribCount
 adJustCount SATISFIED cnt = record {noSatis = (S (noSatis cnt))} cnt
 adJustCount WEAKSATIS cnt = record {noWeakS = (S (noWeakS cnt))} cnt
 adJustCount WEAKDEN   cnt = record {noWeakD = (S (noWeakD cnt))} cnt
@@ -92,11 +92,11 @@ adJustCount UNDECIDED cnt = record {noUndec = (S (noUndec cnt))} cnt
 adJustCount _         cnt = cnt
 
 ||| Implementation of `AdjustContributionCounters` for a list of values.
-adjustCounts : List Satisfaction -> ContribCount
+adjustCounts : List SValue -> ContribCount
 adjustCounts es = foldl (flip $ adJustCount) defCCount es
 
 ||| Implementation of the `WeightedContribution` look up table.
-weightedContrib : Satisfaction -> ContributionTy -> Satisfaction
+weightedContrib : SValue -> CValue -> SValue
 weightedContrib  DENIED    MAKE    = DENIED
 weightedContrib  DENIED    HELPS   = WEAKDEN
 weightedContrib  DENIED    SOMEPOS = WEAKDEN
@@ -150,7 +150,7 @@ weightedContrib  _         _       = NONE
 
 
 ||| Implementation of the `CompareSatisfiedAndDenied`  resolution
-cmpSatAndDen : ContribCount -> Satisfaction
+cmpSatAndDen : ContribCount -> SValue
 cmpSatAndDen (MkCCount ns _ _ nd _) =
   if ns > 0 && nd > 0
     then CONFLICT
@@ -161,7 +161,7 @@ cmpSatAndDen (MkCCount ns _ _ nd _) =
         else NONE
 
 ||| Implementation of the `CompareWSandWD` function
-cmpWSandWD : ContribCount -> Satisfaction
+cmpWSandWD : ContribCount -> SValue
 cmpWSandWD (MkCCount _ nws nwd _ _) =
   if nws > nwd
     then WEAKSATIS
@@ -171,7 +171,7 @@ cmpWSandWD (MkCCount _ nws nwd _ _) =
 
 ||| Implementation of the `CombineContributionutions` function
 %inline
-combineContribs : Satisfaction -> Satisfaction -> Satisfaction
+combineContribs : SValue -> SValue -> SValue
 combineContribs WEAKDEN   DENIED    = DENIED
 combineContribs WEAKDEN   SATISFIED = WEAKSATIS
 combineContribs WEAKDEN   CONFLICT  = CONFLICT

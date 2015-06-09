@@ -24,17 +24,13 @@ import GRL.Common
 
 ||| Check to see if the element is unique.
 |||
-isElemUnique : (node : GrlIR ELEM)
-            -> (model : GModel)
-            -> Bool
-isElemUnique (Element ty t s) m = not $ hasGoal t m
+isElemUnique : (node : GExpr ELEM) -> (model : GModel) -> Bool
+isElemUnique (Elem ty t s) m = not $ hasGoal t m
 
 ||| Check to see if the element is unique.
 |||
 %hint
-checkElemBool : (node : GrlIR ELEM)
-             -> (model : GModel)
-             -> Bool
+checkElemBool : (node : GExpr ELEM) -> (model : GModel) -> Bool
 checkElemBool n m = isElemUnique n m
 
 -- --------------------------------------------------------------------- [ EOF ]

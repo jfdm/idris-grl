@@ -6,10 +6,13 @@ modules = GRL.Common
         , GRL.IR
         , GRL.Model
         , GRL.Builder
+        , GRL.Pretty
         , GRL.Property.Element
         , GRL.Property.Structure
         , GRL.Property.Intention
-        , GRL.Lang.Default
+
+        , GRL.Lang.GLang
+        , GRL.Lang.GLangPlus
 
         , GRL.Eval
         , GRL.Eval.Forward
@@ -17,5 +20,7 @@ modules = GRL.Common
         , GRL.Eval.Strategy
 
         , Test.Amyot
+        , Test.GLang
 
 tests = Test.Amyot.runTest
+      , Test.GLang.runTest

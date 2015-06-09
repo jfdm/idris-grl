@@ -17,25 +17,21 @@ import GRL.Model
 import GRL.IR
 import GRL.Common
 
-import Debug.Trace
-
 %access public
 
 -- ---------------------------------------------- [ Intentional Link Insertion ]
-examineLink : GrlIR INTENT -> Bool
-examineLink (IntentLink cTy c x (Element RESOURCETy n s)) = False
-examineLink (IntentLink cTy c x y)                        = not $ eqGrlIR x y
+examineLink : GExpr INTENT -> Bool
+examineLink (ILink cTy c x (Elem RESty n s)) = False
+examineLink (ILink cTy c x y)                = not $ eqGExpr x y
 
-inModel : GrlIR ELEM -> GModel -> Bool
-inModel (Element ty n s) m = hasGoal n m
+inModel : GExpr ELEM -> GModel -> Bool
+inModel (Elem ty n s) m = hasGoal n m
 
-validLink : (i : GrlIR INTENT) -> (m : GModel) -> Bool
-validLink (IntentLink cTy ty x y) m = (inModel x m) && (inModel y m)
+validLink : GExpr INTENT -> GModel -> Bool
+validLink (ILink cTy ty x y) m = (inModel x m) && (inModel y m)
 
 %hint
-checkIntentBool : (link : GrlIR INTENT)
-              -> (model : GModel)
-              -> Bool
+checkIntentBool : GExpr INTENT -> GModel -> Bool
 checkIntentBool l m = validLink l m && examineLink l
 
 -- --------------------------------------------------------------------- [ EOF ]

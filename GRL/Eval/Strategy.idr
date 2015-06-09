@@ -8,22 +8,22 @@ import GRL.Model
 
 ||| Strategies are just list of node evaluation pairings.
 Strategy : Type
-Strategy = List (GoalNode, Satisfaction)
+Strategy = List (GoalNode, SValue)
 
-buildStrategy : GRL expr => List (expr ELEM, Satisfaction) -> Strategy
+buildStrategy : GRL expr => List (expr ELEM, SValue) -> Strategy
 buildStrategy es = map (\(e,v) => ((convExpr . mkGoal) e, v)) es
 
 ||| Deploy Strategy being careful not to override default values, returning a pairing of the modified model, and original.
 deployStrategy : GModel -> Strategy -> (GModel, GModel)
 deployStrategy oldG ss = (newG, oldG)
   where
-    canUp : Satisfaction -> GoalNode -> GoalNode
-    canUp s n = if isJust (sValue n)
+    canUp : SValue -> GoalNode -> GoalNode
+    canUp s n = if isJust (getSValue n)
                   then n
-                  else record {sValue = Just s} n
+                  else record {getSValue = Just s} n
 
-    doUp : (GoalNode, Satisfaction) -> GModel -> GModel
-    doUp (n,s) m = updateGoalNode (\x => gTitle n == gTitle x )
+    doUp : (GoalNode, SValue) -> GModel -> GModel
+    doUp (n,s) m = updateGoalNode (\x => getNodeTitle n == getNodeTitle x )
                                   (canUp s)
                                   m
 

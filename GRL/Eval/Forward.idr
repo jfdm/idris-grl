@@ -22,41 +22,41 @@ MEvalEffs = [ 'next ::: STATE (Stack NodeID)
             , 'seen ::: STATE (List NodeID)]
 
 private
-getSat' : NodeID -> GModel -> Satisfaction
+getSat' : NodeID -> GModel -> SValue
 getSat' id g =
   case getValueByID id g of
     Nothing => NONE
-    Just v  => case sValue v of
+    Just v  => case getSValue v of
       Nothing => NONE
       Just s  => s
 
-calcDecomp : NodeID -> GModel -> Eff (Satisfaction) MEvalEffs
+calcDecomp : NodeID -> GModel -> Eff (SValue) MEvalEffs
 calcDecomp id g = do
     case getValueByID id g of
       Nothing => pure NONE
       Just val =>
-        case dTy val of
-          NOTTy => pure NONE
-          dval  => do
+        case getStructTy val of
+          Nothing   => pure NONE
+          Just dval => do
             let cedges   = getEdgesByID id g
             let children = map fst $ filter (\x => isDeCompEdge $ snd x) cedges
             let csat     = map (\x => getSat' x g) children
             let res = case dval of
-                      ANDTy => getDecompAnd csat
-                      XORTy => getDecompXOR csat
-                      IORTy => getDecompIOR csat
+                      ANDty => getDecompAnd csat
+                      XORty => getDecompXOR csat
+                      IORty => getDecompIOR csat
             pure res
 
 
 private
 %inline
-calcWeightedContrib : DemiEdge GoalEdge -> GModel -> Satisfaction
+calcWeightedContrib : DemiEdge GoalEdge -> GModel -> SValue
 calcWeightedContrib (id, Nothing)                _ = NONE
 calcWeightedContrib (id, Just (Contribution x))  g = weightedContrib (getSat' id g) x
 calcWeightedContrib (id, Just (Correlation  x))  g = weightedContrib (getSat' id g) x
 calcWeightedContrib _                            _ = NONE
 
-calcContrib : Satisfaction -> NodeID -> GModel -> Eff Satisfaction MEvalEffs
+calcContrib : SValue -> NodeID -> GModel -> Eff SValue MEvalEffs
 calcContrib dval id g = do
    let cedges = getEdgesByID id g
    let wsat   = map (\e => calcWeightedContrib e g) cedges
@@ -65,7 +65,7 @@ calcContrib dval id g = do
      then pure UNDECIDED
      else pure $ combineContribs (cmpSatAndDen count') (cmpWSandWD count')
 
-evalElem : NodeID -> GModel -> Eff Satisfaction MEvalEffs
+evalElem : NodeID -> GModel -> Eff SValue MEvalEffs
 evalElem e g = do
   decompValue  <- calcDecomp e g
   contribValue <- calcContrib decompValue e g
@@ -88,12 +88,12 @@ doinitValid g = do
       if elem curr vs
         then doinitValid g
         else do
-          let val = fromMaybe (GNode GOALTy "" Nothing NOTTy) $ getValueByID curr g
+          let val = fromMaybe (GNode GOALty "" Nothing Nothing) $ getValueByID curr g
           let ns = map fst $ getEdgesByID curr g
 
           'init :- update (\x => if isCons ns
                     then x
-                    else x && isJust (sValue val))
+                    else x && isJust (getSValue val))
 
           'seen :- update (\xs => [curr] ++ xs)
           'next :- update (\xs => pushSThings ns s)
@@ -118,11 +118,11 @@ doEval g = do
             ns  => do
               let childIDs = map fst ns
               let children = catMaybes $ map (\x => getValueByID x g) childIDs
-              let allSat   = and $ map (\x => isJust (sValue x)) children
+              let allSat   = and $ map (\x => isJust (getSValue x)) children
               case allSat of
                 True => do
                   eval <- evalElem curr g
-                  let newG = updateNodeValueByIDUsing curr (\x => record {sValue = Just eval} x) g
+                  let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
                   'seen :- update (\xs => [curr] ++ xs)
                   doEval newG
                 False => do

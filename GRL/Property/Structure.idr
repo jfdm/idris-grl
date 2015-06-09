@@ -21,43 +21,35 @@ import GRL.Common
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
 ||| No loops and all different children.
-allDiff : (src : GrlIR ELEM)
-       -> (ds  : List (GrlIR ELEM))
-       -> Bool
+allDiff : GExpr ELEM -> List (GExpr ELEM) -> Bool
 allDiff src ds = diffDSTs ds && noLoopBack src ds
   where
-    diffDSTs : List (GrlIR ELEM) -> Bool
+    diffDSTs : List (GExpr ELEM) -> Bool
     diffDSTs xs = if length xs == 1
                    then True
-                   else not $ and [ eqGrlIR x y | x <- xs, y <- xs]
+                   else not $ and [ eqGExpr x y | x <- xs, y <- xs]
 
-    noLoopBack : GrlIR ELEM -> List (GrlIR ELEM) -> Bool
-    noLoopBack y xs = not $ and $ map (\x => eqGrlIR x y) xs
+    noLoopBack : GExpr ELEM -> List (GExpr ELEM) -> Bool
+    noLoopBack y xs = not $ and $ map (\x => eqGExpr x y) xs
 
 ||| Nodes are all valid nodes
-validNodes : List (GrlIR ELEM)
-          -> GModel
-          -> Bool
+validNodes : List (GExpr ELEM) -> GModel -> Bool
 validNodes ns m = and $ map (\n => isValid n m) ns
   where
-    isValid : GrlIR ELEM -> GModel -> Bool
-    isValid (Element ty t s) m = hasGoal t m
+    isValid : GExpr ELEM -> GModel -> Bool
+    isValid (Elem ty t s) m = hasGoal t m
 
 ||| The node is free to be decomposed, or has been decomposed and are
 ||| adding the same decomposition.
-validDTy : GrlIR ELEM -> Decomposition -> GModel -> Bool
-validDTy (Element ty t s) dty m =
+validDTy : GExpr ELEM -> GStructTy -> GModel -> Bool
+validDTy (Elem ty t s) dty m =
   case getGoalByTitle t m of
     Nothing => True
-    Just n  => case dTy n of
-      NOTTy => True
-      a     => a == dty
+    Just n  => getStructTy n == Just dty
 
 %hint
-checkStructBool : (link : GrlIR STRUCT)
-               -> (model : GModel)
-               -> Bool
-checkStructBool (StructureLink ty src ds) m =
+checkStructBool : GExpr STRUCT -> GModel -> Bool
+checkStructBool (SLink ty src ds) m =
        allDiff src ds
     && validNodes (src :: ds) m
     && validDTy src ty m

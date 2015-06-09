@@ -1,6 +1,6 @@
 module Test.Amyot
 
-import GRL.Lang.Default
+import GRL.Lang.GLang
 import GRL.Eval
 
 import Debug.Trace
@@ -52,61 +52,50 @@ serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 
 amyotModel : GModel
 amyotModel = emptyModel
-    \= highPerf
-    \= highPerf
-    \= lowCost
-    \= minChange
-    \= maxHardware
-    \= highThrough
-    \= minMsgEx
-    \= minSwitch
-    \= detDataLoc
-    \= dataSCP
-    \= dataNewSNode
-    \= installSNode
-    \= serviceCentralSwitch
-    \= detSLoc
-    \= serviceInSCP
-    \= (minChange    ==> lowCost   | MAKES)
-    \= (maxHardware  ~~> minChange | MAKES)
-    \= (dataNewSNode ~~> minChange | MAKES)
-    \= (dataSCP      ~~> minChange | MAKES)
-    \= (minMsgEx     ==> highThrough | MAKES)
-    \= (minSwitch    ==> highThrough | MAKES)
-    \= (serviceInSCP ==> minMsgEx | SOMENEG)
-    \= (serviceInSCP         ~~> minSwitch | MAKES)
-    \= (serviceCentralSwitch ~~> minSwitch | BREAK)
-    \= (serviceCentralSwitch ==> minMsgEx  | MAKES)
-    \= (detSLoc      &= [serviceCentralSwitch, serviceInSCP])
-    \= (detSLoc      |= [dataNewSNode, dataSCP])
-    \= (dataNewSNode |= [installSNode])
-    \= (highPerf     |= [maxHardware, highThrough])
+   \= highPerf
+   \= lowCost
+   \= minChange
+   \= maxHardware
+   \= highThrough
+   \= minMsgEx
+   \= minSwitch
+   \= detDataLoc
+   \= dataSCP
+   \= dataNewSNode
+   \= installSNode
+   \= serviceCentralSwitch
+   \= detSLoc
+   \= serviceInSCP
+   \= (minChange    ==> lowCost   | MAKES                  )
+   \= (maxHardware  ~~> minChange | MAKES                  )
+   \= (dataNewSNode ~~> minChange | MAKES                  )
+   \= (dataSCP      ~~> minChange | MAKES                  )
+   \= (minMsgEx     ==> highThrough | MAKES                )
+   \= (minSwitch    ==> highThrough | MAKES                )
+   \= (serviceInSCP ==> minMsgEx | SOMENEG                 )
+   \= (serviceInSCP         ~~> minSwitch | MAKES          )
+   \= (serviceCentralSwitch ~~> minSwitch | BREAK          )
+   \= (serviceCentralSwitch ==> minMsgEx  | MAKES          )
+   \= (detSLoc      &= [serviceCentralSwitch, serviceInSCP])
+   \= (detSLoc      |= [dataNewSNode, dataSCP]             )
+   \= (dataNewSNode |= [installSNode]                      )
+   \= (highPerf     |= [maxHardware, highThrough]          )
 
 myFirstStrategy : Strategy
 myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
 
-ppRes : Show a => List (a) -> IO ()
-ppRes Nil     = printLn ""
-ppRes (x::xs) = do
-  printLn x
-  ppRes xs
 
-ppGraph : GModel -> IO ()
-ppGraph g = do
-  ppRes (vertices g)
-  ppRes (edges g)
+-- runTest : IO ()
+-- runTest = do
+--   printLn "AA"
 
-runTest : IO ()
-runTest = do
-  printLn "AA"
+--   case validInit amyotModel of
+--     False => do
+--       putStrLn "Wrongly init'd model."
+--       ppGraph amyotModel
+-- --      printLn amyotModel'
 
-  case validInit amyotModel of
-    False => do
-      putStrLn "Wrongly init'd model."
-      ppGraph amyotModel
---      printLn amyotModel'
-
-    True  => do
-      ppGraph amyotModel
-      let (s,o) = deployStrategy amyotModel myFirstStrategy
-      ppRes $ evalModel s
+--     True  => do
+--       ppGraph amyotModel
+--       let (s,o) = deployStrategy amyotModel myFirstStrategy
+--       ppRes $ evalModel s

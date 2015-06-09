@@ -3,89 +3,173 @@ module GRL.Common
 
 import public Decidable.Equality
 
-data Decomposition  = ANDTy | XORTy | IORTy | NOTTy
-
 data Importance = HIGH | MEDIUM | LOW | NO
 
 namespace Qualiative
-  data Satisfaction : Type where
+  data SValue : Type where
     ||| The intentional element or indicator is sufficiently dissatisfied.
-    DENIED : Satisfaction
+    DENIED : SValue
     ||| The intentional element is partially dissatisfied.
-    WEAKDEN : Satisfaction
+    WEAKDEN : SValue
     ||| The intentional element or indicator is partially satisfied.
-    WEAKSATIS : Satisfaction
+    WEAKSATIS : SValue
     ||| The intentional element is sufficiently satisfied.
-    SATISFIED   : Satisfaction
+    SATISFIED : SValue
     ||| There are arguments strongly in favour and strongly against
     ||| the satisfaction of the intentional element.
-    CONFLICT : Satisfaction
+    CONFLICT : SValue
     ||| The satisfaction level of the intentional element is unknown.
-    UNKNOWN : Satisfaction
+    UNKNOWN : SValue
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
-    NONE : Satisfaction
-    UNDECIDED : Satisfaction
+    NONE : SValue
+    UNDECIDED : SValue
 
 namespace Contributions
-  data ContributionTy : Type where
+  data CValue : Type where
     ||| The contribution is positive and sufficient.
-    MAKES : ContributionTy
+    MAKES : CValue
     ||| The contribution is positive but not sufficient.
-    HELPS : ContributionTy
+    HELPS : CValue
     ||| The contribution is positive, but the extent of the contribution is unknown.
-    SOMEPOS : ContributionTy
+    SOMEPOS : CValue
     ||| There is some contribution, but the extent and the degree (positive or negative) of the contribution is unknown.
-    UNKNOWN : ContributionTy
+    UNKNOWN : CValue
     ||| The contribution is negative, but the extent of the contribution is unknown.
-    SOMENEG : ContributionTy
+    SOMENEG : CValue
     ||| The contribution of the contributing element is negative and sufficient.
-    BREAK : ContributionTy
+    BREAK : CValue
     ||| The contribution is negative but not sufficient.
-    HURTS : ContributionTy
-
+    HURTS : CValue
 
 -- ------------------------------------------------------------------- [ Types ]
 
-data GRLElementTy = GOALTy | SOFTTy | TASKTy | RESOURCETy
+-- data GElemTy = GOALty | SOFTty | TASKty | RESty
+-- data GIntentTy  = IMPACTty | AFFECTSty
+-- data GStructTy  = ANDty | XORty | IORty | NOTty
 
-data GRLIntentTy  = CONTRIBUTION | CORRELATION
+data GTy = ELEM | INTENT | STRUCT
 
-data GrlIRTy = ELEM
-               | INTENT
-               | STRUCT
+data GElemTy : Type where
+    ||| A (hard) Goal is a condition or state of affairs in the
+    ||| world that the stakeholders would like to achieve.
+    |||
+    ||| How the goal is to be achieved is not specified, allowing
+    ||| alternatives to be considered. A goal can be either a business
+    ||| goal or a system goal. A business goal expresses goals regarding
+    ||| the business or state of the business affairs the individual or
+    ||| organization wishes to achieve. A system goal expresses goals
+    ||| the target system should achieve and generally describes the
+    ||| functional requirements of the target information system.
+    |||
+    GOALty : GElemTy
+
+    ||| Softgoals are often used to describe qualities and
+    ||| non-functional aspects such as security, robustness,
+    ||| performance, usability, etc.
+    |||
+    ||| A Softgoal is a condition or state of affairs in the world that
+    ||| the actor would like to achieve, but unlike in the concept of
+    ||| (hard) goal, there are no clear-cut criteria for whether the
+    ||| condition is achieved, and it is up to subjective judgement and
+    ||| interpretation of the modeller to judge whether a particular
+    ||| state of affairs in fact achieves sufficiently the stated
+    ||| softgoal.
+    |||
+    SOFTty : GElemTy
+
+    ||| a Task specifies a particular way of doing something.
+    |||
+    ||| When a task is part of the decomposition of a (higher-level)
+    ||| task, this restricts the higher-level task to that particular
+    ||| course of action. Tasks can also be seen as the solutions in the
+    ||| target system, which will address (or operationalize) goals and
+    ||| softgoals. These solutions provide operations, processes, data
+    ||| representations, structuring, constraints and agents in the
+    ||| target system to meet the needs stated in the goals and
+    ||| softgoals.
+    |||
+    TASKty : GElemTy
+
+    ||| A Resource is a physical or informational entity, for which the
+    ||| main concern is whether it is available.
+    |||
+    RESty : GElemTy
+
+data GIntentTy : Type where
+  ||| A Contribution defines the level of impact that the
+  ||| satisfaction of a source intentional element or indicator has on
+  ||| the satisfaction of a destination intentional element.
+  IMPACTSty : GIntentTy
+  |||  A correlation link emphasizes side-effects between intentional
+  ||| elements in different categories or actor definitions.
+  AFFECTSty : GIntentTy
+
+data GStructTy : Type where
+  ||| The AND Decomposition link enables the hierarchical
+  ||| decomposition of a target intentional element by a source
+  ||| element. A target intentional element can be decomposed into
+  ||| many source intentional elements using as many decomposition
+  ||| links. All of the source intentional elements are necessary for
+  ||| the target intentional element to be satisfied.
+  |||
+  ANDty : GStructTy
+  ||| The XOR Decomposition link enables the description of
+  ||| alternative means of satisfying a target intentional element:
+  ||| Mutually exclusive. The satisfaction of one and only one of the
+  ||| sub-intentional elements is necessary to achieve the target.
+  |||
+  XORty : GStructTy
+  ||| The IOR Decomposition link enables the description of
+  ||| alternative means of satisfying a target intentional element:
+  ||| Not mutually exclusive. The satisfaction of one of the
+  ||| sub-intentional elements is sufficient to achieve the target,
+  ||| but many sub-intentional elements can be satisfied.
+  |||
+  IORty : GStructTy
 
 -- -------------------------------------------------------------------- [ Show ]
 
-instance Show GRLElementTy where
-  show GOALTy     = "GOALTy"
-  show SOFTTy     = "SOFTTy"
-  show TASKTy     = "TASKTy"
-  show RESOURCETy = "RESOURCETy"
+instance Show GElemTy where
+  show GOALty = "GOALTy"
+  show SOFTty = "SOFTTy"
+  show TASKty = "TASKTy"
+  show RESty  = "RESOURCETy"
 
-instance Show GRLIntentTy where
-  show CONTRIBUTION = "CONTRIBUTION"
-  show CORRELATION  = "CORRELATION"
+instance Show GIntentTy where
+  show IMPACTSty = "CONTRIBUTION"
+  show AFFECTSty = "CORRELATION"
 
-instance Show GrlIRTy where
+instance Show GStructTy where
+  show ANDty  = "ANDTy"
+  show XORty  = "XORTy"
+  show IORty  = "IORTy"
+
+instance Show GTy where
   show ELEM   = "ELEM"
   show INTENT = "INTENT"
   show STRUCT = "STRUCT"
 
 -- ---------------------------------------------------------------------- [ Eq ]
 
-instance Eq GRLElementTy where
-  (==) GOALTy     GOALTy     = True
-  (==) SOFTTy     SOFTTy     = True
-  (==) TASKTy     TASKTy     = True
-  (==) RESOURCETy RESOURCETy = True
-  (==) _        _        = False
+instance Eq GElemTy where
+  (==) GOALty GOALty = True
+  (==) SOFTty SOFTty = True
+  (==) TASKty TASKty = True
+  (==) RESty  RESty  = True
+  (==) _        _    = False
 
-instance Eq GRLIntentTy where
-  (==) CONTRIBUTION CONTRIBUTION = True
-  (==) CORRELATION  CORRELATION  = True
-  (==) _            _            = False
+instance Eq GIntentTy where
+  (==) IMPACTSty IMPACTSty = True
+  (==) AFFECTSty AFFECTSty = True
+  (==) _         _         = False
 
-instance Eq GrlIRTy where
+instance Eq GStructTy where
+  (==) ANDty ANDty = True
+  (==) XORty XORty = True
+  (==) IORty IORty = True
+  (==) _     _     = False
+
+instance Eq GTy where
   (==) ELEM   ELEM   = True
   (==) INTENT INTENT = True
   (==) STRUCT STRUCT = True
@@ -93,13 +177,7 @@ instance Eq GrlIRTy where
 
 -- -------------------------------------------------------------------- [ Show ]
 
-instance Show Decomposition where
-  show ANDTy  = "ANDTy"
-  show XORTy  = "XORTy"
-  show IORTy  = "IORTy"
-  show NOTTy  = "NOTTy"
-
-instance Show Satisfaction where
+instance Show SValue where
   show SATISFIED = "SATISFIED"
   show WEAKSATIS = "WEAKSATIS"
   show WEAKDEN   = "WEAKDEN"
@@ -109,24 +187,7 @@ instance Show Satisfaction where
   show NONE      = "NONE"
   show UNDECIDED = "UNDECIDED"
 
-instance Show ContributionTy where
-  show MAKES   = "MAKES"
-  show HELPS   = "HELPS"
-  show SOMEPOS = "SOMEPOS"
-  show UNKNOWN = "UNKNOWN"
-  show SOMENEG = "SOMENEG"
-  show HURTS   = "HURTS"
-  show BREAK   = "BREAKS"
-
--- ---------------------------------------------------------------------- [ Eq ]
-instance Eq Decomposition where
-  (==) ANDTy ANDTy = True
-  (==) XORTy XORTy = True
-  (==) IORTy IORTy = True
-  (==) NOTTy NOTTy = True
-  (==) _   _   = False
-
-instance Eq Satisfaction where
+instance Eq SValue where
   (==) SATISFIED SATISFIED = True
   (==) WEAKSATIS WEAKSATIS = True
   (==) WEAKDEN   WEAKDEN   = True
@@ -137,7 +198,16 @@ instance Eq Satisfaction where
   (==) UNDECIDED UNDECIDED = True
   (==) _         _         = False
 
-instance Eq ContributionTy where
+instance Show CValue where
+  show MAKES   = "MAKES"
+  show HELPS   = "HELPS"
+  show SOMEPOS = "SOMEPOS"
+  show UNKNOWN = "UNKNOWN"
+  show SOMENEG = "SOMENEG"
+  show HURTS   = "HURTS"
+  show BREAK   = "BREAKS"
+
+instance Eq CValue where
   (==) MAKES   MAKES   = True
   (==) HELPS   HELPS   = True
   (==) SOMEPOS SOMEPOS = True
@@ -149,7 +219,7 @@ instance Eq ContributionTy where
 
 
 -- -------------------------------------------------------------------- [ Read ]
-readSatisfaction : String -> Satisfaction
+readSatisfaction : String -> SValue
 readSatisfaction "satisfied" = SATISFIED
 readSatisfaction "weaksatis" = WEAKSATIS
 readSatisfaction "weakden"   = WEAKDEN
@@ -157,7 +227,7 @@ readSatisfaction "denied"    = DENIED
 readSatisfaction "unknown"   = UNKNOWN
 readSatisfaction _           = UNKNOWN
 
-readContribValue : String -> ContributionTy
+readContribValue : String -> CValue
 readContribValue "makes"         = MAKES
 readContribValue "helps"         = HELPS
 readContribValue "some-positive" = SOMEPOS
@@ -169,18 +239,18 @@ readContribValue _               = UNKNOWN
 
 
 -- ------------------------------------------------------------------- [ DecEq ]
-instance DecEq Satisfaction where
-  decEq x y = if x == y then Yes primEq else No primNotEq
-    where
-      primEq : x = y
-      primEq = believe_me (Refl {x})
-      postulate primNotEq : x = y -> Void
+-- instance DecEq Satisfaction where
+--   decEq x y = if x == y then Yes primEq else No primNotEq
+--     where
+--       primEq : x = y
+--       primEq = believe_me (Refl {x})
+--       postulate primNotEq : x = y -> Void
 
 
-instance DecEq ContributionTy where
-  decEq x y = if x == y then Yes primEq else No primNotEq
-    where
-      primEq : x = y
-      primEq = believe_me (Refl {x})
-      postulate primNotEq : x = y -> Void
+-- instance DecEq ContributionTy where
+--   decEq x y = if x == y then Yes primEq else No primNotEq
+--     where
+--       primEq : x = y
+--       primEq = believe_me (Refl {x})
+--       postulate primNotEq : x = y -> Void
 -- --------------------------------------------------------------------- [ EOF ]

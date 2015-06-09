@@ -1,71 +1,60 @@
-||| A veersion of the GRL with added semantics.
-module GRL.Lang.Default
+||| The original unabulterated version of the GRL.
+module GRL.Lang.GLang
 
 import public GRL.Common
 import public GRL.IR
 import public GRL.Model
 import public GRL.Builder
+import public GRL.Pretty
 
-data ValidImpacts : GRLElementTy -> GRLElementTy -> Type where
-  GIS : ValidImpacts GOALTy SOFTTy
-  SIG : ValidImpacts SOFTTy GOALTy
-  TIG : ValidImpacts TASKTy GOALTy
-  TIS : ValidImpacts TASKTy SOFTTy
-  RIG : ValidImpacts RESOURCETy GOALTy
-  RIS : ValidImpacts RESOURCETy GOALTy
+%access public
 
-data ValidDecomp : GRLElementTy -> GRLElementTy -> Type where
-  GHS : ValidDecomp GOALTy SOFTTy
-  THT : ValidDecomp TASKTy TASKTy
+||| The original unadulterated version of the GRL.
+data GLang : GTy -> Type where
+    MkGoal : String -> Maybe SValue -> GLang ELEM
+    MkSoft : String -> Maybe SValue -> GLang ELEM
+    MkTask : String -> Maybe SValue -> GLang ELEM
+    MkRes  : String -> Maybe SValue -> GLang ELEM
 
-data GLangTy = E GRLElementTy | L | S
+    MkImpacts : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
+    MkEffects : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
 
-data GLang : GLangTy -> GrlIRTy -> Type where
-  MkGoal : String -> Maybe Satisfaction -> GLang (E GOALTy) ELEM
-  MkSoft : String -> Maybe Satisfaction -> GLang (E SOFTTy) ELEM
-  MkTask : String -> Maybe Satisfaction -> GLang (E TASKTy) ELEM
-  MkRes  : String -> Maybe Satisfaction -> GLang (E RESOURCETy) ELEM
+    MkAnd : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+    MkXor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+    MkIor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
 
-  MkImpact : ContributionTy
-          -> GLang (E xty) ELEM
-          -> GLang (E yty) ELEM
-          -> {auto prf : ValidImpacts xty yty}
-          -> GLang L INTENT
-
-  MkAnd : GLang (E xty) ELEM
-       -> GLang (E yty) ELEM
-       -> {auto prf : ValidDecomp xty yty}
-       -> GLang S STRUCT
-
-syntax [a] "~~>" [b] "|" [c] = MkImpact c a b
-syntax [a] "&=" [b]          = MkAnd a b
 
 GOAL : Type
-GOAL = GLang (E GOALTy) ELEM
+GOAL = GLang ELEM
 
 SOFT : Type
-SOFT = GLang (E SOFTTy) ELEM
+SOFT = GLang ELEM
 
 TASK : Type
-TASK = GLang (E TASKTy) ELEM
+TASK = GLang ELEM
 
 RES : Type
-RES = GLang (E RESOURCETy) ELEM
+RES = GLang ELEM
 
-IMPACT : Type
-IMPACT = GLang L INTENT
 
-AND : Type
-AND = GLang S STRUCT
+syntax [a] "==>" [b] "|" [c] = MkImpacts c a b
+syntax [a] "~~>" [b] "|" [c] = MkEffects c a b
+syntax [a] "&=" [b] = MkAnd a b
+syntax [a] "X=" [b] = MkXor a b
+syntax [a] "|=" [b] = MkIor a b
 
-instance GRL (\x => GLang ty x) where
-    mkGoal (MkGoal s e) = Element GOALTy s e
-    mkGoal (MkSoft s e) = Element SOFTTy s e
-    mkGoal (MkTask s e) = Element TASKTy s e
-    mkGoal (MkRes  s e) = Element RESOURCETy s e
 
-    mkIntent (MkImpact c a b) = IntentLink CONTRIBUTION c (mkGoal a) (mkGoal b)
+instance GRL GLang where
+    mkGoal (MkGoal s e) = Elem GOALty s e
+    mkGoal (MkSoft s e) = Elem SOFTty s e
+    mkGoal (MkTask s e) = Elem TASKty s e
+    mkGoal (MkRes  s e) = Elem RESty  s e
 
-    mkStruct (MkAnd a b) = StructureLink ANDTy (mkGoal a) [(mkGoal b)]
+    mkIntent (MkImpacts c a b) = ILink IMPACTSty c (mkGoal a) (mkGoal b)
+    mkIntent (MkEffects c a b) = ILink AFFECTSty c (mkGoal a) (mkGoal b)
+
+    mkStruct (MkAnd a bs) = SLink ANDty (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkXor a bs) = SLink XORty (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkIor a bs) = SLink IORty (mkGoal a) (map (mkGoal) bs)
 
 -- --------------------------------------------------------------------- [ EOF ]

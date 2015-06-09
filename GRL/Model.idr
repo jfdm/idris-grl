@@ -12,10 +12,10 @@ import Debug.Trace
 
 record GoalNode where
   constructor GNode
-  nTy : GRLElementTy
-  gTitle : String
-  sValue : Maybe Satisfaction
-  dTy : Decomposition
+  getNodeTy    : GElemTy
+  getNodeTitle : String
+  getSValue    : Maybe SValue
+  getStructTy  : Maybe GStructTy
 
 instance Show GoalNode where
   show (GNode ty n s d) = with List unwords ["[GNode", show ty, n, show s, show d, "]"]
@@ -28,8 +28,8 @@ instance Eq GoalNode where
       xd  == yd
 
 data GoalEdge  : Type where
-  Contribution : ContributionTy -> GoalEdge
-  Correlation  : ContributionTy -> GoalEdge
+  Contribution : CValue -> GoalEdge
+  Correlation  : CValue -> GoalEdge
   Decomp       : GoalEdge
 
 instance Show GoalEdge where
@@ -59,13 +59,13 @@ isCorrelEdge (Just (Correlation y)) = True
 isCorrelEdge _                      = False
 
 getGoalByTitle : String -> GModel -> Maybe GoalNode
-getGoalByTitle t g = getValueUsing (\x => gTitle x == t) g
+getGoalByTitle t g = getValueUsing (\x => getNodeTitle x == t) g
 
 getGoalByTitle' : GoalNode -> GModel -> Maybe GoalNode
-getGoalByTitle' t g = getGoalByTitle (gTitle t) g
+getGoalByTitle' t g = getGoalByTitle (getNodeTitle t) g
 
 hasGoal : String -> GModel -> Bool
-hasGoal t m = hasValueUsing (\(x,_) => gTitle x == t) (graph m)
+hasGoal t m = hasValueUsing (\(x,_) => getNodeTitle x == t) (graph m)
 
 
 updateGoalNode : (sfunc : GoalNode -> Bool)
