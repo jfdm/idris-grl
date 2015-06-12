@@ -5,6 +5,7 @@ import public Decidable.Equality
 
 data Importance = HIGH | MEDIUM | LOW | NO
 
+-- data SValue = DENIED | WEAKDEN | WEAKSATIS | SATISFIED | CONFLICT | UNKNOWN | NONE | UNDECIDED
 namespace Qualiative
   data SValue : Type where
     ||| The intentional element or indicator is sufficiently dissatisfied.
@@ -23,6 +24,9 @@ namespace Qualiative
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
     NONE : SValue
     UNDECIDED : SValue
+
+
+--  data CValue = MAKES | HELPS | SOMEPOS | UNKNOWN | SOMENEG | BREAK | HURTS
 
 namespace Contributions
   data CValue : Type where

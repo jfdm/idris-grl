@@ -23,6 +23,12 @@ data GLang : GTy -> Type where
     MkXor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
     MkIor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
 
+getElemTitle : GLang ELEM -> String
+getElemTitle (MkGoal t _) = t
+getElemTitle (MkSoft t _) = t
+getElemTitle (MkTask t _) = t
+getElemTitle (MkRes  t _) = t
+
 
 GOAL : Type
 GOAL = GLang ELEM

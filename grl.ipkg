@@ -21,6 +21,18 @@ modules = GRL.Common
 
         , Test.Amyot
         , Test.GLang
+        , Test.DSML.TODO.ReSkin
+        , Test.DSML.TODO.Abstract
+        , Test.DSML.Paper.Abstract
+        , Test.DSML.Paper.ReSkin
+        , Test.DSML.Paper.GLang
 
 tests = Test.Amyot.runTest
       , Test.GLang.runTest
+
+--      , Test.DSML.TODO.Abstract.runTest
+      , Test.DSML.TODO.ReSkin.runTest
+
+      , Test.DSML.Paper.ReSkin.runTest
+      , Test.DSML.Paper.GLang.runTest
+--      , Test.DSML.TODO.Paper.runTest

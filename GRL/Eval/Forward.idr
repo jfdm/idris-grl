@@ -11,6 +11,7 @@ import GRL.Common
 import GRL.Model
 
 import GRL.Eval.Qualitative
+import GRL.Eval.Strategy
 
 %access public
 
@@ -138,10 +139,18 @@ validInit g = with Effects runPureInit
         res <- ('init :- get)
         pure res)
 
-evalModel : GModel -> List (GoalNode)
-evalModel g = with Effects runPureInit
-    [ 'next := pushSThings (verticesID g) mkStack
-    , 'seen := List.Nil] $ do
+private
+runEval : GModel -> List (GoalNode)
+runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
+                                     , 'seen := List.Nil] $ do
         newG <- doEval g
         pure $ (vertices newG)
+
+||| Evaluate a model with or without a given strategy.
+|||
+||| This function will deploy the strategy if it is given. Using this
+||| code with a predeployed strategy may give unexpected results.
+evalModel : GModel -> Maybe Strategy -> List (GoalNode)
+evalModel g Nothing  = runEval g
+evalModel g (Just s) = runEval $ fst (deployStrategy g s)
 -- --------------------------------------------------------------------- [ EOF ]

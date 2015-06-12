@@ -50,6 +50,7 @@ detSLoc = MkGoal "Determine Service Location" Nothing
 serviceInSCP : TASK
 serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
 
+-- ------------------------------------------------------------------- [ Model ]
 amyotModel : GModel
 amyotModel = emptyModel
    \= highPerf
@@ -84,9 +85,11 @@ amyotModel = emptyModel
 myFirstStrategy : Strategy
 myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
 
+-- -------------------------------------------------------------------- [ Test ]
+runTest : IO ()
+runTest = do
+  putStrLn $ prettyModel amyotModel
 
--- runTest : IO ()
--- runTest = do
 --   printLn "AA"
 
 --   case validInit amyotModel of
@@ -99,3 +102,5 @@ myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
 --       ppGraph amyotModel
 --       let (s,o) = deployStrategy amyotModel myFirstStrategy
 --       ppRes $ evalModel s
+
+-- --------------------------------------------------------------------- [ EOF ]

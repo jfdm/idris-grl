@@ -2,6 +2,7 @@
 module GRL.Builder
 
 import public Data.AVL.Dependent.Graph
+import public Data.Sigma.DList
 import public Data.List
 
 import GRL.Model
@@ -109,6 +110,15 @@ insert {ty=STRUCT} decl model =
     if checkStructBool (mkStruct decl) model
       then (insertStruct decl model IsValidInsert)
       else error "Bad Structure"
+
+insertMany : GRL expr => {ty : GTy}
+                      -> List (expr ty)
+                      -> GModel
+                      -> GModel
+insertMany ds model = foldl (doInsert) model ds
+  where
+    doInsert : GRL expr => {ty : GTy} -> GModel -> (expr ty) -> GModel
+    doInsert model decl = insert decl model
 
 
 infixl 4 \=
