@@ -65,7 +65,7 @@ getGoalByTitle' : GoalNode -> GModel -> Maybe GoalNode
 getGoalByTitle' t g = getGoalByTitle (getNodeTitle t) g
 
 hasGoal : String -> GModel -> Bool
-hasGoal t m = hasValueUsing (\(x,_) => getNodeTitle x == t) (graph m)
+hasGoal t m = isJust $ getValueUsing (\x => getNodeTitle x == t) m
 
 
 updateGoalNode : (sfunc : GoalNode -> Bool)
