@@ -184,3 +184,4 @@ combineContribs NONE      DENIED    = DENIED
 combineContribs NONE      SATISFIED = SATISFIED
 combineContribs NONE      CONFLICT  = CONFLICT
 combineContribs NONE      NONE      = NONE
+combineContribs _         _         = NONE

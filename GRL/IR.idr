@@ -17,26 +17,54 @@ data GExpr : GTy -> Type where
 getTitle : GExpr ELEM -> String
 getTitle (Elem ty t s) = t
 
-instance Show (GExpr ty) where
-  show (Elem ty t ms) = with List unwords ["[Element", show ty, show t, show ms,"]"]
-  show (ILink ty cty a b) = with List unwords ["[Intent", show ty, show cty, show a, show b, "]"]
-  show (SLink ty x ys) = with List unwords ["[Structure", show ty, show x, show ys, "]"]
+-- -------------------------------------------------------------------- [ Show ]
 
-partial
-eqGExpr : GExpr a -> GExpr b -> Bool
-eqGExpr (Elem xty x sx) (Elem yty y sy) =
-    xty == yty && x == y && sx == sy
-eqGExpr (ILink xty xc xa xb) (ILink yty yc ya yb) =
-    xty == yty && xc == yc && eqGExpr xa ya && eqGExpr xb yb
-eqGExpr (SLink xty xa (xbs)) (SLink yty ya (ybs)) =
-      xty == yty && eqGExpr xa ya && eqGExprList xbs ybs
+shGExprE : GExpr ELEM -> String
+shGExprE (Elem ty t ms) = with List unwords ["[Element", show ty, show t, show ms,"]"]
+
+shGExprI : GExpr INTENT -> String
+shGExprI (ILink ty cty a b) = with List unwords ["[Intent", show ty, show cty, shGExprE a, shGExprE b, "]"]
+
+shGExprS : GExpr STRUCT -> String
+shGExprS (SLink ty x ys) = with List unwords ["[Structure", show ty, shGExprE x, show' ys, "]"]
+  where
+    show' : List (GExpr ELEM) -> String
+    show' ys = "[" ++ (unwords $ intersperse "," (map shGExprE ys)) ++ "]"
+
+instance Show (GExpr ty) where
+  show {ty=ELEM}   x = shGExprE x
+  show {ty=INTENT} x = shGExprI x
+  show {ty=STRUCT} x = shGExprS x
+
+-- ------------------------------------------------------------- [ Eq Instance ]
+
+eqGExprE : GExpr ELEM -> GExpr ELEM -> Bool
+eqGExprE (Elem xty x sx) (Elem yty y sy) = xty == yty && x == y && sx == sy
+
+
+eqGExprI : GExpr INTENT -> GExpr INTENT -> Bool
+eqGExprI (ILink xty xc xa xb) (ILink yty yc ya yb) = xty == yty && xc == yc && eqGExprE xa ya && eqGExprE xb yb
+
+eqGExprS : GExpr STRUCT -> GExpr STRUCT -> Bool
+eqGExprS (SLink xty xa (xbs)) (SLink yty ya (ybs)) =
+      xty == yty && eqGExprE xa ya && eqGExprList xbs ybs
     where
       eqGExprList : List (GExpr ELEM) -> List (GExpr ELEM) -> Bool
       eqGExprList Nil Nil = True
-      eqGExprList Nil ys  = False
-      eqGExprList (x::xs) (y::ys) = eqGExpr x y && assert_smaller (eqGExprList xs ys) (eqGExprList xs ys)
-eqGExpr _ _ = False
+      eqGExprList (x::xs) (y::ys) =
+        if eqGExprE x y
+          then (eqGExprList (assert_smaller (x::xs) xs) (assert_smaller (y::ys) ys))
+          else False
+      eqGExprList _       _       = False
 
+eqGExpr : GExpr a -> GExpr b -> Bool
+eqGExpr {a=ELEM}   {b=ELEM}   x y = eqGExprE x y
+eqGExpr {a=INTENT} {b=INTENT} x y = eqGExprI x y
+eqGExpr {a=STRUCT} {b=STRUCT} x y = eqGExprS x y
+eqGExpr _          _          = False
+
+instance Eq (GExpr ty) where
+  (==) = eqGExpr
 
 ||| The GRL Class for allowing DSL designers to instruct the Goal
 ||| Graph builder how to convert expressions in the DSL to the IR.

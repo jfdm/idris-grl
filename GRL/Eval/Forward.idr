@@ -77,6 +77,7 @@ MInitEffs : List EFFECT
 MInitEffs = [ 'next ::: STATE (Stack NodeID)
             , 'seen ::: STATE (List NodeID)
             , 'init ::: STATE Bool]
+
 private
 doinitValid : GModel -> Eff () MInitEffs
 doinitValid g = do

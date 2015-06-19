@@ -92,6 +92,7 @@ wildMk {ty=ELEM}   decl = mkGoal decl
 wildMk {ty=INTENT} decl = mkIntent decl
 wildMk {ty=STRUCT} decl = mkStruct decl
 
+partial
 insert : GRL expr => {ty : GTy}
                   -> expr ty
                   -> GModel
@@ -111,18 +112,17 @@ insert {ty=STRUCT} decl model =
       then (insertStruct decl model IsValidInsert)
       else error "Bad Structure"
 
+partial
 insertMany : GRL expr => {ty : GTy}
                       -> List (expr ty)
                       -> GModel
                       -> GModel
-insertMany ds model = foldl (doInsert) model ds
-  where
-    doInsert : GRL expr => {ty : GTy} -> GModel -> (expr ty) -> GModel
-    doInsert model decl = insert decl model
+insertMany ds model = foldl (flip $ insert) model ds
 
 
 infixl 4 \=
 
+partial
 (\=) : GRL expr => {ty : GTy}
                 -> (m : GModel)
                 -> (d : expr ty)
@@ -132,7 +132,7 @@ infixl 4 \=
 -- ------------------------------------------------------------- [ Applicative ]
 -- This allows use of idiom brackets.
 
-
+partial
 (<*>) : GRL expr => {ty : GTy}
                   -> GModel
                   -> (d : expr ty)
@@ -160,6 +160,7 @@ convDecl : GRL expr => {ty : GTy}
                     -> GExpr
 convDecl = Decl
 
+partial
 mkModel : GModel -> GExpr -> GModel
 mkModel m (Decl e)  = m \= e
 mkModel m (Seq a b) = mkModel (mkModel m a) b
