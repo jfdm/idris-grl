@@ -117,13 +117,11 @@ TASK = GLang ELEM
 RES : Type
 RES = GLang ELEM
 
-
 syntax [a] "==>" [b] "|" [c] = MkImpacts c a b
 syntax [a] "~~>" [b] "|" [c] = MkEffects c a b
 syntax [a] "&=" [b] = MkAnd a b
 syntax [a] "X=" [b] = MkXor a b
 syntax [a] "|=" [b] = MkIor a b
-
 
 instance GRL GLang where
     mkGoal (MkGoal s e) = Elem GOALty s e
