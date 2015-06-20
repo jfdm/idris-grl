@@ -38,13 +38,15 @@ instance Show (GExpr ty) where
 
 -- ------------------------------------------------------------- [ Eq Instance ]
 
+private
 eqGExprE : GExpr ELEM -> GExpr ELEM -> Bool
 eqGExprE (Elem xty x sx) (Elem yty y sy) = xty == yty && x == y && sx == sy
 
-
+private
 eqGExprI : GExpr INTENT -> GExpr INTENT -> Bool
 eqGExprI (ILink xty xc xa xb) (ILink yty yc ya yb) = xty == yty && xc == yc && eqGExprE xa ya && eqGExprE xb yb
 
+private
 eqGExprS : GExpr STRUCT -> GExpr STRUCT -> Bool
 eqGExprS (SLink xty xa (xbs)) (SLink yty ya (ybs)) =
       xty == yty && eqGExprE xa ya && eqGExprList xbs ybs

@@ -15,7 +15,7 @@ import GRL.Property.Structure
 import Debug.Error
 
 %access public
-
+%default total
 -- ---------------------------------------------------- [ Allowed Constructors ]
 
 ||| Create an empty model
@@ -92,9 +92,7 @@ wildMk {ty=ELEM}   decl = mkGoal decl
 wildMk {ty=INTENT} decl = mkIntent decl
 wildMk {ty=STRUCT} decl = mkStruct decl
 
-partial
-insert : GRL expr => {ty : GTy}
-                  -> expr ty
+insert : GRL expr => expr ty
                   -> GModel
                   -> GModel
 insert {ty=ELEM} decl model =
@@ -112,9 +110,7 @@ insert {ty=STRUCT} decl model =
       then (insertStruct decl model IsValidInsert)
       else error "Bad Structure"
 
-partial
-insertMany : GRL expr => {ty : GTy}
-                      -> List (expr ty)
+insertMany : GRL expr => List (expr ty)
                       -> GModel
                       -> GModel
 insertMany ds model = foldl (flip $ insert) model ds
@@ -122,13 +118,12 @@ insertMany ds model = foldl (flip $ insert) model ds
 
 infixl 4 \=
 
-partial
-(\=) : GRL expr => {ty : GTy}
-                -> (m : GModel)
+(\=) : GRL expr => (m : GModel)
                 -> (d : expr ty)
                 -> GModel
 (\=) model decl = insert decl model
 
+{-
 -- ------------------------------------------------------------- [ Applicative ]
 -- This allows use of idiom brackets.
 
@@ -164,6 +159,5 @@ partial
 mkModel : GModel -> GExpr -> GModel
 mkModel m (Decl e)  = m \= e
 mkModel m (Seq a b) = mkModel (mkModel m a) b
-
-
+-}
 -- --------------------------------------------------------------------- [ EOF ]

@@ -43,7 +43,7 @@ getElemTitle (MkRes  t _) = t
 --     (==) _            _            = False
 
 -- mutual
---   total
+--   private
 --   eqGLang : GLang z -> GLang w -> Bool
 --   eqGLang (MkGoal x s) (MkGoal y t)  = x == y && s == t
 --   eqGLang (MkSoft x s) (MkSoft y t)  = x == y && s == t
@@ -56,17 +56,16 @@ getElemTitle (MkRes  t _) = t
 --   eqGLang (MkIor a as) (MkIor b bs) = eqGLang a b && eqGLangList as bs
 --   eqGLang _            _            = False
 
---   total
+--   private
 --   eqGLangList : List (GLang a) -> List (GLang b) -> Bool
 --   eqGLangList Nil     Nil     = True
 --   eqGLangList (x::xs) (y::ys) =
 --       if eqGLang x y
---         then eqGLangList (assert_smaller (x::xs) xs) (assert_smaller (y::ys) ys)
+--         then eqGLangList xs ys
 --         else False
 --   eqGLangList _       _       = False
 
-
-
+private
 eqGLangE : GLang ELEM -> GLang ELEM -> Bool
 eqGLangE (MkGoal x s) (MkGoal y t)  = x == y && s == t
 eqGLangE (MkSoft x s) (MkSoft y t)  = x == y && s == t
@@ -74,32 +73,37 @@ eqGLangE (MkTask x s) (MkTask y t)  = x == y && s == t
 eqGLangE (MkRes  x s) (MkRes  y t)  = x == y && s == t
 eqGLangE _            _             = False
 
+private
 eqGLangI : GLang INTENT -> GLang INTENT -> Bool
 eqGLangI (MkImpacts c a b) (MkImpacts d x y) = c == d && eqGLangE a x && eqGLangE b y
 eqGLangI (MkEffects c a b) (MkEffects d x y) = c == d && eqGLangE a x && eqGLangE b y
 eqGLangI _                 _                 = False
 
 mutual
+  private
   eqGLangS : GLang STRUCT -> GLang STRUCT -> Bool
   eqGLangS (MkAnd a as) (MkAnd b bs) = eqGLangE a b && eqGLangList as bs
   eqGLangS (MkXor a as) (MkXor b bs) = eqGLangE a b && eqGLangList as bs
   eqGLangS (MkIor a as) (MkIor b bs) = eqGLangE a b && eqGLangList as bs
   eqGLangS _            _            = False
 
-  total
+  private
   eqGLangList : List (GLang ELEM) -> List (GLang ELEM) -> Bool
   eqGLangList Nil     Nil     = True
   eqGLangList (x::xs) (y::ys) =
       if eqGLangE x y
-        then eqGLangList (assert_smaller (x::xs) xs) (assert_smaller (y::ys) ys)
+        then eqGLangList xs ys
         else False
   eqGLangList _       _       = False
 
+eqGLang : GLang a -> GLang b -> Bool
+eqGLang {a=ELEM}   {b=ELEM}   x y = eqGLangE x y
+eqGLang {a=INTENT} {b=INTENT} x y = eqGLangI x y
+eqGLang {a=STRUCT} {b=STRUCT} x y = eqGLangS x y
+eqGLang _          _          = False
+
 instance Eq (GLang ty) where
-  (==) {ty=ELEM}   x y = eqGLangE x y
-  (==) {ty=INTENT} x y = eqGLangI x y
-  (==) {ty=STRUCT} x y = eqGLangS x y
-  (==)             _ _ = False
+  (==) = eqGLang
 
 GOAL : Type
 GOAL = GLang ELEM

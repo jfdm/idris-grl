@@ -72,6 +72,7 @@ evalElem e g = do
   contribValue <- calcContrib decompValue e g
   pure contribValue
 
+-- --------------------------------------------------- [ Initialisation Checks ]
 
 MInitEffs : List EFFECT
 MInitEffs = [ 'next ::: STATE (Stack NodeID)
@@ -79,6 +80,7 @@ MInitEffs = [ 'next ::: STATE (Stack NodeID)
             , 'init ::: STATE Bool]
 
 private
+partial
 doinitValid : GModel -> Eff () MInitEffs
 doinitValid g = do
   s <- 'next :- get
@@ -93,15 +95,24 @@ doinitValid g = do
           let val = fromMaybe (GNode GOALty "" Nothing Nothing) $ getValueByID curr g
           let ns = map fst $ getEdgesByID curr g
 
-          'init :- update (\x => if isCons ns
-                    then x
-                    else x && isJust (getSValue val))
-
+          'init :- update (\x => if isCons ns then x else (x && isJust (getSValue val)))
           'seen :- update (\xs => [curr] ++ xs)
-          'next :- update (\xs => pushSThings ns s)
+          'next :- update (\xs => pushSThings ns xs)
           doinitValid g
 
+partial
+validInit : GModel -> Bool
+validInit g = with Effects runPureInit
+    [ 'next := pushSThings (verticesID g) mkStack
+    , 'seen := List.Nil
+    , 'init := True] $ (do
+        doinitValid g
+        res <- ('init :- get)
+        pure res)
+
+-- -------------------------------------------------------------- [ Evaluation ]
 private
+partial
 doEval : GModel -> Eff GModel MEvalEffs
 doEval g = do
   s <- 'next :- get
@@ -113,34 +124,27 @@ doEval g = do
       if elem curr vs
         then doEval g
         else do
-          case getEdgesByID curr g of
-            Nil => do
+          let ns = getEdgesByID curr g
+          if isNil ns
+            then do
               'seen :- update (\xs => [curr] ++ xs)
               doEval g
-            ns  => do
+            else do
               let childIDs = map fst ns
               let children = catMaybes $ map (\x => getValueByID x g) childIDs
               let allSat   = and $ map (\x => isJust (getSValue x)) children
-              case allSat of
-                True => do
+              if allSat
+                then do
                   eval <- evalElem curr g
                   let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
                   'seen :- update (\xs => [curr] ++ xs)
                   doEval newG
-                False => do
-                  'next :- update (\xs => pushSThings childIDs s)
+                else do
+                  'next :- update (\xs => pushSThings childIDs xs)
                   doEval g
 
-validInit : GModel -> Bool
-validInit g = with Effects runPureInit
-    [ 'next := pushSThings (verticesID g) mkStack
-    , 'seen := List.Nil
-    , 'init := True] $ (do
-        doinitValid g
-        res <- ('init :- get)
-        pure res)
-
 private
+partial
 runEval : GModel -> List (GoalNode)
 runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
                                      , 'seen := List.Nil] $ do
@@ -151,6 +155,7 @@ runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkSta
 |||
 ||| This function will deploy the strategy if it is given. Using this
 ||| code with a predeployed strategy may give unexpected results.
+partial
 evalModel : GModel -> Maybe Strategy -> List (GoalNode)
 evalModel g Nothing  = runEval g
 evalModel g (Just s) = runEval $ fst (deployStrategy g s)
