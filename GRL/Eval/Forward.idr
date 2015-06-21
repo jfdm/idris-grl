@@ -1,4 +1,4 @@
- module GRL.Eval.Forward
+module GRL.Eval.Forward
 
 import Effects
 import Effect.State
@@ -147,9 +147,12 @@ private
 partial
 runEval : GModel -> List (GoalNode)
 runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
-                                     , 'seen := List.Nil] $ do
+                                     , 'seen := List.Nil] $
+    if validInit g
+      then do
         newG <- doEval g
-        pure $ (vertices newG)
+        pure (vertices newG)
+      else pure Nil
 
 ||| Evaluate a model with or without a given strategy.
 |||
