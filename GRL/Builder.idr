@@ -115,6 +115,10 @@ insertMany : GRL expr => List (expr ty)
                       -> GModel
 insertMany ds model = foldl (flip $ insert) model ds
 
+insertMany' : GRL expr => DList GTy expr ts
+                       -> GModel
+                       -> GModel
+insertMany' ds model = DList.foldl (flip $ insert) model ds
 
 infixl 4 \=
 

@@ -136,4 +136,10 @@ instance GRL GLang where
     mkStruct (MkXor a bs) = SLink XORty (mkGoal a) (map (mkGoal) bs)
     mkStruct (MkIor a bs) = SLink IORty (mkGoal a) (map (mkGoal) bs)
 
+
+mkG : GElemTy -> String -> Maybe SValue -> GLang ELEM
+mkG GOALty = MkGoal
+mkG SOFTty = MkSoft
+mkG TASKty = MkTask
+mkG RESty  = MkRes
 -- --------------------------------------------------------------------- [ EOF ]
