@@ -14,6 +14,7 @@ import GRL.Property.Structure
 import GRL.Pretty
 
 import Debug.Error
+import Debug.Trace
 
 %access public
 %default total
@@ -78,13 +79,12 @@ insertStruct : GRL expr => (s : expr STRUCT)
                         -> (m : GModel)
                         -> ValidInsert (mkStruct s) m
                         -> GModel
+insertStruct l@(SLink ty x Nil) _ _ = error "AA"
 insertStruct l@(SLink ty x ys) model p =
     updateGoalNode (\n => getTitle x == getNodeTitle n)
                    (\x => record {getStructTy = Just ty} x)
-                   (doInsert l model)
-  where
-    doInsert : GExpr STRUCT -> GModel -> GModel
-    doInsert l mo = foldl (\m, y => insertLink x y (Just $ (convExpr . mkStruct) l) m) mo ys
+                   $ foldl (\m, y => insertLink x y (Just $ (convExpr $ mkStruct l)) m) model ys
+
 
 wildMk : GRL expr => {ty : GTy}
                   -> (expr ty)

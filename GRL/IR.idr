@@ -66,7 +66,7 @@ eqGExpr {a=STRUCT} {b=STRUCT} x y = eqGExprS x y
 eqGExpr _          _          = False
 
 instance Eq (GExpr ty) where
-  (==) = eqGExpr
+  (==) x y = eqGExpr x y
 
 ||| The GRL Class for allowing DSL designers to instruct the Goal
 ||| Graph builder how to convert expressions in the DSL to the IR.

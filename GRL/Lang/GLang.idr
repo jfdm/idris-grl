@@ -190,8 +190,9 @@ getGroups xs = DList.foldr doGrouping (DGroup Nil Nil Nil) xs
 private
 recoverList : DeclGroups -> (ss ** DList GTy GLang ss)
 recoverList (DGroup es is ss) =
-       (_ ** getProof (fromList es) ++ (getProof (fromList is)) ++ (getProof (fromList ss)))
-
+       (_ ** getProof (fromList es)
+          ++ (getProof (fromList is))
+          ++ (getProof (fromList ss)))
 
 groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
 groupDecls xs = recoverList $ getGroups xs
