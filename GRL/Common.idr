@@ -179,6 +179,18 @@ instance Eq GTy where
   (==) STRUCT STRUCT = True
   (==) _      _      = False
 
+-- --------------------------------------------------------------- [ Orderable ]
+instance Ord GTy where
+  compare ELEM   ELEM   = EQ
+  compare INTENT INTENT = EQ
+  compare STRUCT STRUCT = EQ
+  compare ELEM   _      = LT
+  compare _      ELEM   = GT
+  compare INTENT _      = LT
+  compare _      INTENT = GT
+  compare STRUCT _      = LT
+  compare _      STRUCT = GT
+
 -- -------------------------------------------------------------------- [ Show ]
 
 instance Show SValue where

@@ -105,6 +105,13 @@ eqGLang _          _          = False
 instance Eq (GLang ty) where
   (==) = eqGLang
 
+
+cmpGLang : GLang x -> GLang y -> Ordering
+cmpGLang {x} {y} _ _ = compare x y
+
+instance Ord (GLang ty) where
+  compare x y = cmpGLang x y
+
 GOAL : Type
 GOAL = GLang ELEM
 
@@ -135,6 +142,31 @@ instance GRL GLang where
     mkStruct (MkAnd a bs) = SLink ANDty (mkGoal a) (map (mkGoal) bs)
     mkStruct (MkXor a bs) = SLink XORty (mkGoal a) (map (mkGoal) bs)
     mkStruct (MkIor a bs) = SLink IORty (mkGoal a) (map (mkGoal) bs)
+
+private
+record DeclGroups where
+  constructor DGroup
+  elems : List (GLang ELEM)
+  intes : List (GLang INTENT)
+  strus : List (GLang STRUCT)
+
+private
+getGroups : DList GTy GLang gs -> DeclGroups
+getGroups xs = DList.foldr doGrouping (DGroup Nil Nil Nil) xs
+  where
+    doGrouping : GLang ty -> DeclGroups -> DeclGroups
+    doGrouping {ty=ELEM}   x g = record {elems = x :: (elems g)} g
+    doGrouping {ty=INTENT} x g = record {intes = x :: (intes g)} g
+    doGrouping {ty=STRUCT} x g = record {strus = x :: (strus g)} g
+
+private
+recoverList : DeclGroups -> (ss ** DList GTy GLang ss)
+recoverList (DGroup es is ss) =
+       (_ ** getProof (fromList es) ++ (getProof (fromList is)) ++ (getProof (fromList ss)))
+
+
+groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
+groupDecls xs = recoverList $ getGroups xs
 
 
 mkG : GElemTy -> String -> Maybe SValue -> GLang ELEM
