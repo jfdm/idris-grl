@@ -44,13 +44,16 @@ validNodes ns m = and $ map (\n => isValid n m) ns
 validDTy : GExpr ELEM -> GStructTy -> GModel -> Bool
 validDTy (Elem ty t s) dty m =
   case getGoalByTitle t m of
-    Nothing => True
-    Just n  => getStructTy n == Just dty
+    Nothing => False
+    Just n  => case getStructTy n of
+        Nothing  => True
+        Just xty => xty == dty
 
 %hint
 checkStructBool : GExpr STRUCT -> GModel -> Bool
 checkStructBool (SLink ty src ds) m =
-       allDiff src ds
+    length ds >= 1
+    && allDiff src ds
     && validNodes (src :: ds) m
     && validDTy src ty m
 

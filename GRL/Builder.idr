@@ -11,6 +11,7 @@ import GRL.Common
 import GRL.Property.Element
 import GRL.Property.Intention
 import GRL.Property.Structure
+import GRL.Pretty
 
 import Debug.Error
 
@@ -108,16 +109,18 @@ insert {ty=INTENT} decl model =
 insert {ty=STRUCT} decl model =
     if checkStructBool (mkStruct decl) model
       then (insertStruct decl model IsValidInsert)
-      else error "Bad Structure"
+      else error $ unwords ["Bad Structure arises from trying to insert\n\t", show (mkStruct decl), "\ninto\n\t",prettyModel model]
 
 insertMany : GRL expr => List (expr ty)
                       -> GModel
                       -> GModel
+insertMany Nil model = model
 insertMany ds model = foldl (flip $ insert) model ds
 
 insertMany' : GRL expr => DList GTy expr ts
                        -> GModel
                        -> GModel
+insertMany' Nil model = model
 insertMany' ds model = DList.foldl (flip $ insert) model ds
 
 infixl 4 \=

@@ -30,6 +30,34 @@ getElemTitle (MkSoft t _) = t
 getElemTitle (MkTask t _) = t
 getElemTitle (MkRes  t _) = t
 
+private
+showElem : GLang ELEM -> String
+showElem (MkGoal t sval) = "[Goal " ++ t ++ " " ++ show sval ++ "]"
+showElem (MkSoft t sval) = "[Soft " ++ t ++ " " ++ show sval ++ "]"
+showElem (MkTask t sval) = "[Task " ++ t ++ " " ++ show sval ++ "]"
+showElem (MkRes  t sval) = "[Res "  ++ t ++ " " ++ show sval ++ "]"
+
+private
+showIntent : GLang INTENT -> String
+showIntent (MkImpacts c a b) = "[Impacts " ++ show c ++ " " ++ showElem a ++ " " ++ showElem b ++ "]"
+showIntent (MkEffects c a b) = "[Effects " ++ show c ++ " " ++ showElem a ++ " " ++ showElem b ++ "]"
+
+private
+showElems : List (GLang ELEM) -> String
+showElems ys = "[" ++ (unwords $ intersperse "," (map showElem ys)) ++ "]"
+
+private
+showStruct : GLang STRUCT -> String
+showStruct (MkAnd a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
+showStruct (MkXor a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
+showStruct (MkIor a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
+
+instance Show (GLang ty) where
+    show {ty=ELEM}   x = showElem x
+    show {ty=INTENT} x = showIntent x
+    show {ty=STRUCT} x = showStruct x
+
+
 -- instance Eq (GLang ty) where
 --     (==) (MkGoal x s) (MkGoal y t)  = x == y && s == t
 --     (==) (MkSoft x s) (MkSoft y t)  = x == y && s == t
