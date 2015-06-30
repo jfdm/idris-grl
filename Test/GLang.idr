@@ -1,8 +1,15 @@
+-- --------------------------------------------------------- [ GLang.idr<Test> ]
+-- Module    : GLang.idr<Test>
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 module Test.GLang
 
 import GRL.Lang.GLangPlus
 import GRL.Eval
 
+-- ------------------------------------------------------------------- [ Nodes ]
 highPerf : GOAL
 highPerf = MkGoal "High Performance" Nothing
 
@@ -15,6 +22,8 @@ foobar = MkSoft "AAA" Nothing
 bar : TASK
 bar = MkTask "asasas" Nothing
 
+-- ------------------------------------------------------------------- [ Model ]
+
 amyotModel : GModel
 amyotModel = emptyModel
     \= highPerf
@@ -24,8 +33,10 @@ amyotModel = emptyModel
     \= (bar ~~> lowCost | MAKES)
     \= (highPerf &= lowCost)
 
-
+-- -------------------------------------------------------------------- [ Test ]
 runTest : IO ()
 runTest = do
     printLn "AA"
     putStrLn $ prettyModel amyotModel
+
+-- --------------------------------------------------------------------- [ EOF ]

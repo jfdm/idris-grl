@@ -1,9 +1,18 @@
+-- --------------------------------------------------------------- [ Amyot.idr ]
+-- Module    : Amyot.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| The example from Amyot
 module Test.Amyot
 
 import GRL.Lang.GLang
 import GRL.Eval
 
 import Debug.Trace
+
+-- ------------------------------------------------------------------- [ Nodes ]
 
 -- Service Provider
 highPerf : SOFT
@@ -95,17 +104,5 @@ runTest = do
 namespace Main
   main : IO ()
   main = runTest
---   printLn "AA"
-
---   case validInit amyotModel of
---     False => do
---       putStrLn "Wrongly init'd model."
---       ppGraph amyotModel
--- --      printLn amyotModel'
-
---     True  => do
---       ppGraph amyotModel
---       let (s,o) = deployStrategy amyotModel myFirstStrategy
---       ppRes $ evalModel s
 
 -- --------------------------------------------------------------------- [ EOF ]

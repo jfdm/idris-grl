@@ -1,3 +1,10 @@
+-- -------------------------------------------------------------- [ ReSkin.idr ]
+-- Module    : ReSkin.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| Example DSML through reSkinning the GRL.
 module Test.DSML.Paper.ReSkin
 
 import public GRL.Common
@@ -58,6 +65,7 @@ instance GRL (\x => PML ty x) where
   mkStruct (AddElem x y) = SLink ANDty (mkGoal x) [(mkGoal y)]
 
 -- ---------------------------------------------------------------- [ MkPretty ]
+
 syntax [a] "==>" [b] = AddAction a b
 syntax [a] "&=" [b]  = AddElem a b
 

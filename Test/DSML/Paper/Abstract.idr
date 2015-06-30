@@ -1,9 +1,18 @@
+-- ------------------------------------------------------------ [ Abstract.idr ]
+-- Module    : Abstract.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| A DSML based on the GRL implemented using Types as Abstract Interpreters.
 module Test.DSML.Paper.Abstract
 
 import GRL.Lang.GLang
 import public Data.Sigma.DList
 
 %access public
+
+-- ------------------------------------------------------------------- [ Types ]
 
 data CTy = STy | ATy | BTy
 

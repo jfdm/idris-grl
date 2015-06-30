@@ -1,3 +1,10 @@
+-- -------------------------------------------------------------- [ ReSkin.idr ]
+-- Module    : ReSkin.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| TODO list achieved through reskinning the GRL.
 module Test.DSML.TODO.ReSkin
 
 import public GRL.Common

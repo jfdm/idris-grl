@@ -1,3 +1,10 @@
+-- -------------------------------------------------------- [ GLang.idr<Paper> ]
+-- Module    : GLang.idr<Paper>
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| Example paper modelling using the GRL.
 module Test.DSML.Paper.GLang
 
 import GRL.Lang.GLang
