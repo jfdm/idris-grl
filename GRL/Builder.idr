@@ -101,29 +101,29 @@ insert : GRL expr => expr ty
 insert {ty=ELEM} decl model =
     if checkElemBool (mkGoal decl) model
       then (insertElem (mkGoal decl) model IsValidInsert)
-      else error $ unwords ["Bad Element arises from trying to insert\n\n\t", show (mkGoal decl), "\n\ninto\n\n\t", prettyModel model]
+      else error $ with List unwords ["Bad Element arises from trying to insert\n\n\t", show (mkGoal decl), "\n\ninto\n\n\t", prettyModel model]
 
 insert {ty=INTENT} decl model =
     if checkIntentBool (mkIntent decl) model
       then (insertIntent (mkIntent decl) model IsValidInsert)
-      else error $ unwords ["Bad Intent arises from trying to insert\n\n\t", show (mkIntent decl), "\n\ninto\n\n\t", prettyModel model]
+      else error $ with List unwords ["Bad Intent arises from trying to insert\n\n\t", show (mkIntent decl), "\n\ninto\n\n\t", prettyModel model]
 
 insert {ty=STRUCT} decl model =
     if checkStructBool (mkStruct decl) model
       then (insertStruct (mkStruct decl) model IsValidInsert)
-      else error $ unwords ["Bad Structure arises from trying to insert\n\n\t", show (mkStruct decl), "\n\ninto\n\n\t",prettyModel model]
+      else error $ with List unwords ["Bad Structure arises from trying to insert\n\n\t", show (mkStruct decl), "\n\ninto\n\n\t",prettyModel model]
 
 insertMany : GRL expr => List (expr ty)
                       -> GModel
                       -> GModel
 insertMany Nil model = model
-insertMany ds model = foldl (flip $ insert) model ds
+insertMany ds model = with List foldl (flip $ insert) model ds
 
 insertMany' : GRL expr => DList GTy expr ts
                        -> GModel
                        -> GModel
 insertMany' Nil model = model
-insertMany' ds model = DList.foldl (flip $ insert) model ds
+insertMany' ds model = with DList foldl (flip $ insert) model ds
 
 infixl 4 \=
 
