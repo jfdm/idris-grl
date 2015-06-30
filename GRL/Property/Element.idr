@@ -1,3 +1,9 @@
+-- ------------------------------------------------------------- [ Element.idr ]
+-- Module    : Element.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| This module details correctness properties for element insertion.
 |||
 ||| Correctness/Soundness Properties ::

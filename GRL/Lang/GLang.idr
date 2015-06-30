@@ -1,4 +1,10 @@
-||| The original unabulterated version of the GRL.
+-- --------------------------------------------------------------- [ GLang.idr ]
+-- Module    : GLang.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| The original unadulterated version of the GRL.
 module GRL.Lang.GLang
 
 import public GRL.Common
@@ -12,23 +18,72 @@ import public GRL.Pretty
 
 ||| The original unadulterated version of the GRL.
 data GLang : GTy -> Type where
+    ||| Make a Goal node.
     MkGoal : String -> Maybe SValue -> GLang ELEM
+    ||| Make a Soft Goal node.
     MkSoft : String -> Maybe SValue -> GLang ELEM
+    ||| Make a Task node.
     MkTask : String -> Maybe SValue -> GLang ELEM
+    ||| Make a resource node.
     MkRes  : String -> Maybe SValue -> GLang ELEM
 
+    ||| Declare an impact relation.
     MkImpacts : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
+
+    ||| Declare a side-effect relation.
     MkEffects : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
 
+    ||| And decomposition relation.
     MkAnd : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+    ||| XOR decomposition relation.
     MkXor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+    ||| IOR decomposition relation.
     MkIor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
 
+-- --------------------------------------------------------------- [ Accessors ]
+
+||| Obtain the node's title.
 getElemTitle : GLang ELEM -> String
 getElemTitle (MkGoal t _) = t
 getElemTitle (MkSoft t _) = t
 getElemTitle (MkTask t _) = t
 getElemTitle (MkRes  t _) = t
+
+||| Quick constructor.
+mkG : GElemTy -> String -> Maybe SValue -> GLang ELEM
+mkG GOALty = MkGoal
+mkG SOFTty = MkSoft
+mkG TASKty = MkTask
+mkG RESty  = MkRes
+
+-- -------------------------------------------------------------------- [ Sort ]
+private
+record DeclGroups where
+  constructor DGroup
+  elems : List (GLang ELEM)
+  intes : List (GLang INTENT)
+  strus : List (GLang STRUCT)
+
+private
+getGroups : DList GTy GLang gs -> DeclGroups
+getGroups xs = DList.foldr doGrouping (DGroup Nil Nil Nil) xs
+  where
+    doGrouping : GLang ty -> DeclGroups -> DeclGroups
+    doGrouping {ty=ELEM}   x g = record {elems = x :: (elems g)} g
+    doGrouping {ty=INTENT} x g = record {intes = x :: (intes g)} g
+    doGrouping {ty=STRUCT} x g = record {strus = x :: (strus g)} g
+
+private
+recoverList : DeclGroups -> (ss ** DList GTy GLang ss)
+recoverList (DGroup es is ss) =
+       (_ ** getProof (fromList es)
+          ++ (getProof (fromList is))
+          ++ (getProof (fromList ss)))
+
+groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
+groupDecls xs = recoverList $ getGroups xs
+
+-- -------------------------------------------------------------------- [ Show ]
 
 private
 showElem : GLang ELEM -> String
@@ -52,10 +107,16 @@ showStruct (MkAnd a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
 showStruct (MkXor a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
 showStruct (MkIor a bs) = "[And " ++ showElem a ++ " " ++ showElems bs ++ "]"
 
+private
+showLang : {ty : GTy} -> GLang ty -> String
+showLang {ty=ELEM}   x = showElem x
+showLang {ty=INTENT} x = showIntent x
+showLang {ty=STRUCT} x = showStruct x
+
 instance Show (GLang ty) where
-    show {ty=ELEM}   x = showElem x
-    show {ty=INTENT} x = showIntent x
-    show {ty=STRUCT} x = showStruct x
+    show x = showLang x
+
+-- ---------------------------------------------------------------------- [ Eq ]
 
 private
 eqGLangE : GLang ELEM -> GLang ELEM -> Bool
@@ -92,17 +153,20 @@ eqGLang : GLang a -> GLang b -> Bool
 eqGLang {a=ELEM}   {b=ELEM}   x y = eqGLangE x y
 eqGLang {a=INTENT} {b=INTENT} x y = eqGLangI x y
 eqGLang {a=STRUCT} {b=STRUCT} x y = eqGLangS x y
-eqGLang _          _          = False
+eqGLang _          _              = False
 
 instance Eq (GLang ty) where
   (==) = eqGLang
 
+-- -------------------------------------------------------------- [ Comparable ]
 
 cmpGLang : GLang x -> GLang y -> Ordering
 cmpGLang {x} {y} _ _ = compare x y
 
 instance Ord (GLang ty) where
   compare x y = cmpGLang x y
+
+-- ---------------------------------------------------------------- [ Synonyms ]
 
 GOAL : Type
 GOAL = GLang ELEM
@@ -116,11 +180,15 @@ TASK = GLang ELEM
 RES : Type
 RES = GLang ELEM
 
+-- ----------------------------------------------------------- [ Pretty Syntax ]
+
 syntax [a] "==>" [b] "|" [c] = MkImpacts c a b
 syntax [a] "~~>" [b] "|" [c] = MkEffects c a b
 syntax [a] "&=" [b] = MkAnd a b
 syntax [a] "X=" [b] = MkXor a b
 syntax [a] "|=" [b] = MkIor a b
+
+-- --------------------------------------------------------------------- [ GRL ]
 
 instance GRL GLang where
     mkGoal (MkGoal s e) = Elem GOALty s e
@@ -135,36 +203,4 @@ instance GRL GLang where
     mkStruct (MkXor a bs) = SLink XORty (mkGoal a) (map (mkGoal) bs)
     mkStruct (MkIor a bs) = SLink IORty (mkGoal a) (map (mkGoal) bs)
 
-private
-record DeclGroups where
-  constructor DGroup
-  elems : List (GLang ELEM)
-  intes : List (GLang INTENT)
-  strus : List (GLang STRUCT)
-
-private
-getGroups : DList GTy GLang gs -> DeclGroups
-getGroups xs = DList.foldr doGrouping (DGroup Nil Nil Nil) xs
-  where
-    doGrouping : GLang ty -> DeclGroups -> DeclGroups
-    doGrouping {ty=ELEM}   x g = record {elems = x :: (elems g)} g
-    doGrouping {ty=INTENT} x g = record {intes = x :: (intes g)} g
-    doGrouping {ty=STRUCT} x g = record {strus = x :: (strus g)} g
-
-private
-recoverList : DeclGroups -> (ss ** DList GTy GLang ss)
-recoverList (DGroup es is ss) =
-       (_ ** getProof (fromList es)
-          ++ (getProof (fromList is))
-          ++ (getProof (fromList ss)))
-
-groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
-groupDecls xs = recoverList $ getGroups xs
-
-
-mkG : GElemTy -> String -> Maybe SValue -> GLang ELEM
-mkG GOALty = MkGoal
-mkG SOFTty = MkSoft
-mkG TASKty = MkTask
-mkG RESty  = MkRes
 -- --------------------------------------------------------------------- [ EOF ]

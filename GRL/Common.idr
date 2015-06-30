@@ -1,3 +1,9 @@
+-- -------------------------------------------------------------- [ Common.idr ]
+-- Module    : Common.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| Common enumerated types used.
 module GRL.Common
 

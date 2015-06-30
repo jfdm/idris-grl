@@ -1,3 +1,9 @@
+-- ------------------------------------------------------------- [ Forward.idr ]
+-- Module    : Forward.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 module GRL.Eval.Forward
 
 import Effects

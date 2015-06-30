@@ -1,3 +1,9 @@
+-- ----------------------------------------------------------- [ Intention.idr ]
+-- Module    : Intention.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| This section details the combinator for intentional link insertion.
 |||
 ||| Correctness/Soundness Properties of an Intentional Link

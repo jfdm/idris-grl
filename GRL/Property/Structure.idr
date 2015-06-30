@@ -1,3 +1,9 @@
+-- ----------------------------------------------------------- [ Structure.idr ]
+-- Module    : Structure.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| This section details the check for structural link insertion.
 |||
 ||| Correctness/Soundess Properties of a Structural Link

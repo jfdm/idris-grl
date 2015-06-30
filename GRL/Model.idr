@@ -1,3 +1,9 @@
+-- --------------------------------------------------------------- [ Model.idr ]
+-- Module    : Model.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| The GRL Model as  Goal Graph
 module GRL.Model
 
@@ -5,11 +11,13 @@ import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Common
-
 import Debug.Trace
 
 %access public
 
+-- ------------------------------------------------------------------- [ Nodes ]
+
+||| Nodes in the Goal Graph
 record GoalNode where
   constructor GNode
   getNodeTy    : GElemTy
@@ -27,6 +35,8 @@ instance Eq GoalNode where
       xs  == ys  &&
       xd  == yd
 
+-- ------------------------------------------------------------------- [ Edges ]
+
 data GoalEdge  : Type where
   Contribution : CValue -> GoalEdge
   Correlation  : CValue -> GoalEdge
@@ -43,8 +53,12 @@ instance Eq GoalEdge where
   (==) Decomp           Decomp           = True
   (==) _                _                = False
 
+-- ---------------------------------------------------------------- [ Synonyms ]
+
 GModel : Type
 GModel = Graph (GoalNode) (GoalEdge)
+
+-- ---------------------------------------------------------- [ Util Functions ]
 
 isDeCompEdge : Maybe GoalEdge -> Bool
 isDeCompEdge (Just Decomp) = True
@@ -76,3 +90,5 @@ updateGoalNode f u m =
     case getValueUsing f m of
       Nothing  => m
       Just val => updateNodeValueUsing val u m
+
+-- --------------------------------------------------------------------- [ EOF ]

@@ -1,3 +1,9 @@
+-- ------------------------------------------------------------------ [ IR.idr ]
+-- Module    : IR.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| The intermediate representation for GRL-Derived Languages.
 module DSL.IR
 
@@ -13,28 +19,33 @@ data GExpr : GTy -> Type where
   ILink : GIntentTy -> CValue -> GExpr ELEM -> GExpr ELEM -> GExpr INTENT
   SLink : GStructTy -> GExpr ELEM -> List (GExpr ELEM) -> GExpr STRUCT
 
-
 getTitle : GExpr ELEM -> String
 getTitle (Elem ty t s) = t
 
 -- -------------------------------------------------------------------- [ Show ]
 
+private
 shGExprE : GExpr ELEM -> String
 shGExprE (Elem ty t ms) = with List unwords ["[Element", show ty, show t, show ms,"]"]
 
+private
 shGExprI : GExpr INTENT -> String
 shGExprI (ILink ty cty a b) = with List unwords ["[Intent", show ty, show cty, shGExprE a, shGExprE b, "]"]
 
+private
 shGExprS : GExpr STRUCT -> String
 shGExprS (SLink ty x ys) = with List unwords ["[Structure", show ty, shGExprE x, show' ys, "]"]
   where
     show' : List (GExpr ELEM) -> String
     show' ys = "[" ++ (unwords $ intersperse "," (map shGExprE ys)) ++ "]"
 
+shGExpr : {ty : GTy} -> GExpr ty -> String
+shGExpr {ty=ELEM}   x = shGExprE x
+shGExpr {ty=INTENT} x = shGExprI x
+shGExpr {ty=STRUCT} x = shGExprS x
+
 instance Show (GExpr ty) where
-  show {ty=ELEM}   x = shGExprE x
-  show {ty=INTENT} x = shGExprI x
-  show {ty=STRUCT} x = shGExprS x
+  show x = shGExpr x
 
 -- ------------------------------------------------------------- [ Eq Instance ]
 
@@ -73,8 +84,11 @@ instance Eq (GExpr ty) where
 |||
 ||| @a The DSL which is indexed by `GTy` type.
 class GRL (a : GTy -> Type) where
+  ||| Instruct the interpreter to construct a goal node.
   mkGoal   : a ELEM   -> GExpr ELEM
+  ||| Intruct the interpreter to construct a intent link.
   mkIntent : a INTENT -> GExpr INTENT
+  ||| Instruct the interpreter to consturct a structural link.
   mkStruct : a STRUCT -> GExpr STRUCT
 
 -- --------------------------------------------------------------------- [ EOF ]

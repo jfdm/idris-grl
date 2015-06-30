@@ -1,10 +1,15 @@
+-- --------------------------------------------------------- [ Qualitative.idr ]
+-- Module    : Qualitative.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| Qualitative evaluations for
 module GRL.Eval.Qualitative
 
 import public Effects
 import public Effect.State
 import public Effect.Exception
-
 
 import GRL.Common
 import GRL.Model
@@ -37,6 +42,7 @@ instance [andSat] Ord SValue where
    compare SATISFIED _         = GT
    compare _         SATISFIED = LT
 
+||| Calculate AND decomposition
 getDecompAnd : List SValue -> SValue
 getDecompAnd ss = foldl (\olds,s => min @{andSat} s olds) SATISFIED ss
 
@@ -66,12 +72,15 @@ instance [orSat] Ord SValue where
     compare SATISFIED _         = GT
     compare _         SATISFIED = LT
 
+||| Calculate IOR decomposition.
 getDecompIOR : List SValue -> SValue
 getDecompIOR ss = foldl (\olds,s => min @{orSat} s olds) SATISFIED ss
 
+||| Calculate XOR decomposition.
 getDecompXOR : List SValue -> SValue
 getDecompXOR ss = foldl (\olds,s => max @{orSat} s olds) DENIED ss
 
+||| Record to keep track of contribution valeu counts.
 record ContribCount where
   constructor MkCCount
   noSatis  : Nat
@@ -80,6 +89,7 @@ record ContribCount where
   noDenied : Nat
   noUndec  : Nat
 
+||| Default constructor for `ContribCount`
 defCCount : ContribCount
 defCCount = MkCCount Z Z Z Z Z
 
@@ -185,3 +195,5 @@ combineContribs NONE      SATISFIED = SATISFIED
 combineContribs NONE      CONFLICT  = CONFLICT
 combineContribs NONE      NONE      = NONE
 combineContribs _         _         = NONE
+
+-- --------------------------------------------------------------------- [ EOF ]

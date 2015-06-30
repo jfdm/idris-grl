@@ -1,3 +1,9 @@
+-- ------------------------------------------------------------ [ Strategy.idr ]
+-- Module    : Strategy.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
 ||| Evaluation Strategies
 module GRL.Eval.Strategy
 
@@ -29,3 +35,5 @@ deployStrategy oldG ss = (newG, oldG)
 
     newG : GModel
     newG = foldl (flip doUp) oldG ss
+
+-- --------------------------------------------------------------------- [ EOF ]
