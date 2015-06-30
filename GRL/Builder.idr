@@ -69,8 +69,8 @@ insertIntent : GRL expr => (i : expr INTENT)
                         -> (m : GModel)
                         -> ValidInsert (mkIntent i) m
                         -> GModel
-insertIntent l@(ILink ty val x y) model p =
-  insertLink y x (Just $ (convExpr . mkIntent) l) model
+insertIntent (ILink ty val x y) model p =
+  insertLink y x (Just $ (convExpr . mkIntent) ((ILink ty val x y))) model
 
 -- --------------------------------------------------------------- [ Structure ]
 ||| Do structure insertion.
@@ -79,11 +79,10 @@ insertStruct : GRL expr => (s : expr STRUCT)
                         -> (m : GModel)
                         -> ValidInsert (mkStruct s) m
                         -> GModel
-insertStruct l@(SLink ty x Nil) _ _ = error "AA"
-insertStruct l@(SLink ty x ys) model p =
+insertStruct (SLink ty x ys) model p =
     updateGoalNode (\n => getTitle x == getNodeTitle n)
                    (\x => record {getStructTy = Just ty} x)
-                   $ foldl (\m, y => insertLink x y (Just $ (convExpr $ mkStruct l)) m) model ys
+                   $ foldl (\m, y => insertLink x y (Just $ (convExpr $ mkStruct ((SLink ty x ys)))) m) model ys
 
 
 wildMk : GRL expr => {ty : GTy}

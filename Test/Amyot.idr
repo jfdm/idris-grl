@@ -90,6 +90,11 @@ runTest : IO ()
 runTest = do
   putStrLn $ prettyModel amyotModel
 
+-- -------------------------------------------------------------------- [ Main ]
+
+namespace Main
+  main : IO ()
+  main = runTest
 --   printLn "AA"
 
 --   case validInit amyotModel of
