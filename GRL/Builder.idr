@@ -45,11 +45,11 @@ data ValidInsert : {ty : GTy} -> GExpr ty -> GModel -> Type where
 
 ||| Perform the insertion of elements into the model.
 private
-insertElem : GRL expr => (e : expr ELEM)
-                      -> (m : GModel)
-                      -> ValidInsert (mkGoal e) m
-                      -> GModel
-insertElem elem model p = addNode (convExpr $ mkGoal elem) model
+insertElem : (e : GExpr ELEM)
+          -> (m : GModel)
+          -> ValidInsert e m
+          -> GModel
+insertElem el model p = addNode (convExpr el) model
 
 -- ------------------------------------------------------------------- [ Links ]
 private
@@ -65,25 +65,28 @@ insertLink (Elem _ x _) (Elem _ y _) i m =
 -- --------------------------------------------------------------- [ Intention ]
 ||| Perform the insertion of label into the model.
 private
-insertIntent : GRL expr => (i : expr INTENT)
-                        -> (m : GModel)
-                        -> ValidInsert (mkIntent i) m
-                        -> GModel
+insertIntent : (i : GExpr INTENT)
+            -> (m : GModel)
+            -> ValidInsert i m
+            -> GModel
 insertIntent (ILink ty val x y) model p =
-  insertLink y x (Just $ (convExpr . mkIntent) ((ILink ty val x y))) model
+  insertLink y x (Just (convExpr (ILink ty val x y))) model
 
 -- --------------------------------------------------------------- [ Structure ]
 ||| Do structure insertion.
 private
-insertStruct : GRL expr => (s : expr STRUCT)
-                        -> (m : GModel)
-                        -> ValidInsert (mkStruct s) m
-                        -> GModel
+insertStruct : (s : GExpr STRUCT)
+            -> (m : GModel)
+            -> ValidInsert s m
+            -> GModel
 insertStruct (SLink ty x ys) model p =
     updateGoalNode (\n => getTitle x == getNodeTitle n)
-                   (\x => record {getStructTy = Just ty} x)
-                   $ foldl (\m, y => insertLink x y (Just $ (convExpr $ mkStruct ((SLink ty x ys)))) m) model ys
-
+                   (\n => record {getStructTy = Just ty} n)
+                   model'
+  where
+    model' : GModel
+    model' = foldl (\m, y => insertLink x y (Just $ (convExpr (SLink ty x ys))) m)
+                   model ys
 
 wildMk : GRL expr => {ty : GTy}
                   -> (expr ty)
@@ -97,17 +100,17 @@ insert : GRL expr => expr ty
                   -> GModel
 insert {ty=ELEM} decl model =
     if checkElemBool (mkGoal decl) model
-      then (insertElem decl model IsValidInsert)
+      then (insertElem (mkGoal decl) model IsValidInsert)
       else error "Bad Element"
 
 insert {ty=INTENT} decl model =
     if checkIntentBool (mkIntent decl) model
-      then (insertIntent decl model IsValidInsert)
+      then (insertIntent (mkIntent decl) model IsValidInsert)
       else error "Bad Intent"
 
 insert {ty=STRUCT} decl model =
     if checkStructBool (mkStruct decl) model
-      then (insertStruct decl model IsValidInsert)
+      then (insertStruct (mkStruct decl) model IsValidInsert)
       else error $ unwords ["Bad Structure arises from trying to insert\n\t", show (mkStruct decl), "\ninto\n\t",prettyModel model]
 
 insertMany : GRL expr => List (expr ty)
