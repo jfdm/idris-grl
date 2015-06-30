@@ -1,6 +1,6 @@
 package grl
 
-opts = "-p effects -p containers --warnpartial"
+opts = "-p effects -p containers --warnreach --warnpartial --log 2"
 
 modules = GRL.Common
         , GRL.IR
@@ -23,16 +23,16 @@ modules = GRL.Common
         , Test.GLang
         , Test.DSML.TODO.ReSkin
         , Test.DSML.TODO.Abstract
-        , Test.DSML.Paper.Abstract
+--        , Test.DSML.Paper.Abstract
         , Test.DSML.Paper.ReSkin
         , Test.DSML.Paper.GLang
 
 tests = Test.Amyot.runTest
       , Test.GLang.runTest
 
---      , Test.DSML.TODO.Abstract.runTest
+      , Test.DSML.TODO.Abstract.runTest
       , Test.DSML.TODO.ReSkin.runTest
 
       , Test.DSML.Paper.ReSkin.runTest
       , Test.DSML.Paper.GLang.runTest
---      , Test.DSML.TODO.Paper.runTest
+--      , Test.DSML.Paper.Abstract.runTest

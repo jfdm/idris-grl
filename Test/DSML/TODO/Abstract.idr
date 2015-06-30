@@ -21,10 +21,10 @@ data HasSubTask : (GLang STRUCT) -> Type where
 
 
 data TODO : GModel -> Type where
-  MkList : DList (GLang ELEM)   Task       es
-        -> DList (GLang ELEM)   Action     as
-        -> DList (GLang INTENT) ActsOn     is
-        -> DList (GLang STRUCT) HasSubTask ss
+  MkList : DList (GLang ELEM)   (\x => Task       x) es
+        -> DList (GLang ELEM)   (\x => Action     x) as
+        -> DList (GLang INTENT) (\x => ActsOn     x) is
+        -> DList (GLang STRUCT) (\x => HasSubTask x) ss
         -> TODO (insertMany ss $ insertMany is $ insertMany as $ insertMany es emptyModel)
 
 

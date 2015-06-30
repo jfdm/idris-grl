@@ -37,7 +37,7 @@ convExpr : {ty : GTy} -> GExpr ty -> interpTy ty
 convExpr (Elem eTy t s)            = GNode eTy t s Nothing
 convExpr (ILink IMPACTSty cTy _ _) = Contribution cTy
 convExpr (ILink AFFECTSty cTy _ _) = Correlation  cTy
-convExpr (SLink _ _ _) = Decomp
+convExpr (SLink _ _ _)             = Decomp
 
 -- --------------------------------------------------------------- [ Insertion ]
 data ValidInsert : {ty : GTy} -> GExpr ty -> GModel -> Type where
@@ -101,17 +101,17 @@ insert : GRL expr => expr ty
 insert {ty=ELEM} decl model =
     if checkElemBool (mkGoal decl) model
       then (insertElem (mkGoal decl) model IsValidInsert)
-      else error "Bad Element"
+      else error $ unwords ["Bad Element arises from trying to insert\n\n\t", show (mkGoal decl), "\n\ninto\n\n\t", prettyModel model]
 
 insert {ty=INTENT} decl model =
     if checkIntentBool (mkIntent decl) model
       then (insertIntent (mkIntent decl) model IsValidInsert)
-      else error "Bad Intent"
+      else error $ unwords ["Bad Intent arises from trying to insert\n\n\t", show (mkIntent decl), "\n\ninto\n\n\t", prettyModel model]
 
 insert {ty=STRUCT} decl model =
     if checkStructBool (mkStruct decl) model
       then (insertStruct (mkStruct decl) model IsValidInsert)
-      else error $ unwords ["Bad Structure arises from trying to insert\n\t", show (mkStruct decl), "\ninto\n\t",prettyModel model]
+      else error $ unwords ["Bad Structure arises from trying to insert\n\n\t", show (mkStruct decl), "\n\ninto\n\n\t",prettyModel model]
 
 insertMany : GRL expr => List (expr ty)
                       -> GModel

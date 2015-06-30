@@ -57,42 +57,6 @@ instance Show (GLang ty) where
     show {ty=INTENT} x = showIntent x
     show {ty=STRUCT} x = showStruct x
 
-
--- instance Eq (GLang ty) where
---     (==) (MkGoal x s) (MkGoal y t)  = x == y && s == t
---     (==) (MkSoft x s) (MkSoft y t)  = x == y && s == t
---     (==) (MkTask x s) (MkTask y t)  = x == y && s == t
---     (==) (MkRes  x s) (MkRes  y t)  = x == y && s == t
---     (==) (MkImpacts c a b) (MkImpacts d x y) = c == d && a == x && b == y
---     (==) (MkEffects c a b) (MkEffects d x y) = c == d && a == x && b == y
---     (==) (MkAnd a as) (MkAnd b bs) = a == b && as == bs
---     (==) (MkXor a as) (MkXor b bs) = a == b && as == bs
---     (==) (MkIor a as) (MkIor b bs) = a == b && as == bs
---     (==) _            _            = False
-
--- mutual
---   private
---   eqGLang : GLang z -> GLang w -> Bool
---   eqGLang (MkGoal x s) (MkGoal y t)  = x == y && s == t
---   eqGLang (MkSoft x s) (MkSoft y t)  = x == y && s == t
---   eqGLang (MkTask x s) (MkTask y t)  = x == y && s == t
---   eqGLang (MkRes  x s) (MkRes  y t)  = x == y && s == t
---   eqGLang (MkImpacts c a b) (MkImpacts d x y) = c == d && eqGLang a x && eqGLang b y
---   eqGLang (MkEffects c a b) (MkEffects d x y) = c == d && eqGLang a x && eqGLang b y
---   eqGLang (MkAnd a as) (MkAnd b bs) = eqGLang a b && eqGLangList as bs
---   eqGLang (MkXor a as) (MkXor b bs) = eqGLang a b && eqGLangList as bs
---   eqGLang (MkIor a as) (MkIor b bs) = eqGLang a b && eqGLangList as bs
---   eqGLang _            _            = False
-
---   private
---   eqGLangList : List (GLang a) -> List (GLang b) -> Bool
---   eqGLangList Nil     Nil     = True
---   eqGLangList (x::xs) (y::ys) =
---       if eqGLang x y
---         then eqGLangList xs ys
---         else False
---   eqGLangList _       _       = False
-
 private
 eqGLangE : GLang ELEM -> GLang ELEM -> Bool
 eqGLangE (MkGoal x s) (MkGoal y t)  = x == y && s == t
