@@ -1,6 +1,6 @@
 package grl
 
-opts = "-p effects -p containers --warnreach --warnpartial"
+opts = "-p effects -p containers --warnpartial"
 
 modules = GRL.Common
         , GRL.IR

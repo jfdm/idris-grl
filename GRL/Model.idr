@@ -1,7 +1,7 @@
 ||| The GRL Model as  Goal Graph
 module GRL.Model
 
-import public Data.AVL.Dependent.Graph
+import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Common

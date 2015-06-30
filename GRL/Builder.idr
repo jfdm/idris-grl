@@ -1,7 +1,7 @@
 ||| This module defines a 'compiler' that transforms the GRL IR into the Goal Graph.
 module GRL.Builder
 
-import public Data.AVL.Dependent.Graph
+import public Data.AVL.Graph
 import public Data.Sigma.DList
 import public Data.List
 

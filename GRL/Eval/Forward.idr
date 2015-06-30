@@ -3,8 +3,8 @@ module GRL.Eval.Forward
 import Effects
 import Effect.State
 
-import Data.AVL.Dependent.Dict
-import Data.AVL.Dependent.Graph
+import Data.AVL.Dict
+import Data.AVL.Graph
 import Data.Stack
 
 import GRL.Common

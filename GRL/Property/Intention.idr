@@ -10,7 +10,7 @@ module GRL.Property.Intention
 
 import public Decidable.Equality
 
-import public Data.AVL.Dependent.Graph
+import public Data.AVL.Graph
 import public Data.List
 
 import GRL.Model
