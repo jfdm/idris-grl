@@ -78,7 +78,7 @@ amyotModel = emptyModel
    \= (serviceCentralSwitch ~~> minSwitch | BREAK          )
    \= (serviceCentralSwitch ==> minMsgEx  | MAKES          )
    \= (detSLoc      &= [serviceCentralSwitch, serviceInSCP])
-   \= (detSLoc      |= [dataNewSNode, dataSCP]             )
+   \= (detDataLoc   |= [dataNewSNode, dataSCP]             )
    \= (dataNewSNode |= [installSNode]                      )
    \= (highPerf     |= [maxHardware, highThrough]          )
 
