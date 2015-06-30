@@ -1,4 +1,11 @@
-||| This module defines a 'compiler' that transforms the GRL IR into the Goal Graph.
+-- ------------------------------------------------------------- [ Builder.idr ]
+-- Module    : Builder.idr
+-- Copyright : (c) Jan de Muijnck-Hughes
+-- License   : see LICENSE
+-- --------------------------------------------------------------------- [ EOH ]
+
+||| This module defines an 'interpreter' for constructing Goal Graphs
+||| from GRL esque languages.
 module GRL.Builder
 
 import public Data.AVL.Graph
@@ -18,6 +25,7 @@ import Debug.Trace
 
 %access public
 %default total
+
 -- ---------------------------------------------------- [ Allowed Constructors ]
 
 ||| Create an empty model
@@ -47,11 +55,20 @@ data ValidInsert : {ty : GTy} -> GExpr ty -> GModel -> Type where
 private
 insertElem : (e : GExpr ELEM)
           -> (m : GModel)
-          -> ValidInsert e m
+--          -> ValidInsert e m
           -> GModel
-insertElem el model p = addNode (convExpr el) model
+insertElem decl model =
+  if not $ checkElemBool decl model
+    then error $ with List unwords
+            ["Bad Element arises from trying to insert\n\n\t"
+            , show decl
+            , "\n\ninto\n\n\t"
+            , prettyModel model]
+    else addNode (convExpr decl) model
 
 -- ------------------------------------------------------------------- [ Links ]
+
+||| Do the actual insertion of an edge into the model.
 private
 insertLink : GExpr ELEM -> GExpr ELEM -> Maybe GoalEdge -> GModel -> GModel
 insertLink (Elem _ x _) (Elem _ y _) i m =
@@ -63,110 +80,78 @@ insertLink (Elem _ x _) (Elem _ y _) i m =
         Just yID => addValueEdge (xID, yID, i) m
 
 -- --------------------------------------------------------------- [ Intention ]
+
 ||| Perform the insertion of label into the model.
 private
 insertIntent : (i : GExpr INTENT)
             -> (m : GModel)
-            -> ValidInsert i m
+--            -> ValidInsert i m
             -> GModel
-insertIntent (ILink ty val x y) model p =
-  insertLink y x (Just (convExpr (ILink ty val x y))) model
+insertIntent decl@(ILink ty val x y) model =
+  if not $ checkIntentBool decl model
+      then error $ with List unwords
+             ["Bad Intent arises from trying to insert\n\n\t"
+             , show decl
+             , "\n\ninto\n\n\t"
+             , prettyModel model]
+      else insertLink y x (Just (convExpr decl)) model
 
 -- --------------------------------------------------------------- [ Structure ]
 ||| Do structure insertion.
 private
 insertStruct : (s : GExpr STRUCT)
             -> (m : GModel)
-            -> ValidInsert s m
+--            -> ValidInsert s m
             -> GModel
-insertStruct (SLink ty x ys) model p =
-    updateGoalNode (\n => getTitle x == getNodeTitle n)
-                   (\n => record {getStructTy = Just ty} n)
-                   model'
+insertStruct decl@(SLink ty x ys) model =
+    if not $ checkStructBool decl model
+      then error $ with List unwords
+             ["Bad Structure arises from trying to insert\n\n\t"
+             , show decl
+             , "\n\ninto\n\n\t",
+             prettyModel model]
+      else newModel
   where
     model' : GModel
     model' = foldl (\m, y => insertLink x y (Just $ (convExpr (SLink ty x ys))) m)
                    model ys
 
-wildMk : GRL expr => {ty : GTy}
-                  -> (expr ty)
-                  -> GExpr ty
-wildMk {ty=ELEM}   decl = mkGoal decl
-wildMk {ty=INTENT} decl = mkIntent decl
-wildMk {ty=STRUCT} decl = mkStruct decl
+    newModel : GModel
+    newModel = updateGoalNode (\n => getTitle x == getNodeTitle n)
+                   (\n => record {getStructTy = Just ty} n)
+                   model'
 
+-- ----------------------------------------------------------- [ Do the Insert ]
+
+||| Insert a single declarations into the model.
 insert : GRL expr => expr ty
                   -> GModel
                   -> GModel
-insert {ty=ELEM} decl model =
-    if checkElemBool (mkGoal decl) model
-      then (insertElem (mkGoal decl) model IsValidInsert)
-      else error $ with List unwords ["Bad Element arises from trying to insert\n\n\t", show (mkGoal decl), "\n\ninto\n\n\t", prettyModel model]
+insert {ty=ELEM}   decl model = insertElem   (mkGoal decl)   model
+insert {ty=INTENT} decl model = insertIntent (mkIntent decl) model
+insert {ty=STRUCT} decl model = insertStruct (mkStruct decl) model
 
-insert {ty=INTENT} decl model =
-    if checkIntentBool (mkIntent decl) model
-      then (insertIntent (mkIntent decl) model IsValidInsert)
-      else error $ with List unwords ["Bad Intent arises from trying to insert\n\n\t", show (mkIntent decl), "\n\ninto\n\n\t", prettyModel model]
-
-insert {ty=STRUCT} decl model =
-    if checkStructBool (mkStruct decl) model
-      then (insertStruct (mkStruct decl) model IsValidInsert)
-      else error $ with List unwords ["Bad Structure arises from trying to insert\n\n\t", show (mkStruct decl), "\n\ninto\n\n\t",prettyModel model]
-
+||| Insert many declarations of the same type into the model.
 insertMany : GRL expr => List (expr ty)
                       -> GModel
                       -> GModel
 insertMany Nil model = model
 insertMany ds model = with List foldl (flip $ insert) model ds
 
+||| Insert many different declarations into the model.
 insertMany' : GRL expr => DList GTy expr ts
                        -> GModel
                        -> GModel
 insertMany' Nil model = model
 insertMany' ds model = with DList foldl (flip $ insert) model ds
 
+
 infixl 4 \=
 
+||| Short hand for inserting a single declaration.
 (\=) : GRL expr => (m : GModel)
                 -> (d : expr ty)
                 -> GModel
 (\=) model decl = insert decl model
 
-{-
--- ------------------------------------------------------------- [ Applicative ]
--- This allows use of idiom brackets.
-
-partial
-(<*>) : GRL expr => {ty : GTy}
-                  -> GModel
-                  -> (d : expr ty)
-                  -> GModel
-(<*>) m a = m \= a
-
-pure : GModel -> GModel
-pure a = a
-
--- ------------------------------------------------------------- [ Do Notation ]
--- This should allow for do notation to be employed...
-
-data GExpr : Type where
-  Decl : GRL expr => {ty : GTy}
-                  -> expr ty
-                  -> GExpr
-  Seq : GExpr -> GExpr -> GExpr
-
-(>>=) : GExpr -> (() -> GExpr) -> GExpr
-(>>=) first andThen = Seq first (andThen ())
-
-implicit
-convDecl : GRL expr => {ty : GTy}
-                    -> (expr ty)
-                    -> GExpr
-convDecl = Decl
-
-partial
-mkModel : GModel -> GExpr -> GModel
-mkModel m (Decl e)  = m \= e
-mkModel m (Seq a b) = mkModel (mkModel m a) b
--}
 -- --------------------------------------------------------------------- [ EOF ]
