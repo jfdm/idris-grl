@@ -239,6 +239,25 @@ instance Eq CValue where
   (==) BREAK   BREAK   = True
   (==) _       _       = False
 
+instance Cast CValue String where
+  cast MAKES   = "MAKES"
+  cast HELPS   = "HELPS"
+  cast SOMEPOS = "SOMEPOS"
+  cast UNKNOWN = "UNKNOWN"
+  cast SOMENEG = "SOMENEG"
+  cast HURTS   = "HURTS"
+  cast BREAK   = "BREAKS"
+
+
+instance Cast SValue String where
+  cast SATISFIED = "SATISFIED"
+  cast WEAKSATIS = "WEAKSATIS"
+  cast WEAKDEN   = "WEAKDEN"
+  cast DENIED    = "DENIED"
+  cast CONFLICT  = "CONFLICT"
+  cast UNKNOWN   = "UNKNOWN"
+  cast NONE      = "NONE"
+  cast UNDECIDED = "UNDECIDED"
 
 -- -------------------------------------------------------------------- [ Read ]
 readSatisfaction : String -> SValue
