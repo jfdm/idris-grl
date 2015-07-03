@@ -259,24 +259,27 @@ instance Cast SValue String where
   cast NONE      = "NONE"
   cast UNDECIDED = "UNDECIDED"
 
--- -------------------------------------------------------------------- [ Read ]
-readSatisfaction : String -> SValue
-readSatisfaction "satisfied" = SATISFIED
-readSatisfaction "weaksatis" = WEAKSATIS
-readSatisfaction "weakden"   = WEAKDEN
-readSatisfaction "denied"    = DENIED
-readSatisfaction "unknown"   = UNKNOWN
-readSatisfaction _           = UNKNOWN
+instance Cast String CValue where
+  cast "MAKES"   = MAKES
+  cast "HELPS"   = HELPS
+  cast "SOMEPOS" = SOMEPOS
+  cast "UNKNOWN" = UNKNOWN
+  cast "SOMENEG" = SOMENEG
+  cast "HURTS"   = HURTS
+  cast "BREAKS"  = BREAK
+  cast _         = UNKNOWN
 
-readContribValue : String -> CValue
-readContribValue "makes"         = MAKES
-readContribValue "helps"         = HELPS
-readContribValue "some-positive" = SOMEPOS
-readContribValue "unknown"       = UNKNOWN
-readContribValue "some-negative" = SOMENEG
-readContribValue "hurts"         = HURTS
-readContribValue "breaks"        = BREAK
-readContribValue _               = UNKNOWN
+instance Cast String SValue where
+  cast "SATISFIED"   = SATISFIED
+  cast "WEAKSATIS"   = WEAKSATIS
+  cast "WEAKDEN"     = WEAKDEN
+  cast "DENIED"      = DENIED
+  cast "CONFLICT"    = CONFLICT
+  cast "UNKNOWN"     = UNKNOWN
+  cast "NONE"        = NONE
+  cast "UNDECIDED"   = UNDECIDED
+  cast _             = UNKNOWN
+
 
 
 -- ------------------------------------------------------------------- [ DecEq ]

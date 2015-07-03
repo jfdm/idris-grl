@@ -85,7 +85,7 @@ instance Eq (GExpr ty) where
 ||| @a The DSL which is indexed by `GTy` type.
 class GRL (a : GTy -> Type) where
   ||| Instruct the interpreter to construct a goal node.
-  mkGoal   : a ELEM   -> GExpr ELEM
+  mkElem   : a ELEM   -> GExpr ELEM
   ||| Intruct the interpreter to construct a intent link.
   mkIntent : a INTENT -> GExpr INTENT
   ||| Instruct the interpreter to consturct a structural link.

@@ -1,0 +1,9 @@
+#+TITLE: GRL Examples
+#+AUTHOR: Jan de Muijnck-Hughes
+#+DATE: [2015-07-03]
+
+The GRL package contains within the directory =Test.GRL= example instances of the GRL.
+This directory contains replications of those tests modelled within *jUCMNav* an opensource eclipse plugin for working with the GRL.
+
+
+Several of the examples have been taken from: http://www.cs.toronto.edu/km/GRL/

@@ -13,61 +13,61 @@ import GRL.Lang.GLang
 
 -- ---------------------------------------------------------------- [ Elements ]
 paper : GOAL
-paper = MkGoal "My First Paper" Nothing
+paper = mkGoal "My First Paper"
 
 abst : GOAL
-abst = MkGoal "Abstract" Nothing
+abst = mkGoal "Abstract"
 
 bib : GOAL
-bib = MkGoal "Bibliography" Nothing
+bib = mkGoal "Bibliography"
 
 intro : GOAL
-intro = MkGoal "Intro" Nothing
+intro = mkGoal "Intro"
 
 meth : GOAL
-meth = MkGoal "Methodology" Nothing
+meth = mkGoal "Methodology"
 
 res : GOAL
-res = MkGoal "Results" Nothing
+res = mkGoal "Results"
 
 disc : GOAL
-disc = MkGoal "Discussion" Nothing
+disc = mkGoal "Discussion"
 
 wabs : TASK
-wabs = MkTask "Write Abstract" (Just SATISFIED)
+wabs = mkSatTask "Write Abstract" (Just SATISFIED)
 
 rabs : TASK
-rabs = MkTask "Review Abstract" (Just WEAKSATIS)
+rabs = mkSatTask "Review Abstract" (Just WEAKSATIS)
 
 wbib : TASK
-wbib = MkTask "Write Bib" (Just WEAKSATIS)
+wbib = mkSatTask "Write Bib" (Just WEAKSATIS)
 
 rbib : TASK
-rbib = MkTask "Review Bib" (Just WEAKSATIS)
+rbib = mkSatTask "Review Bib" (Just WEAKSATIS)
 
 wIntro : TASK
-wIntro = MkTask "Write Intro" (Just DENIED)
+wIntro = mkSatTask "Write Intro" (Just DENIED)
 
 rIntro : TASK
-rIntro = MkTask "Review Intro" (Just DENIED)
+rIntro = mkSatTask "Review Intro" (Just DENIED)
 
 wMeth : TASK
-wMeth = MkTask "Write Meth" (Just DENIED)
+wMeth = mkSatTask "Write Meth" (Just DENIED)
 
 rMeth : TASK
-rMeth = MkTask "Review Meth" (Just DENIED)
+rMeth = mkSatTask "Review Meth" (Just DENIED)
 
 wRes : TASK
-wRes = MkTask "Write Results" (Just DENIED)
+wRes = mkSatTask "Write Results" (Just DENIED)
 
 rRes : TASK
-rRes = MkTask "Review Results" (Just DENIED)
+rRes = mkSatTask "Review Results" (Just DENIED)
 
 wDis : TASK
-wDis = MkTask "Write Discussion" (Just DENIED)
+wDis = mkSatTask "Write Discussion" (Just DENIED)
 
 rDis : TASK
-rDis = MkTask "Review Discussion" (Just DENIED)
+rDis = mkSatTask "Review Discussion" (Just DENIED)
 
 -- --------------------------------------------------------------- [ Model Def ]
 

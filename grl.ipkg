@@ -19,20 +19,27 @@ modules = GRL.Common
         , GRL.Eval.Qualitative
         , GRL.Eval.Strategy
 
-        , Test.Amyot
-        , Test.GLang
+        , Test.Amyot.Main
+        , Test.Amyot.IOR
+ --       , Test.Amyot.AND
+ --       , Test.Amyot.Contrib
+
         , Test.DSML.TODO.ReSkin
         , Test.DSML.TODO.Abstract
+
 --        , Test.DSML.Paper.Abstract
         , Test.DSML.Paper.ReSkin
         , Test.DSML.Paper.GLang
 
-tests = Test.Amyot.runTest
-      , Test.GLang.runTest
+tests =
+--        Test.Amyot.Main.runTest
+       Test.Amyot.IOR.runTest
+--       , Test.Amyot.AND.runTest
+--       , Test.Amyot.Contrib.runTest
 
-      , Test.DSML.TODO.Abstract.runTest
-      , Test.DSML.TODO.ReSkin.runTest
+--      , Test.DSML.TODO.Abstract.runTest
+--      , Test.DSML.TODO.ReSkin.runTest
 
-      , Test.DSML.Paper.ReSkin.runTest
-      , Test.DSML.Paper.GLang.runTest
+--      , Test.DSML.Paper.ReSkin.runTest
+--      , Test.DSML.Paper.GLang.runTest
 --      , Test.DSML.Paper.Abstract.runTest

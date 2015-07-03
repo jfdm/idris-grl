@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| The example from Amyot
-module Test.Amyot
+module Test.Amyot.Main
 
 import GRL.Lang.GLang
 import GRL.Eval
@@ -16,48 +16,48 @@ import Debug.Trace
 
 -- Service Provider
 highPerf : SOFT
-highPerf = MkSoft "High Performance" Nothing
+highPerf = mkSoft "High Performance"
 
 lowCost : SOFT
-lowCost  = MkSoft "Low Cost" Nothing
+lowCost  = mkSoft "Low Cost"
 
 minChange : SOFT
-minChange = MkSoft "Minimum Changes to Infrastructure" Nothing
+minChange = mkSoft "Minimum Changes to Infrastructure"
 
 maxHardware : SOFT
-maxHardware = MkSoft "Maximun Hardware Utilisation" (Just WEAKSATIS)
+maxHardware = mkSoft "Maximun Hardware Utilisation"
 
 highThrough : SOFT
-highThrough = MkSoft "High Throughput" Nothing
+highThrough = mkSoft "High Throughput"
 
 minMsgEx : SOFT
-minMsgEx = MkSoft "Minimum Message Exchange" Nothing
+minMsgEx = mkSoft "Minimum Message Exchange"
 
 minSwitch : SOFT
-minSwitch = MkSoft "Minimum Switch Load" Nothing
+minSwitch = mkSoft "Minimum Switch Load"
 
 -- System
 
 detDataLoc : GOAL
-detDataLoc = MkGoal "Determine Data Location" Nothing
+detDataLoc = mkGoal "Determine Data Location"
 
 dataSCP : TASK
-dataSCP = MkTask "Data in Service Control Point" (Just SATISFIED)
+dataSCP = mkTask "Data in Service Control Point"
 
 dataNewSNode : TASK
-dataNewSNode = MkTask "Data in New Service Node" Nothing
+dataNewSNode = mkTask "Data in New Service Node"
 
 installSNode : TASK
-installSNode = MkTask "Install Service Node" Nothing -- chang
+installSNode = mkTask "Install Service Node"  -- chang
 
 serviceCentralSwitch : TASK
-serviceCentralSwitch = MkTask "Service in Central Switch" Nothing
+serviceCentralSwitch = mkTask "Service in Central Switch"
 
 detSLoc : GOAL
-detSLoc = MkGoal "Determine Service Location" Nothing
+detSLoc = mkGoal "Determine Service Location"
 
 serviceInSCP : TASK
-serviceInSCP = MkTask "Service in Service Control Point" (Just SATISFIED)
+serviceInSCP = mkTask "Service in Service Control Point"
 
 -- ------------------------------------------------------------------- [ Model ]
 amyotModel : GModel
@@ -98,11 +98,5 @@ myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
 runTest : IO ()
 runTest = do
   putStrLn $ prettyModel amyotModel
-
--- -------------------------------------------------------------------- [ Main ]
-
-namespace Main
-  main : IO ()
-  main = runTest
 
 -- --------------------------------------------------------------------- [ EOF ]

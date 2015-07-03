@@ -86,13 +86,13 @@ AND = GLang S STRUCT
 -- --------------------------------------------------------------------- [ GRL ]
 
 instance GRL (\x => GLang ty x) where
-    mkGoal (MkGoal s e) = Elem GOALty s e
-    mkGoal (MkSoft s e) = Elem SOFTty s e
-    mkGoal (MkTask s e) = Elem TASKty s e
-    mkGoal (MkRes  s e) = Elem RESty  s e
+    mkElem (MkGoal s e) = Elem GOALty s e
+    mkElem (MkSoft s e) = Elem SOFTty s e
+    mkElem (MkTask s e) = Elem TASKty s e
+    mkElem (MkRes  s e) = Elem RESty  s e
 
-    mkIntent (MkImpact c a b) = ILink IMPACTSty c (mkGoal a) (mkGoal b)
+    mkIntent (MkImpact c a b) = ILink IMPACTSty c (mkElem a) (mkElem b)
 
-    mkStruct (MkAnd a b) = SLink ANDty (mkGoal a) [(mkGoal b)]
+    mkStruct (MkAnd a b) = SLink ANDty (mkElem a) [(mkElem b)]
 
 -- --------------------------------------------------------------------- [ EOF ]

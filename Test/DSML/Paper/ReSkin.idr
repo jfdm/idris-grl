@@ -52,17 +52,17 @@ data PML : PTy -> GTy -> Type where
            -> PML ALinkTy INTENT
 
 instance GRL (\x => PML ty x) where
-  mkGoal (MkPaper t) = Elem GOALty t Nothing
-  mkGoal (MkSect  t) = Elem GOALty t Nothing
-  mkGoal (MkBib)     = Elem GOALty "Bibliography" Nothing
-  mkGoal (MkAbs)     = Elem GOALty "Abstract" Nothing
+  mkElem (MkPaper t) = Elem GOALty t Nothing
+  mkElem (MkSect  t) = Elem GOALty t Nothing
+  mkElem (MkBib)     = Elem GOALty "Bibliography" Nothing
+  mkElem (MkAbs)     = Elem GOALty "Abstract" Nothing
 
-  mkGoal (MkAuth t s) = Elem TASKty ("Authoring " ++ t) (Just s)
-  mkGoal (MkRev  t s) = Elem TASKty ("Reviewing " ++ t) (Just s)
+  mkElem (MkAuth t s) = Elem TASKty ("Authoring " ++ t) (Just s)
+  mkElem (MkRev  t s) = Elem TASKty ("Reviewing " ++ t) (Just s)
 
-  mkIntent (AddAction x y) = ILink IMPACTSty MAKES (mkGoal x) (mkGoal y)
+  mkIntent (AddAction x y) = ILink IMPACTSty MAKES (mkElem x) (mkElem y)
 
-  mkStruct (AddElem x y) = SLink ANDty (mkGoal x) [(mkGoal y)]
+  mkStruct (AddElem x y) = SLink ANDty (mkElem x) [(mkElem y)]
 
 -- ---------------------------------------------------------------- [ MkPretty ]
 

@@ -17,6 +17,7 @@ import public GRL.Pretty
 %default total
 
 ||| The original unadulterated version of the GRL.
+abstract
 data GLang : GTy -> Type where
     ||| Make a Goal node.
     MkGoal : String -> Maybe SValue -> GLang ELEM
@@ -49,12 +50,48 @@ getElemTitle (MkSoft t _) = t
 getElemTitle (MkTask t _) = t
 getElemTitle (MkRes  t _) = t
 
-||| Quick constructor.
-mkG : GElemTy -> String -> Maybe SValue -> GLang ELEM
-mkG GOALty = MkGoal
-mkG SOFTty = MkSoft
-mkG TASKty = MkTask
-mkG RESty  = MkRes
+-- ------------------------------------------------------------ [ Constructors ]
+
+mkGoal : String -> GLang ELEM
+mkGoal t = MkGoal t (Just UNKNOWN)
+
+mkSoft : String -> GLang ELEM
+mkSoft t = MkSoft t (Just UNKNOWN)
+
+mkTask : String -> GLang ELEM
+mkTask t = MkTask t (Just UNKNOWN)
+
+mkRes : String -> GLang ELEM
+mkRes t = MkRes t (Just UNKNOWN)
+
+
+mkSatGoal : String -> Maybe SValue -> GLang ELEM
+mkSatGoal = MkGoal
+
+mkSatSoft : String -> Maybe SValue -> GLang ELEM
+mkSatSoft = MkSoft
+
+mkSatTask : String -> Maybe SValue -> GLang ELEM
+mkSatTask = MkTask
+
+mkSatRes : String -> Maybe SValue -> GLang ELEM
+mkSatRes = MkRes
+
+
+mkImpacts : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
+mkImpacts = MkImpacts
+
+mkEffects : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
+mkEffects = MkEffects
+
+mkAnd : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+mkAnd = MkAnd
+
+mkIor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+mkIor = MkIor
+
+mkXor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
+mkXor = MkXor
 
 -- -------------------------------------------------------------------- [ Sort ]
 private
@@ -87,10 +124,10 @@ groupDecls xs = recoverList $ getGroups xs
 
 private
 showElem : GLang ELEM -> String
-showElem (MkGoal t sval) = "[Goal " ++ t ++ " " ++ show sval ++ "]"
-showElem (MkSoft t sval) = "[Soft " ++ t ++ " " ++ show sval ++ "]"
-showElem (MkTask t sval) = "[Task " ++ t ++ " " ++ show sval ++ "]"
-showElem (MkRes  t sval) = "[Res "  ++ t ++ " " ++ show sval ++ "]"
+showElem (MkGoal t s) = with List unwords ["[Goal", t, show s, "]"]
+showElem (MkSoft t s) = with List unwords ["[Soft", t, show s, "]"]
+showElem (MkTask t s) = with List unwords ["[Task", t, show s, "]"]
+showElem (MkRes  t s) = with List unwords ["[Res" , t, show s, "]"]
 
 private
 showIntent : GLang INTENT -> String
@@ -120,11 +157,11 @@ instance Show (GLang ty) where
 
 private
 eqGLangE : GLang ELEM -> GLang ELEM -> Bool
-eqGLangE (MkGoal x s) (MkGoal y t)  = x == y && s == t
-eqGLangE (MkSoft x s) (MkSoft y t)  = x == y && s == t
-eqGLangE (MkTask x s) (MkTask y t)  = x == y && s == t
-eqGLangE (MkRes  x s) (MkRes  y t)  = x == y && s == t
-eqGLangE _            _             = False
+eqGLangE (MkGoal x t) (MkGoal y u) = x == y && t == u
+eqGLangE (MkSoft x t) (MkSoft y u) = x == y && t == u
+eqGLangE (MkTask x t) (MkTask y u) = x == y && t == u
+eqGLangE (MkRes  x t) (MkRes  y u) = x == y && t == u
+eqGLangE _            _            = False
 
 private
 eqGLangI : GLang INTENT -> GLang INTENT -> Bool
@@ -182,25 +219,25 @@ RES = GLang ELEM
 
 -- ----------------------------------------------------------- [ Pretty Syntax ]
 
-syntax [a] "==>" [b] "|" [c] = MkImpacts c a b
-syntax [a] "~~>" [b] "|" [c] = MkEffects c a b
-syntax [a] "&=" [b] = MkAnd a b
-syntax [a] "X=" [b] = MkXor a b
-syntax [a] "|=" [b] = MkIor a b
+syntax [a] "==>" [b] "|" [c] = mkImpacts c a b
+syntax [a] "~~>" [b] "|" [c] = mkEffects c a b
+syntax [a] "&=" [b] = mkAnd a b
+syntax [a] "X=" [b] = mkXor a b
+syntax [a] "|=" [b] = mkIor a b
 
 -- --------------------------------------------------------------------- [ GRL ]
 
 instance GRL GLang where
-    mkGoal (MkGoal s e) = Elem GOALty s e
-    mkGoal (MkSoft s e) = Elem SOFTty s e
-    mkGoal (MkTask s e) = Elem TASKty s e
-    mkGoal (MkRes  s e) = Elem RESty  s e
+    mkElem (MkGoal s v) = Elem GOALty s v
+    mkElem (MkSoft s v) = Elem SOFTty s v
+    mkElem (MkTask s v) = Elem TASKty s v
+    mkElem (MkRes  s v) = Elem RESty  s v
 
-    mkIntent (MkImpacts c a b) = ILink IMPACTSty c (mkGoal a) (mkGoal b)
-    mkIntent (MkEffects c a b) = ILink AFFECTSty c (mkGoal a) (mkGoal b)
+    mkIntent (MkImpacts c a b) = ILink IMPACTSty c (mkElem a) (mkElem b)
+    mkIntent (MkEffects c a b) = ILink AFFECTSty c (mkElem a) (mkElem b)
 
-    mkStruct (MkAnd a bs) = SLink ANDty (mkGoal a) (map (mkGoal) bs)
-    mkStruct (MkXor a bs) = SLink XORty (mkGoal a) (map (mkGoal) bs)
-    mkStruct (MkIor a bs) = SLink IORty (mkGoal a) (map (mkGoal) bs)
+    mkStruct (MkAnd a bs) = SLink ANDty (mkElem a) (map mkElem bs)
+    mkStruct (MkXor a bs) = SLink XORty (mkElem a) (map mkElem bs)
+    mkStruct (MkIor a bs) = SLink IORty (mkElem a) (map mkElem bs)
 
 -- --------------------------------------------------------------------- [ EOF ]

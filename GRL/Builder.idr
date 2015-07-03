@@ -127,7 +127,7 @@ insertStruct decl@(SLink ty x ys) model =
 insert : GRL expr => expr ty
                   -> GModel
                   -> GModel
-insert {ty=ELEM}   decl model = insertElem   (mkGoal decl)   model
+insert {ty=ELEM}   decl model = insertElem   (mkElem decl)   model
 insert {ty=INTENT} decl model = insertIntent (mkIntent decl) model
 insert {ty=STRUCT} decl model = insertStruct (mkStruct decl) model
 
