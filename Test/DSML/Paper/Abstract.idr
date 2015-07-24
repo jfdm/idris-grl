@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| A DSML based on the GRL implemented using Types as Abstract Interpreters.
-module Test.DSML.Paper.Abstract
+module Test.DSML.Paper.AbstractPrime
 
 import GRL.Lang.GLang
 import public Data.Sigma.DList
@@ -14,48 +14,75 @@ import public Data.Sigma.DList
 
 -- ------------------------------------------------------------------- [ Types ]
 
+data Ty = PAPERty | ITEMty | COMPty
+
 data CTy = STy | ATy | BTy
 
-data Comp : GLang ELEM -> CTy -> Type where
-  Sect : (t:String) -> Comp (MkGoal t          Nothing) STy
-  Abst :               Comp (MkGoal "Abstract" Nothing) ATy
-  Bibl :               Comp (MkGoal "Biblio"   Nothing) BTy
+-- ------------------------------------------------------------- [ Interpreter ]
 
+data InterpRes : Ty -> Type where
+  ResComp  : GLang ELEM                 -> InterpRes COMPty
+  ResPaper : GModel                     -> InterpRes PAPERty
+  ResITEM  : GLang ELEM -> GLang INTENT -> InterpRes ITEMty
 
-modelPaper : String -> GLang ELEM -> GLang ELEM -> List (GLang ELEM) -> GModel
-modelPaper t a b es = insert (pelem &= es) m
+interpComp : String -> InterpRes COMPty
+interpComp t = ResComp $ mkGoal t
+
+interpPaper : String
+           -> InterpRes COMPty
+           -> InterpRes COMPty
+           -> List (InterpRes COMPty)
+           -> InterpRes PAPERty
+interpPaper s (ResComp a) (ResComp b) es = ResPaper $ insert (pelem &= es') m
   where
     pelem : GLang ELEM
-    pelem = MkGoal t Nothing
+    pelem = mkGoal s
+
+    es' : List (GLang ELEM)
+    es' = map (\(ResComp e) => e) es
 
     m : GModel
-    m = insert pelem $ insert a $ insert b $ insertMany es emptyModel
+    m = insert pelem $ insert a $ insert b $ insertMany es' emptyModel
 
-data Paper : GModel -> Type where
+interpTODO : String -> SValue -> InterpRes COMPty -> InterpRes ITEMty
+interpTODO d s (ResComp a) = ResITEM rtask (rtask ==> a | MAKES)
+  where
+    rtask : GLang ELEM
+    rtask = mkSatTask (d ++ getElemTitle a) (Just s)
+
+
+interpTODOS : InterpRes PAPERty
+           -> List (InterpRes ITEMty)
+           -> GModel
+interpTODOS (ResPaper m) es' = insertMany is $ insertMany es m
+  where
+    is : List (GLang INTENT)
+    is = map (\(ResITEM _ i) => i) es'
+
+    es : List (GLang ELEM)
+    es = map (\(ResITEM e _) => e) es'
+
+-- ---------------------------------------------------------------- [ The DSML ]
+
+data Comp : InterpRes COMPty -> CTy -> Type where
+  Sect : (t:String) -> Comp (interpComp t         ) STy
+  Abst :               Comp (interpComp "Abstract") ATy
+  Bibl :               Comp (interpComp "Biblio"  ) BTy
+
+data Paper : InterpRes PAPERty -> Type where
   MkPaper : (t : String)
          -> Comp a ATy
          -> Comp b BTy
-         -> (DList (GLang ELEM) (\x => Comp x STy) ss)
-         -> Paper (modelPaper t a b ss)
+         -> DList (InterpRes COMPty) (\x => Comp x STy) ss
+         -> Paper (interpPaper t a b ss)
 
-
-addAct : String -> GLang ELEM -> SValue -> (GLang ELEM, GLang INTENT)
-addAct d s a = (rtask, (rtask ==> a | MAKES))
-  where
-    rtask : GLang ELEM
-    rtask = MkTask (d ++ getElemTitle a) (Just s)
-
-data TODO : (GLang ELEM, GLang INTENT) -> Type where
-  Review : (c : Comp a ty) -> (s : SValue) -> TODO (addAct "Review " a s)
-  Write  : (c : Comp a ty) -> (s : SValue) -> TODO (addAct "Writing " a s)
-
-data TList : List (GLang ELEM) -> List (GLang INTENT) -> Type where
-  Nil  : TList Nil Nil
-  (::) : TODO (x,y) -> TList xs ys -> TList (x::xs) (y::ys)
+data TODO : InterpRes ITEMty -> Type where
+  Review : (c : Comp a ty) -> (s : SValue) -> TODO (interpTODO "Review " s a)
+  Write  : (c : Comp a ty) -> (s : SValue) -> TODO (interpTODO "Writing "s a)
 
 data PaperToDos : GModel -> Type where
   MkTODO : Paper m
-        -> TList es is
-        -> PaperToDos (insertMany is $ insertMany es m)
+        -> DList (InterpRes ITEMty) TODO ts
+        -> PaperToDos (interpTODOS m ts)
 
 -- --------------------------------------------------------------------- [ EOF ]

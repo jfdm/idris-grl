@@ -27,7 +27,7 @@ modules = GRL.Common
         , Test.DSML.TODO.ReSkin
         , Test.DSML.TODO.Abstract
 
---        , Test.DSML.Paper.Abstract
+        , Test.DSML.Paper.Abstract
         , Test.DSML.Paper.ReSkin
         , Test.DSML.Paper.GLang
 
