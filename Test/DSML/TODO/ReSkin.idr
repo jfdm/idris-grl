@@ -40,9 +40,9 @@ data TLang : TTy -> GTy -> Type where
             -> TLang SubLinkTy STRUCT
 
 instance GRL (\x => TLang ty x) where
-  mkElem (MkTask s)   = Elem GOALty s Nothing
-  mkElem (MkSTask s)  = Elem GOALty s Nothing
-  mkElem (MkAction s) = Elem TASKty s (Just SATISFIED)
+  mkElem (MkTask s)   = Elem GOALty s UNKNOWN
+  mkElem (MkSTask s)  = Elem GOALty s UNKNOWN
+  mkElem (MkAction s) = Elem TASKty s SATISFIED
 
   mkIntent (ActsOn c x y) = ILink IMPACTSty c (mkElem x) (mkElem y)
 

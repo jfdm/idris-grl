@@ -22,7 +22,7 @@ record GoalNode where
   constructor GNode
   getNodeTy    : GElemTy
   getNodeTitle : String
-  getSValue    : Maybe SValue
+  getSValue    : SValue
   getStructTy  : Maybe GStructTy
 
 instance Show GoalNode where

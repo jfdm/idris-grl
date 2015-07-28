@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| Testing IOR contribution evaluation
-module Test.Amyot.IOR
+module Test.Contribution
 
 import GRL.Lang.GLang
 import GRL.Eval
@@ -16,7 +16,7 @@ import GRL.Eval
 -- -------------------------------------------------------- [ Model Definition ]
 
 conn : GOAL
-conn = mkGoal "Connection"
+conn = mkGoal "Increase Mobility"
 
 lan : TASK
 lan = mkTask "LAN"
@@ -30,40 +30,37 @@ internet = mkTask "Internet"
 model : GModel
 model = emptyModel
    \= conn \= lan \= wireless \= internet
-   \= conn |= [lan,wireless,internet]
+   \= (internet ==> conn | SOMEPOS)
+   \= (wireless ==> conn | MAKES)
+   \= (lan      ==> conn | SOMENEG)
 
--- -------------------------------------------------------------- [ Strategies ]
+-- ---------------------------------------------------------- [ IOR Strategies ]
 
 a : Strategy
-a = buildStrategy [(lan, UNKNOWN), (wireless, WEAKSATIS), (internet, DENIED)]
+a = buildStrategy [(lan, NONE), (wireless, WEAKSATIS), (internet, WEAKDEN)]
 
 b : Strategy
-b = buildStrategy [(lan, DENIED), (wireless, DENIED), (internet, DENIED)]
-
-c : Strategy
-c = buildStrategy [(lan, CONFLICT), (wireless, WEAKSATIS), (internet, DENIED)]
-
-d : Strategy
-d = buildStrategy [(lan, CONFLICT), (wireless, SATISFIED), (internet, DENIED)]
+b = buildStrategy [(lan, NONE), (wireless, WEAKSATIS), (internet, WEAKSATIS)]
 
 -- -------------------------------------------------------------------- [ Test ]
 
 partial
+doTest : GModel -> Maybe Strategy -> IO ()
+doTest m s = do
+  let res = evalModel m s
+  case List.find (\x => getNodeTitle x == "Increase Mobility") res of
+    Nothing => printLn "oopsie"
+    Just x  => printLn $ getSValue x
+
+partial
 runTest : IO ()
 runTest = do
-  putStrLn "Testing IOR"
-  putStrLn $ prettyModel model
+  putStrLn "--> Decomposition Tests"
 
-  putStrLn "Strategy A"
-  printLn $ evalModel model (Just a)
+  putStrLn "Strategy A: expecting None"
+  doTest model (Just a)
 
-  putStrLn "Strategy B"
-  printLn $ evalModel model (Just b)
-
-  putStrLn "Strategy C"
-  printLn $ evalModel model (Just c)
-
-  putStrLn "Strategy D"
-  printLn $ evalModel model (Just d)
+  putStrLn "Strategy B: expected Weakly Satisfied"
+  doTest model (Just b)
 
 -- --------------------------------------------------------------------- [ EOF ]

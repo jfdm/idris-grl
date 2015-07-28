@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| The example from Amyot
-module Test.Amyot.Main
+module Test.Amyot
 
 import GRL.Lang.GLang
 import GRL.Eval

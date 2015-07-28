@@ -19,6 +19,8 @@ import GRL.Model
 import GRL.Eval.Qualitative
 import GRL.Eval.Strategy
 
+import Debug.Trace
+
 %access public
 
 -- ----------------------------------------------------- [ Forward Propagation ]
@@ -29,13 +31,11 @@ MEvalEffs = [ 'next ::: STATE (Stack NodeID)
             , 'seen ::: STATE (List NodeID)]
 
 private
-getSat' : NodeID -> GModel -> SValue
+getSat' : NodeID -> GModel -> Maybe SValue
 getSat' id g =
   case getValueByID id g of
-    Nothing => NONE
-    Just v  => case getSValue v of
-      Nothing => NONE
-      Just s  => s
+    Nothing => Nothing
+    Just v  => Just $ getSValue v
 
 calcDecomp : NodeID -> GModel -> Eff (SValue) MEvalEffs
 calcDecomp id g = do
@@ -47,7 +47,7 @@ calcDecomp id g = do
           Just dval => do
             let cedges   = getEdgesByID id g
             let children = map fst $ filter (\x => isDeCompEdge $ snd x) cedges
-            let csat     = map (\x => getSat' x g) children
+            let csat     = catMaybes $ map (\x => getSat' x g) children
             let res = case dval of
                       ANDty => getDecompAnd csat
                       XORty => getDecompXOR csat
@@ -55,22 +55,28 @@ calcDecomp id g = do
             pure res
 
 
+
+getWeightedContrib : NodeID -> CValue -> GModel -> Maybe SValue
+getWeightedContrib id y g = case getSat' id g of
+  Nothing => Nothing
+  Just x  => Just $ weightedContrib x y
+
 private
 %inline
-calcWeightedContrib : DemiEdge GoalEdge -> GModel -> SValue
-calcWeightedContrib (id, Nothing)                _ = NONE
-calcWeightedContrib (id, Just (Contribution x))  g = weightedContrib (getSat' id g) x
-calcWeightedContrib (id, Just (Correlation  x))  g = weightedContrib (getSat' id g) x
-calcWeightedContrib _                            _ = NONE
+calcWeightedContrib : DemiEdge GoalEdge -> GModel -> Maybe SValue
+calcWeightedContrib (id, Just (Contribution x))  g = getWeightedContrib id x g
+calcWeightedContrib (id, Just (Correlation  x))  g = getWeightedContrib id x g
+calcWeightedContrib _                            _ = Nothing
 
 calcContrib : SValue -> NodeID -> GModel -> Eff SValue MEvalEffs
 calcContrib dval id g = do
-   let cedges = getEdgesByID id g
-   let wsat   = map (\e => calcWeightedContrib e g) cedges
-   let count' = adjustCounts (dval::wsat)
-   if not (noUndec count' > 0)
-     then pure UNDECIDED
-     else pure $ combineContribs (cmpSatAndDen count') (cmpWSandWD count')
+   let cedges   = getEdgesByID id g
+   let children = filter (\x => not (isDeCompEdge $ snd x)) cedges
+   let wsat     = catMaybes $ map (\e => calcWeightedContrib e g) children
+   let count'   = adjustCounts (dval::wsat)
+   if (noUndec count' > 0)
+     then pure UNKNOWN
+     else pure $ combineContribs (cmpWSandWD count') (cmpSatAndDen count')
 
 evalElem : NodeID -> GModel -> Eff SValue MEvalEffs
 evalElem e g = do
@@ -84,37 +90,6 @@ MInitEffs : List EFFECT
 MInitEffs = [ 'next ::: STATE (Stack NodeID)
             , 'seen ::: STATE (List NodeID)
             , 'init ::: STATE Bool]
-
-private
-partial
-doinitValid : GModel -> Eff () MInitEffs
-doinitValid g = do
-  s <- 'next :- get
-  case popS' s of
-    Nothing           => pure ()
-    Just (curr, newS) => do
-      'next :- put newS
-      vs <- 'seen :- get
-      if elem curr vs
-        then doinitValid g
-        else do
-          let val = fromMaybe (GNode GOALty "" Nothing Nothing) $ getValueByID curr g
-          let ns = map fst $ getEdgesByID curr g
-
-          'init :- update (\x => if isCons ns then x else (x && isJust (getSValue val)))
-          'seen :- update (\xs => [curr] ++ xs)
-          'next :- update (\xs => pushSThings ns xs)
-          doinitValid g
-
-partial
-validInit : GModel -> Bool
-validInit g = with Effects runPureInit
-    [ 'next := pushSThings (verticesID g) mkStack
-    , 'seen := List.Nil
-    , 'init := True] $ (do
-        doinitValid g
-        res <- ('init :- get)
-        pure res)
 
 -- -------------------------------------------------------------- [ Evaluation ]
 private
@@ -138,27 +113,18 @@ doEval g = do
             else do
               let childIDs = map fst ns
               let children = catMaybes $ map (\x => getValueByID x g) childIDs
-              let allSat   = and $ map (\x => isJust (getSValue x)) children
-              if allSat
-                then do
-                  eval <- evalElem curr g
-                  let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
-                  'seen :- update (\xs => [curr] ++ xs)
-                  doEval newG
-                else do
-                  'next :- update (\xs => pushSThings childIDs xs)
-                  doEval g
+              eval <- evalElem curr g
+              let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = eval} x) g
+              'seen :- update (\xs => [curr] ++ xs)
+              doEval newG
 
 private
 partial
 runEval : GModel -> List (GoalNode)
 runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
-                                     , 'seen := List.Nil] $
-    if validInit g
-      then do
-        newG <- doEval g
-        pure (vertices newG)
-      else pure Nil
+                                     , 'seen := List.Nil] $ do
+    newG <- doEval g
+    pure (vertices newG)
 
 ||| Evaluate a model with or without a given strategy.
 |||

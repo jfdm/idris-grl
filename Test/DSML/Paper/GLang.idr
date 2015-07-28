@@ -34,40 +34,40 @@ disc : GOAL
 disc = mkGoal "Discussion"
 
 wabs : TASK
-wabs = mkSatTask "Write Abstract" (Just SATISFIED)
+wabs = mkSatTask "Write Abstract" SATISFIED
 
 rabs : TASK
-rabs = mkSatTask "Review Abstract" (Just WEAKSATIS)
+rabs = mkSatTask "Review Abstract" (WEAKSATIS)
 
 wbib : TASK
-wbib = mkSatTask "Write Bib" (Just WEAKSATIS)
+wbib = mkSatTask "Write Bib" (WEAKSATIS)
 
 rbib : TASK
-rbib = mkSatTask "Review Bib" (Just WEAKSATIS)
+rbib = mkSatTask "Review Bib" (WEAKSATIS)
 
 wIntro : TASK
-wIntro = mkSatTask "Write Intro" (Just DENIED)
+wIntro = mkSatTask "Write Intro" (DENIED)
 
 rIntro : TASK
-rIntro = mkSatTask "Review Intro" (Just DENIED)
+rIntro = mkSatTask "Review Intro" (DENIED)
 
 wMeth : TASK
-wMeth = mkSatTask "Write Meth" (Just DENIED)
+wMeth = mkSatTask "Write Meth" (DENIED)
 
 rMeth : TASK
-rMeth = mkSatTask "Review Meth" (Just DENIED)
+rMeth = mkSatTask "Review Meth" (DENIED)
 
 wRes : TASK
-wRes = mkSatTask "Write Results" (Just DENIED)
+wRes = mkSatTask "Write Results" (DENIED)
 
 rRes : TASK
-rRes = mkSatTask "Review Results" (Just DENIED)
+rRes = mkSatTask "Review Results" (DENIED)
 
 wDis : TASK
-wDis = mkSatTask "Write Discussion" (Just DENIED)
+wDis = mkSatTask "Write Discussion" (DENIED)
 
 rDis : TASK
-rDis = mkSatTask "Review Discussion" (Just DENIED)
+rDis = mkSatTask "Review Discussion" (DENIED)
 
 -- --------------------------------------------------------------- [ Model Def ]
 

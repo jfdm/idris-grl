@@ -29,7 +29,6 @@ namespace Qualiative
     UNKNOWN : SValue
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
     NONE : SValue
-    UNDECIDED : SValue
 
 
 --  data CValue = MAKES | HELPS | SOMEPOS | UNKNOWN | SOMENEG | BREAK | HURTS
@@ -207,7 +206,6 @@ instance Show SValue where
   show CONFLICT  = "CONFLICT"
   show UNKNOWN   = "UNKNOWN"
   show NONE      = "NONE"
-  show UNDECIDED = "UNDECIDED"
 
 instance Eq SValue where
   (==) SATISFIED SATISFIED = True
@@ -217,7 +215,6 @@ instance Eq SValue where
   (==) CONFLICT  CONFLICT  = True
   (==) UNKNOWN   UNKNOWN   = True
   (==) NONE      NONE      = True
-  (==) UNDECIDED UNDECIDED = True
   (==) _         _         = False
 
 instance Show CValue where
@@ -257,7 +254,6 @@ instance Cast SValue String where
   cast CONFLICT  = "CONFLICT"
   cast UNKNOWN   = "UNKNOWN"
   cast NONE      = "NONE"
-  cast UNDECIDED = "UNDECIDED"
 
 instance Cast String CValue where
   cast "MAKES"   = MAKES
@@ -277,24 +273,6 @@ instance Cast String SValue where
   cast "CONFLICT"    = CONFLICT
   cast "UNKNOWN"     = UNKNOWN
   cast "NONE"        = NONE
-  cast "UNDECIDED"   = UNDECIDED
   cast _             = UNKNOWN
 
-
-
--- ------------------------------------------------------------------- [ DecEq ]
--- instance DecEq Satisfaction where
---   decEq x y = if x == y then Yes primEq else No primNotEq
---     where
---       primEq : x = y
---       primEq = believe_me (Refl {x})
---       postulate primNotEq : x = y -> Void
-
-
--- instance DecEq ContributionTy where
---   decEq x y = if x == y then Yes primEq else No primNotEq
---     where
---       primEq : x = y
---       primEq = believe_me (Refl {x})
---       postulate primNotEq : x = y -> Void
 -- --------------------------------------------------------------------- [ EOF ]

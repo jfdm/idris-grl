@@ -16,69 +16,64 @@ import GRL.Model
 
 %access public
 
-instance [andSat] Ord SValue where
-   compare SATISFIED SATISFIED = EQ
-   compare WEAKSATIS WEAKSATIS = EQ
-   compare WEAKDEN   WEAKDEN   = EQ
-   compare DENIED    DENIED    = EQ
-   compare CONFLICT  CONFLICT  = EQ
-   compare UNKNOWN   UNKNOWN   = EQ
-   compare NONE      NONE      = EQ
-   compare UNDECIDED UNDECIDED = EQ
-   compare DENIED    _         = LT
-   compare _         DENIED    = GT
-   compare CONFLICT  UNDECIDED = EQ
-   compare UNDECIDED CONFLICT  = EQ
-   compare CONFLICT  _         = LT
-   compare _         CONFLICT  = GT
-   compare UNDECIDED _         = LT
-   compare _         UNDECIDED = GT
-   compare WEAKDEN   _         = LT
-   compare _         WEAKDEN   = GT
-   compare NONE      _         = LT
-   compare _         NONE      = GT
-   compare WEAKSATIS _         = LT
-   compare _         WEAKSATIS = GT
-   compare SATISFIED _         = GT
-   compare _         SATISFIED = LT
+instance [andSN] Cast SValue Nat where
+  cast DENIED    = cast 0
+  cast CONFLICT  = cast 1
+  cast UNKNOWN   = cast 1
+  cast WEAKDEN   = cast 2
+  cast NONE      = cast 3
+  cast WEAKSATIS = cast 4
+  cast SATISFIED = cast 5
+
+instance [andNS] Cast Nat SValue where
+  cast Z                     = DENIED
+  cast (S Z)                 = UNKNOWN
+  cast (S (S Z))             = WEAKDEN
+  cast (S (S (S Z)))         = NONE
+  cast (S (S (S (S Z))))     = WEAKSATIS
+  cast (S (S (S (S (S Z))))) = SATISFIED
+  cast _                     = UNKNOWN
+
 
 ||| Calculate AND decomposition
 getDecompAnd : List SValue -> SValue
-getDecompAnd ss = foldl (\olds,s => min @{andSat} s olds) SATISFIED ss
+getDecompAnd ss = cast @{andNS} $ foldl (\olds,s => min (toNat s) olds) (cast 5) ss
+  where
+    toNat : SValue -> Nat
+    toNat sv = cast @{andSN} sv
 
-instance [orSat] Ord SValue where
-    compare SATISFIED SATISFIED = EQ
-    compare WEAKSATIS WEAKSATIS = EQ
-    compare WEAKDEN   WEAKDEN   = EQ
-    compare DENIED    DENIED    = EQ
-    compare CONFLICT  CONFLICT  = EQ
-    compare UNKNOWN   UNKNOWN   = EQ
-    compare NONE      NONE      = EQ
-    compare UNDECIDED UNDECIDED = EQ
-    compare DENIED    _         = LT
-    compare _         DENIED    = GT
-    compare WEAKDEN   _         = LT
-    compare _         WEAKDEN   = GT
-    compare NONE      _         = LT
-    compare _         NONE      = GT
-    compare WEAKSATIS _         = LT
-    compare _         WEAKSATIS = GT
-    compare CONFLICT  UNDECIDED = EQ
-    compare UNDECIDED CONFLICT  = EQ
-    compare CONFLICT  _         = LT
-    compare _         CONFLICT  = GT
-    compare UNDECIDED _         = LT
-    compare _         UNDECIDED = GT
-    compare SATISFIED _         = GT
-    compare _         SATISFIED = LT
+instance [orSN] Cast SValue Nat where
+  cast DENIED    = cast 0
+  cast WEAKDEN   = cast 1
+  cast NONE      = cast 2
+  cast WEAKSATIS = cast 3
+  cast CONFLICT  = cast 4
+  cast UNKNOWN   = cast 4
+  cast SATISFIED = cast 5
+
+instance [orNS] Cast Nat SValue where
+  cast Z                     = DENIED
+  cast (S Z)                 = WEAKDEN
+  cast (S (S Z))             = NONE
+  cast (S (S (S Z)))         = WEAKSATIS
+  cast (S (S (S (S Z))))     = UNKNOWN
+  cast (S (S (S (S (S Z))))) = SATISFIED
+  cast _                     = UNKNOWN
+
 
 ||| Calculate IOR decomposition.
 getDecompIOR : List SValue -> SValue
-getDecompIOR ss = foldl (\olds,s => min @{orSat} s olds) SATISFIED ss
+getDecompIOR ss = cast @{orNS} $ foldl (\olds,s => max (toNat s) olds) (cast 0) ss
+  where
+    toNat : SValue -> Nat
+    toNat sv = cast @{orSN} sv
 
 ||| Calculate XOR decomposition.
 getDecompXOR : List SValue -> SValue
-getDecompXOR ss = foldl (\olds,s => max @{orSat} s olds) DENIED ss
+getDecompXOR ss = cast @{orNS} $ foldl (\olds,s => min (toNat s) olds) (cast 5) ss
+  where
+    toNat : SValue -> Nat
+    toNat sv = cast @{orSN} sv
 
 ||| Record to keep track of contribution valeu counts.
 record ContribCount where
@@ -95,10 +90,11 @@ defCCount = MkCCount Z Z Z Z Z
 
 ||| Implementation of `AdjustContributionCounters`
 adJustCount : SValue -> ContribCount -> ContribCount
-adJustCount SATISFIED cnt = record {noSatis = (S (noSatis cnt))} cnt
-adJustCount WEAKSATIS cnt = record {noWeakS = (S (noWeakS cnt))} cnt
-adJustCount WEAKDEN   cnt = record {noWeakD = (S (noWeakD cnt))} cnt
-adJustCount UNDECIDED cnt = record {noUndec = (S (noUndec cnt))} cnt
+adJustCount SATISFIED cnt = record {noSatis  = (S (noSatis cnt))} cnt
+adJustCount DENIED    cnt = record {noDenied = (S (noDenied cnt))} cnt
+adJustCount WEAKSATIS cnt = record {noWeakS  = (S (noWeakS cnt))} cnt
+adJustCount WEAKDEN   cnt = record {noWeakD  = (S (noWeakD cnt))} cnt
+adJustCount UNKNOWN   cnt = record {noUndec  = (S (noUndec cnt))} cnt
 adJustCount _         cnt = cnt
 
 ||| Implementation of `AdjustContributionCounters` for a list of values.
@@ -110,49 +106,49 @@ weightedContrib : SValue -> CValue -> SValue
 weightedContrib  DENIED    MAKE    = DENIED
 weightedContrib  DENIED    HELPS   = WEAKDEN
 weightedContrib  DENIED    SOMEPOS = WEAKDEN
-weightedContrib  DENIED    ZERO    = NONE
+weightedContrib  DENIED    UNKNOWN    = NONE
 weightedContrib  DENIED    SOMENEG = WEAKSATIS
 weightedContrib  DENIED    HURT    = WEAKSATIS
 weightedContrib  DENIED    BREAK   = SATISFIED
 weightedContrib  WEAKDEN   MAKE    = WEAKDEN
 weightedContrib  WEAKDEN   HELPS   = WEAKDEN
 weightedContrib  WEAKDEN   SOMEPOS = WEAKDEN
-weightedContrib  WEAKDEN   ZERO    = NONE
+weightedContrib  WEAKDEN   UNKNOWN    = NONE
 weightedContrib  WEAKDEN   SOMENEG = WEAKSATIS
 weightedContrib  WEAKDEN   HURT    = WEAKSATIS
 weightedContrib  WEAKDEN   BREAK   = WEAKSATIS
 weightedContrib  WEAKSATIS MAKE    = WEAKSATIS
 weightedContrib  WEAKSATIS HELPS    = WEAKSATIS
 weightedContrib  WEAKSATIS SOMEPOS = WEAKSATIS
-weightedContrib  WEAKSATIS ZERO    = NONE
+weightedContrib  WEAKSATIS UNKNOWN    = NONE
 weightedContrib  WEAKSATIS SOMENEG = WEAKDEN
 weightedContrib  WEAKSATIS HURT    = WEAKDEN
 weightedContrib  WEAKSATIS BREAK   = WEAKDEN
 weightedContrib  SATISFIED MAKE    = SATISFIED
 weightedContrib  SATISFIED HELPS   = WEAKSATIS
 weightedContrib  SATISFIED SOMEPOS = WEAKSATIS
-weightedContrib  SATISFIED ZERO    = NONE
+weightedContrib  SATISFIED UNKNOWN    = NONE
 weightedContrib  SATISFIED SOMENEG = WEAKDEN
 weightedContrib  SATISFIED HURT    = WEAKDEN
 weightedContrib  SATISFIED BREAK   = DENIED
-weightedContrib  CONFLICT  MAKE    = UNDECIDED
-weightedContrib  CONFLICT  HELPS   = UNDECIDED
-weightedContrib  CONFLICT  SOMEPOS = UNDECIDED
-weightedContrib  CONFLICT  ZERO    = UNDECIDED
-weightedContrib  CONFLICT  SOMENEG = UNDECIDED
-weightedContrib  CONFLICT  HURT    = UNDECIDED
-weightedContrib  CONFLICT  BREAK   = UNDECIDED
-weightedContrib  UNDECIDED MAKE    = UNDECIDED
-weightedContrib  UNDECIDED HELPS   = UNDECIDED
-weightedContrib  UNDECIDED SOMEPOS = UNDECIDED
-weightedContrib  UNDECIDED ZERO    = UNDECIDED
-weightedContrib  UNDECIDED SOMENEG = UNDECIDED
-weightedContrib  UNDECIDED HURT    = UNDECIDED
-weightedContrib  UNDECIDED BREAK   = UNDECIDED
+weightedContrib  CONFLICT  MAKE    = UNKNOWN
+weightedContrib  CONFLICT  HELPS   = UNKNOWN
+weightedContrib  CONFLICT  SOMEPOS = UNKNOWN
+weightedContrib  CONFLICT  UNKNOWN    = UNKNOWN
+weightedContrib  CONFLICT  SOMENEG = UNKNOWN
+weightedContrib  CONFLICT  HURT    = UNKNOWN
+weightedContrib  CONFLICT  BREAK   = UNKNOWN
+weightedContrib  UNKNOWN MAKE    = UNKNOWN
+weightedContrib  UNKNOWN HELPS   = UNKNOWN
+weightedContrib  UNKNOWN SOMEPOS = UNKNOWN
+weightedContrib  UNKNOWN UNKNOWN    = UNKNOWN
+weightedContrib  UNKNOWN SOMENEG = UNKNOWN
+weightedContrib  UNKNOWN HURT    = UNKNOWN
+weightedContrib  UNKNOWN BREAK   = UNKNOWN
 weightedContrib  NONE      MAKE    = NONE
 weightedContrib  NONE      HELPS   = NONE
 weightedContrib  NONE      SOMEPOS = NONE
-weightedContrib  NONE      ZERO    = NONE
+weightedContrib  NONE      UNKNOWN    = NONE
 weightedContrib  NONE      SOMENEG = NONE
 weightedContrib  NONE      HURT    = NONE
 weightedContrib  NONE      BREAK   = NONE
@@ -161,24 +157,37 @@ weightedContrib  _         _       = NONE
 
 ||| Implementation of the `CompareSatisfiedAndDenied`  resolution
 cmpSatAndDen : ContribCount -> SValue
-cmpSatAndDen (MkCCount ns _ _ nd _) =
-  if ns > 0 && nd > 0
+cmpSatAndDen cnt =
+  if noSatis cnt > 0 && noDenied cnt > 0
     then CONFLICT
-    else if ns > 0 && nd == 0
+    else if noSatis cnt > 0 && noDenied cnt == 0
       then SATISFIED
-      else if nd > 0 && ns == 0
+      else if noDenied cnt > 0 && noSatis cnt == 0
         then DENIED
-        else NONE
+        else if noSatis cnt == 0 && noDenied cnt == 0
+          then NONE
+          else NONE
 
 ||| Implementation of the `CompareWSandWD` function
 cmpWSandWD : ContribCount -> SValue
-cmpWSandWD (MkCCount _ nws nwd _ _) =
-  if nws > nwd
+cmpWSandWD cnt =
+  if noWeakS cnt > noWeakD cnt
     then WEAKSATIS
-    else if nwd > nws
+    else if noWeakD cnt > noWeakS cnt
       then WEAKDEN
-      else NONE
+      else if noWeakD cnt == noWeakS cnt
+        then NONE
+        else UNKNOWN
 
+
+{-
+  noSatis  : Nat
+  noWeakS  : Nat
+  noWeakD  : Nat
+  noDenied : Nat
+  noUndec  : Nat
+
+-}
 ||| Implementation of the `CombineContributionutions` function
 %inline
 combineContribs : SValue -> SValue -> SValue
@@ -194,6 +203,6 @@ combineContribs NONE      DENIED    = DENIED
 combineContribs NONE      SATISFIED = SATISFIED
 combineContribs NONE      CONFLICT  = CONFLICT
 combineContribs NONE      NONE      = NONE
-combineContribs _         _         = NONE
+combineContribs _         _         = UNKNOWN
 
 -- --------------------------------------------------------------------- [ EOF ]
