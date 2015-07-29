@@ -84,13 +84,6 @@ evalElem e g = do
   contribValue <- calcContrib decompValue e g
   pure contribValue
 
--- --------------------------------------------------- [ Initialisation Checks ]
-
-MInitEffs : List EFFECT
-MInitEffs = [ 'next ::: STATE (Stack NodeID)
-            , 'seen ::: STATE (List NodeID)
-            , 'init ::: STATE Bool]
-
 -- -------------------------------------------------------------- [ Evaluation ]
 private
 partial

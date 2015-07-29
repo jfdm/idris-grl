@@ -75,6 +75,9 @@ isCorrelEdge _                      = False
 getGoalByTitle : String -> GModel -> Maybe GoalNode
 getGoalByTitle t g = getValueUsing (\x => getNodeTitle x == t) g
 
+getGoalIDByTitle : String -> GModel -> Maybe NodeID
+getGoalIDByTitle t g = getNodeIDUsing (\x => getNodeTitle x == t) g
+
 getGoalByTitle' : GoalNode -> GModel -> Maybe GoalNode
 getGoalByTitle' t g = getGoalByTitle (getNodeTitle t) g
 
