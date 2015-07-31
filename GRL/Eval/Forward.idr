@@ -12,6 +12,7 @@ import Effect.State
 import Data.AVL.Dict
 import Data.AVL.Graph
 import Data.Stack
+import Data.Queue
 import Data.Vect
 
 import GRL.Common
@@ -28,8 +29,7 @@ import Debug.Trace
 
 ||| The effects used in a BFS.
 MEvalEffs : List EFFECT
-MEvalEffs = [ 'next ::: STATE (Stack NodeID)
-            , 'seen ::: STATE (List NodeID)]
+MEvalEffs = [STATE (Queue NodeID)]
 
 private
 getSat' : NodeID -> GModel -> Maybe SValue
@@ -98,38 +98,68 @@ validityCheck g = allLeafsValid && not gTy
 
 
 -- -------------------------------------------------------------- [ Evaluation ]
-private
+-- private
+-- partial
+-- doEval' : GModel -> Eff GModel MEvalEffs
+-- doEval' g = do
+--   s <- 'next :- get
+--   case popS' s of
+--     Nothing           => pure g
+--     Just (curr, newS) => do
+--       'next :- put newS
+--       vs <- 'seen :- get
+--       if elem curr vs
+--         then doEval' g
+--         else do
+--           let ns = getEdgesByID curr g
+--           if isNil ns
+--             then do
+--               'seen :- update (\xs => [curr] ++ xs)
+--               doEval' g
+--             else do
+--               let childIDs = map fst ns
+--               let children = catMaybes $ map (\x => getValueByID x g) childIDs
+--               eval <- evalElem curr g
+--               let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
+--               'seen :- update (\xs => [curr] ++ xs)
+--               doEval' newG
+
 partial
 doEval : GModel -> Eff GModel MEvalEffs
 doEval g = do
-  s <- 'next :- get
-  case popS' s of
-    Nothing           => pure g
-    Just (curr, newS) => do
-      'next :- put newS
-      vs <- 'seen :- get
-      if elem curr vs
-        then doEval g
-        else do
-          let ns = getEdgesByID curr g
-          if isNil ns
-            then do
-              'seen :- update (\xs => [curr] ++ xs)
-              doEval g
+  q <- get
+  case popQ' q of
+    Nothing        => pure g
+    Just (c, newQ) => do
+      put newQ
+      case getValueByID c g of --- if node doesn't exist
+        Nothing => pure g
+        Just c' => do
+          if isJust $ getSValue c' --- if satisfied then move on
+            then doEval g
             else do
-              let childIDs = map fst ns
-              let children = catMaybes $ map (\x => getValueByID x g) childIDs
-              eval <- evalElem curr g
-              let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
-              'seen :- update (\xs => [curr] ++ xs)
-              doEval newG
+              let childIDs = getEdgesByID c g
+              if isNil childIDs --- if leaf node
+                then pure g
+                else do
+                  let children = getValuesByID (map fst childIDs) g
+                  if and $ map (\x => isJust $ getSValue x) children
+                    then do
+                      eval <- evalElem c g
+                      let newG = updateNodeValueByIDUsing c (\x => record {getSValue = Just eval} x) g
+                      doEval newG
+                    else do
+                      update (\xs => pushQ c xs)
+                      doEval g
+
+
+
 
 private
 partial
 runEval : GModel
       -> List (GoalNode)
-runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
-                                     , 'seen := List.Nil] $ do
+runEval g = with Effects runPureInit [pushQThings (verticesID g) mkQueue] $ do
     if validityCheck g
       then do
         newG <- doEval g
