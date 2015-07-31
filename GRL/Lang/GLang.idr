@@ -20,13 +20,13 @@ import public GRL.Pretty
 abstract
 data GLang : GTy -> Type where
     ||| Make a Goal node.
-    MkGoal : String -> SValue -> GLang ELEM
+    MkGoal : String -> Maybe SValue -> GLang ELEM
     ||| Make a Soft Goal node.
-    MkSoft : String -> SValue -> GLang ELEM
+    MkSoft : String -> Maybe SValue -> GLang ELEM
     ||| Make a Task node.
-    MkTask : String -> SValue -> GLang ELEM
+    MkTask : String -> Maybe SValue -> GLang ELEM
     ||| Make a resource node.
-    MkRes  : String -> SValue -> GLang ELEM
+    MkRes  : String -> Maybe SValue -> GLang ELEM
 
     ||| Declare an impact relation.
     MkImpacts : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
@@ -53,28 +53,28 @@ getElemTitle (MkRes  t _) = t
 -- ------------------------------------------------------------ [ Constructors ]
 
 mkGoal : String -> GLang ELEM
-mkGoal t = MkGoal t UNKNOWN
+mkGoal t = MkGoal t Nothing
 
 mkSoft : String -> GLang ELEM
-mkSoft t = MkSoft t UNKNOWN
+mkSoft t = MkSoft t Nothing
 
 mkTask : String -> GLang ELEM
-mkTask t = MkTask t UNKNOWN
+mkTask t = MkTask t Nothing
 
 mkRes : String -> GLang ELEM
-mkRes t = MkRes t UNKNOWN
+mkRes t = MkRes t Nothing
 
 
-mkSatGoal : String -> SValue -> GLang ELEM
+mkSatGoal : String -> Maybe SValue -> GLang ELEM
 mkSatGoal = MkGoal
 
-mkSatSoft : String -> SValue -> GLang ELEM
+mkSatSoft : String -> Maybe SValue -> GLang ELEM
 mkSatSoft = MkSoft
 
-mkSatTask : String -> SValue -> GLang ELEM
+mkSatTask : String -> Maybe SValue -> GLang ELEM
 mkSatTask = MkTask
 
-mkSatRes : String -> SValue -> GLang ELEM
+mkSatRes : String -> Maybe SValue -> GLang ELEM
 mkSatRes = MkRes
 
 

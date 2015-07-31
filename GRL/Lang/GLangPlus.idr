@@ -37,13 +37,13 @@ data GLangPTy = E GElemTy | L | S
 ||| The GLang Language with improved structural semantics.
 data GLang : GLangPTy -> GTy -> Type where
   ||| Make a Goal node.
-  MkGoal : String -> SValue -> GLang (E GOALty) ELEM
+  MkGoal : String -> Maybe SValue -> GLang (E GOALty) ELEM
   ||| Make a Soft Goal node.
-  MkSoft : String -> SValue -> GLang (E SOFTty) ELEM
+  MkSoft : String -> Maybe SValue -> GLang (E SOFTty) ELEM
   ||| Make a Task node.
-  MkTask : String -> SValue -> GLang (E TASKty) ELEM
+  MkTask : String -> Maybe SValue -> GLang (E TASKty) ELEM
   ||| Make a resource node.
-  MkRes  : String -> SValue -> GLang (E RESty)  ELEM
+  MkRes  : String -> Maybe SValue -> GLang (E RESty)  ELEM
 
   ||| Declare an impact relation.
   MkImpact : CValue

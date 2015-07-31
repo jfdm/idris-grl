@@ -12,6 +12,7 @@ import Effect.State
 import Data.AVL.Dict
 import Data.AVL.Graph
 import Data.Stack
+import Data.Vect
 
 import GRL.Common
 import GRL.Model
@@ -35,7 +36,7 @@ getSat' : NodeID -> GModel -> Maybe SValue
 getSat' id g =
   case getValueByID id g of
     Nothing => Nothing
-    Just v  => Just $ getSValue v
+    Just v  => getSValue v
 
 calcDecomp : NodeID -> GModel -> Eff (SValue) MEvalEffs
 calcDecomp id g = do
@@ -84,6 +85,18 @@ evalElem e g = do
   contribValue <- calcContrib decompValue e g
   pure contribValue
 
+-- -------------------------------------------------------------- [ Init Check ]
+
+validityCheck : GModel -> Bool
+validityCheck g = allLeafsValid && not gTy
+  where
+    allLeafsValid : Bool
+    allLeafsValid = and $ map (\x => isJust (getSValue x)) (getValuesByID (leafNodes g) g)
+
+    gTy : Bool
+    gTy = isDisconnected g
+
+
 -- -------------------------------------------------------------- [ Evaluation ]
 private
 partial
@@ -107,24 +120,30 @@ doEval g = do
               let childIDs = map fst ns
               let children = catMaybes $ map (\x => getValueByID x g) childIDs
               eval <- evalElem curr g
-              let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = eval} x) g
+              let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
               'seen :- update (\xs => [curr] ++ xs)
               doEval newG
 
 private
 partial
-runEval : GModel -> List (GoalNode)
+runEval : GModel
+      -> List (GoalNode)
 runEval g = with Effects runPureInit [ 'next := pushSThings (verticesID g) mkStack
                                      , 'seen := List.Nil] $ do
-    newG <- doEval g
-    pure (vertices newG)
+    if validityCheck g
+      then do
+        newG <- doEval g
+        pure (vertices newG)
+      else pure Nil
 
 ||| Evaluate a model with or without a given strategy.
 |||
 ||| This function will deploy the strategy if it is given. Using this
 ||| code with a predeployed strategy may give unexpected results.
 partial
-evalModel : GModel -> Maybe Strategy -> List (GoalNode)
+evalModel : (g : GModel)
+         -> Maybe Strategy
+         -> List (GoalNode)
 evalModel g Nothing  = runEval g
 evalModel g (Just s) = runEval $ fst (deployStrategy g s)
 -- --------------------------------------------------------------------- [ EOF ]

@@ -15,7 +15,7 @@ import GRL.Common
 ||| An IR to aid in converting DSL language constructs into Goal Graph
 ||| objects.
 data GExpr : GTy -> Type where
-  Elem  : GElemTy -> String -> SValue -> GExpr ELEM
+  Elem  : GElemTy -> String -> Maybe SValue -> GExpr ELEM
   ILink : GIntentTy -> CValue -> GExpr ELEM -> GExpr ELEM -> GExpr INTENT
   SLink : GStructTy -> GExpr ELEM -> List (GExpr ELEM) -> GExpr STRUCT
 

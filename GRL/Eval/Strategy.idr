@@ -24,7 +24,7 @@ deployStrategy : GModel -> Strategy -> (GModel, GModel)
 deployStrategy oldG ss = (newG, oldG)
   where
     canUp : SValue -> GoalNode -> GoalNode
-    canUp s n = record {getSValue = s} n
+    canUp s n = record {getSValue = Just s} n
 
     doUp : (GoalNode, SValue) -> GModel -> GModel
     doUp (n,s) m = updateGoalNode (\x => getNodeTitle n == getNodeTitle x )

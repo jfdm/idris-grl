@@ -48,7 +48,7 @@ interpTODO : String -> SValue -> InterpRes COMPty -> InterpRes ITEMty
 interpTODO d s (ResComp a) = ResITEM rtask (rtask ==> a | MAKES)
   where
     rtask : GLang ELEM
-    rtask = mkSatTask (d ++ getElemTitle a) s
+    rtask = mkSatTask (d ++ getElemTitle a) (Just s)
 
 
 interpTODOS : InterpRes PAPERty

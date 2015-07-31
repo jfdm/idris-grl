@@ -17,7 +17,7 @@ data Task : (GLang ELEM) -> Type where
 ||| Specify action
 data Action : (GLang ELEM) -> Type where
   MkAction : (t:String) -> (s:SValue)
-          -> Action (mkSatTask t s)
+          -> Action (mkSatTask t (Just s))
 
 ||| Specify task relation.
 data ActsOn : (GLang INTENT) -> Type where

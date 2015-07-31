@@ -1,27 +1,75 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="jfdm" created="July 3, 2015 5:33:53 PM BST" modified="July 3, 2015 5:47:49 PM BST" specVersion="6" urnVersion="1.27" nextGlobalID="141">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="jfdm" created="July 3, 2015 5:33:53 PM BST" modified="July 30, 2015 5:17:06 PM BST" specVersion="7" urnVersion="1.27" nextGlobalID="141">
   <ucmspec>
     <scenarioGroups name="ScenarioGroup5" id="5">
       <scenarios name="ScenarioDef6" id="6"/>
     </scenarioGroups>
   </ucmspec>
   <grlspec>
-    <intElements name="performance" id="11" linksDest="103 104 105" refs="12"/>
-    <intElements name="Usability" id="15" linksDest="121 122 123" refs="16"/>
-    <intElements name="User Friendly" id="17" linksSrc="122" refs="18"/>
-    <intElements name="Supportiveness" id="19" linksDest="135" linksSrc="121" refs="20"/>
-    <intElements name="Ease of Learning" id="21" linksSrc="123" refs="22"/>
-    <intElements name="Flexibility" id="23" linksDest="124 125" refs="24"/>
-    <intElements name="interoperability" id="25" linksDest="136" linksSrc="124" refs="26"/>
-    <intElements name="Scalability" id="27" linksSrc="125" refs="28"/>
-    <intElements name="Good System Management" id="29" linksSrc="108 135 136" refs="30"/>
-    <intElements name="Maximum System Capacity" id="31" linksDest="108 115 116" linksSrc="130" refs="32"/>
-    <intElements name="Maximize CPU Capacity" id="35" linksSrc="115" refs="36"/>
-    <intElements name="Maximize Memory Capacity" id="39" linksSrc="116" refs="40"/>
-    <intElements name="Maximum DB Capacity" id="51" linksSrc="106" refs="52"/>
-    <intElements name="through-put" id="61" linksDest="106 130" linksSrc="105" refs="62"/>
-    <intElements name="Responsiveness" id="63" linksSrc="104" refs="64"/>
-    <intElements name="reliability" id="65" linksSrc="103" refs="66"/>
+    <intElements name="performance" id="11" linksDest="103 104 105" refs="12">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Usability" id="15" linksDest="121 122 123" refs="16">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="User Friendly" id="17" linksSrc="122" refs="18">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Supportiveness" id="19" linksDest="135" linksSrc="121" refs="20">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Ease of Learning" id="21" linksSrc="123" refs="22">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Flexibility" id="23" linksDest="124 125" refs="24">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="interoperability" id="25" linksDest="136" linksSrc="124" refs="26">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Scalability" id="27" linksSrc="125" refs="28">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Good System Management" id="29" linksSrc="108 135 136" refs="30">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Maximum System Capacity" id="31" linksDest="108 115 116" linksSrc="130" refs="32">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Maximize CPU Capacity" id="35" linksSrc="115" refs="36">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <intElements name="Maximize Memory Capacity" id="39" linksSrc="116" refs="40">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Maximum DB Capacity" id="51" linksSrc="106" refs="52">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="through-put" id="61" linksDest="106 130" linksSrc="105" refs="62">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Responsiveness" id="63" linksSrc="104" refs="64">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="reliability" id="65" linksSrc="103" refs="66">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
     <links xsi:type="grl:Decomposition" name="Decomposition103" id="103" refs="//@urndef/@specDiagrams.0/@connections.0" dest="11" src="65"/>
     <links xsi:type="grl:Decomposition" name="Decomposition104" id="104" refs="//@urndef/@specDiagrams.0/@connections.1" dest="11" src="63"/>
     <links xsi:type="grl:Decomposition" name="Decomposition105" id="105" refs="//@urndef/@specDiagrams.0/@connections.2" dest="11" src="61"/>
@@ -38,7 +86,14 @@
     <links xsi:type="grl:Contribution" name="Contribution135" id="135" refs="//@urndef/@specDiagrams.0/@connections.13" dest="19" src="29" correlation="true"/>
     <links xsi:type="grl:Contribution" name="Contribution136" id="136" refs="//@urndef/@specDiagrams.0/@connections.14" dest="25" src="29" correlation="true"/>
     <groups name="StrategiesGroup3" id="3" strategies="4"/>
-    <strategies name="EvaluationStrategy4" id="4" author="jfdm" group="3"/>
+    <strategies name="EvaluationStrategy4" id="4" author="jfdm" group="3">
+      <evaluations evaluation="-50" qualitativeEvaluation="WeaklyDenied" intElement="39">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="35">
+        <kpiEvalValueSet/>
+      </evaluations>
+    </strategies>
     <impactModel/>
     <indicatorGroup name="Time" id="7" isRedesignCategory="true"/>
     <indicatorGroup name="Cost" id="8" isRedesignCategory="true"/>
