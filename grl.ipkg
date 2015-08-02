@@ -19,6 +19,8 @@ modules = GRL.Common
         , GRL.Eval.Qualitative
         , GRL.Eval.Strategy
 
+        , Test.Utils
+
         , Test.Decomposition
         , Test.Contribution
         , Test.Amyot
@@ -31,10 +33,9 @@ modules = GRL.Common
         , Test.DSML.Paper.GLang
 
 tests =
---        Test.Amyot.runTest
        Test.Decomposition.runTest
      , Test.Contribution.runTest
-
+     , Test.Amyot.runTest
 --      , Test.DSML.TODO.Abstract.runTest
 --      , Test.DSML.TODO.ReSkin.runTest
 

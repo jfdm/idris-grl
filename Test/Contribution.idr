@@ -55,7 +55,7 @@ doTest m s = do
 partial
 runTest : IO ()
 runTest = do
-  putStrLn "--> Decomposition Tests"
+  putStrLn "--> Composition Tests"
 
   putStrLn "Strategy A: expecting None"
   doTest model (Just a)

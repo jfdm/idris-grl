@@ -81,13 +81,13 @@ runTest = do
   putStrLn "--> Decomposition Tests"
   printLn $ True == and [ WEAKDEN   == getDecompAnd [WEAKDEN,WEAKSATIS,NONE]
                         , SATISFIED == getDecompAnd [SATISFIED,SATISFIED,SATISFIED]
-                        , UNKNOWN   == getDecompAnd [WEAKDEN,WEAKSATIS,CONFLICT]
+                        , UNDECIDED == getDecompAnd [WEAKDEN,WEAKSATIS,CONFLICT]
                         , DENIED    == getDecompAnd [DENIED,WEAKSATIS,CONFLICT]
                         ]
 
   printLn $ True == and [ WEAKSATIS == getDecompIOR [WEAKDEN,WEAKSATIS,NONE]
                         , WEAKDEN   == getDecompIOR [WEAKDEN,WEAKDEN,WEAKDEN]
-                        , UNKNOWN   == getDecompIOR [WEAKDEN,WEAKSATIS,CONFLICT]
+                        , UNDECIDED == getDecompIOR [WEAKDEN,WEAKSATIS,CONFLICT]
                         , SATISFIED == getDecompIOR [WEAKDEN,SATISFIED,CONFLICT]
                         ]
 

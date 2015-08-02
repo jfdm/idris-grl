@@ -26,7 +26,7 @@ namespace Qualiative
     ||| the satisfaction of the intentional element.
     CONFLICT : SValue
     ||| The satisfaction level of the intentional element is unknown.
-    UNKNOWN : SValue
+    UNDECIDED : SValue
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
     NONE : SValue
 
@@ -204,7 +204,7 @@ instance Show SValue where
   show WEAKDEN   = "WEAKDEN"
   show DENIED    = "DENIED"
   show CONFLICT  = "CONFLICT"
-  show UNKNOWN   = "UNKNOWN"
+  show UNDECIDED = "UNDECIDED"
   show NONE      = "NONE"
 
 instance Eq SValue where
@@ -213,7 +213,7 @@ instance Eq SValue where
   (==) WEAKDEN   WEAKDEN   = True
   (==) DENIED    DENIED    = True
   (==) CONFLICT  CONFLICT  = True
-  (==) UNKNOWN   UNKNOWN   = True
+  (==) UNDECIDED UNDECIDED = True
   (==) NONE      NONE      = True
   (==) _         _         = False
 
@@ -252,7 +252,7 @@ instance Cast SValue String where
   cast WEAKDEN   = "WEAKDEN"
   cast DENIED    = "DENIED"
   cast CONFLICT  = "CONFLICT"
-  cast UNKNOWN   = "UNKNOWN"
+  cast UNDECIDED = "UNDECIDED"
   cast NONE      = "NONE"
 
 instance Cast String CValue where
@@ -271,8 +271,8 @@ instance Cast String SValue where
   cast "WEAKDEN"     = WEAKDEN
   cast "DENIED"      = DENIED
   cast "CONFLICT"    = CONFLICT
-  cast "UNKNOWN"     = UNKNOWN
+  cast "UNDECIDED"   = UNDECIDED
   cast "NONE"        = NONE
-  cast _             = UNKNOWN
+  cast _             = NONE
 
 -- --------------------------------------------------------------------- [ EOF ]

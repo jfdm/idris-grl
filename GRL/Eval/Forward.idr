@@ -38,13 +38,13 @@ getSat' id g =
     Nothing => Nothing
     Just v  => getSValue v
 
-calcDecomp : NodeID -> GModel -> Eff (SValue) MEvalEffs
+calcDecomp : NodeID -> GModel -> Eff (Maybe SValue) MEvalEffs
 calcDecomp id g = do
     case getValueByID id g of
-      Nothing => pure NONE
+      Nothing => pure Nothing
       Just val =>
         case getStructTy val of
-          Nothing   => pure NONE
+          Nothing   => pure Nothing
           Just dval => do
             let cedges   = getEdgesByID id g
             let children = map fst $ filter (\x => isDeCompEdge $ snd x) cedges
@@ -53,7 +53,7 @@ calcDecomp id g = do
                       ANDty => getDecompAnd csat
                       XORty => getDecompXOR csat
                       IORty => getDecompIOR csat
-            pure res
+            pure $ Just res
 
 
 
@@ -69,15 +69,18 @@ calcWeightedContrib (id, Just (Contribution x))  g = getWeightedContrib id x g
 calcWeightedContrib (id, Just (Correlation  x))  g = getWeightedContrib id x g
 calcWeightedContrib _                            _ = Nothing
 
-calcContrib : SValue -> NodeID -> GModel -> Eff SValue MEvalEffs
+calcContrib : Maybe SValue -> NodeID -> GModel -> Eff SValue MEvalEffs
 calcContrib dval id g = do
    let cedges   = getEdgesByID id g
    let children = filter (\x => not (isDeCompEdge $ snd x)) cedges
    let wsat     = catMaybes $ map (\e => calcWeightedContrib e g) children
-   let count'   = adjustCounts (dval::wsat)
+   let vs       = case dval of
+       Nothing => wsat
+       Just x  => x::wsat
+   let count'   = adjustCounts vs
    if (noUndec count' > 0)
-     then pure UNKNOWN
-     else pure $ combineContribs (cmpWSandWD count') (cmpSatAndDen count')
+     then pure UNDECIDED
+     else pure $ combineContribs count'
 
 evalElem : NodeID -> GModel -> Eff SValue MEvalEffs
 evalElem e g = do
@@ -96,6 +99,16 @@ validityCheck g = allLeafsValid && not gTy
     gTy : Bool
     gTy = isDisconnected g
 
+initGraph : GModel -> GModel
+initGraph g = foldl (doUp) g (leaves)
+  where
+    leaves : List GoalNode
+    leaves = map (\x => if isJust (getSValue x) then x else record {getSValue = Just NONE} x) (getValuesByID (leafNodes g) g)
+
+    doUp : GModel -> GoalNode -> GModel
+    doUp m n = updateGoalNode (\x => getNodeTitle n == getNodeTitle x)
+                              (\x => n)
+                              m
 
 -- -------------------------------------------------------------- [ Evaluation ]
 -- private
@@ -152,19 +165,29 @@ doEval g = do
                       update (\xs => pushQ c xs)
                       doEval g
 
-
-
-
 private
 partial
-runEval : GModel
-      -> List (GoalNode)
-runEval g = with Effects runPureInit [pushQThings (verticesID g) mkQueue] $ do
-    if validityCheck g
-      then do
-        newG <- doEval g
-        pure (vertices newG)
-      else pure Nil
+runEval : GModel -> List (GoalNode)
+runEval g = with Effects
+    runPureInit [pushQThings (verticesID g) mkQueue]
+                (wrapper g)
+  where
+    wrapper : GModel -> Eff (List GoalNode) MEvalEffs
+    wrapper g =
+      case validityCheck g of
+        True => do
+              newG <- doEval g
+              pure (vertices newG)
+        False => do
+              let g' = initGraph g
+              case validityCheck g' of
+                True => do
+                  newG <- doEval g'
+                  pure (vertices newG)
+                False => pure Nil
+
+
+
 
 ||| Evaluate a model with or without a given strategy.
 |||

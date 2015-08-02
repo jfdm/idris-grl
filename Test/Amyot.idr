@@ -10,7 +10,10 @@ module Test.Amyot
 import GRL.Lang.GLang
 import GRL.Eval
 
-import Debug.Trace
+import Test.Utils
+
+%default total
+%access public
 
 -- ------------------------------------------------------------------- [ Nodes ]
 
@@ -62,41 +65,93 @@ serviceInSCP = mkTask "Service in Service Control Point"
 -- ------------------------------------------------------------------- [ Model ]
 amyotModel : GModel
 amyotModel = emptyModel
-   \= highPerf
-   \= lowCost
-   \= minChange
-   \= maxHardware
-   \= highThrough
-   \= minMsgEx
-   \= minSwitch
-   \= detDataLoc
-   \= dataSCP
-   \= dataNewSNode
-   \= installSNode
-   \= serviceCentralSwitch
-   \= detSLoc
-   \= serviceInSCP
-   \= (minChange    ==> lowCost   | MAKES                  )
-   \= (maxHardware  ~~> minChange | MAKES                  )
-   \= (dataNewSNode ~~> minChange | MAKES                  )
-   \= (dataSCP      ~~> minChange | MAKES                  )
-   \= (minMsgEx     ==> highThrough | MAKES                )
-   \= (minSwitch    ==> highThrough | MAKES                )
+   \= highPerf               --  0
+   \= lowCost                --  1
+   \= minChange              --  2
+   \= maxHardware            --  3
+   \= highThrough            --  4
+   \= minMsgEx               --  5
+   \= minSwitch              --  6
+   \= detDataLoc             --  7
+   \= dataSCP                --  8
+   \= dataNewSNode           --  9
+   \= installSNode           -- 10
+   \= serviceCentralSwitch   -- 11
+   \= detSLoc                -- 12
+   \= serviceInSCP           -- 13
+   \= (minChange    ==> lowCost   | HELPS                  )
+   \= (maxHardware  ~~> minChange | HELPS                  )
+   \= (dataNewSNode ~~> minChange | HURTS                  )
+   \= (dataSCP      ~~> minChange | HELPS                  )
+   \= (minMsgEx     ==> highThrough | SOMEPOS              )
+   \= (minSwitch    ==> highThrough | HELPS                )
    \= (serviceInSCP ==> minMsgEx | SOMENEG                 )
-   \= (serviceInSCP         ~~> minSwitch | MAKES          )
-   \= (serviceCentralSwitch ~~> minSwitch | BREAK          )
+   \= (serviceInSCP ~~> minSwitch | MAKES                  )
    \= (serviceCentralSwitch ==> minMsgEx  | MAKES          )
-   \= (detSLoc      &= [serviceCentralSwitch, serviceInSCP])
+   \= (serviceCentralSwitch ~~> minSwitch | BREAK          )
+   \= (detSLoc      |= [serviceCentralSwitch, serviceInSCP])
    \= (detDataLoc   |= [dataNewSNode, dataSCP]             )
-   \= (dataNewSNode |= [installSNode]                      )
-   \= (highPerf     |= [maxHardware, highThrough]          )
+   \= (dataNewSNode &= [installSNode]                      )
+   \= (highPerf     &= [maxHardware, highThrough]          )
 
-myFirstStrategy : Strategy
-myFirstStrategy = buildStrategy [(detSLoc,SATISFIED)]
+-- ---------------------------------------------------------------- [ Strategy ]
+
+strategy1 : Strategy
+strategy1 = buildStrategy [ (maxHardware, WEAKSATIS)
+                          , (dataSCP, SATISFIED)
+                          , (serviceCentralSwitch, SATISFIED)]
+
+strategy1ExpectedResults : Strategy
+strategy1ExpectedResults = buildStrategy
+    [ (lowCost,              WEAKSATIS)
+    , (minChange,            WEAKSATIS)
+    , (detDataLoc,           SATISFIED)
+    , (highPerf,             NONE)
+    , (maxHardware,          WEAKSATIS)
+    , (highThrough,          NONE)
+    , (minMsgEx,             SATISFIED)
+    , (minSwitch,            DENIED)
+    , (dataSCP,              SATISFIED)
+    , (dataNewSNode,         NONE)
+    , (installSNode,         NONE)
+    , (serviceCentralSwitch, SATISFIED)
+    , (detSLoc,              SATISFIED)
+    , (serviceInSCP,         NONE)]
+
+-- ---------------------------------------------------------------- [ Strategy ]
+
+strategy2 : Strategy
+strategy2 = buildStrategy
+    [ (maxHardware, WEAKSATIS)
+    , (serviceCentralSwitch, SATISFIED)
+    , (installSNode, SATISFIED)]
+
+strategy2ExpectedResults : Strategy
+strategy2ExpectedResults = buildStrategy
+    [ (lowCost,              NONE)
+    , (minChange,            NONE)
+    , (detDataLoc,           SATISFIED)
+    , (highPerf,             NONE)
+    , (maxHardware,          WEAKSATIS)
+    , (highThrough,          NONE)
+    , (minMsgEx,             SATISFIED)
+    , (minSwitch,            DENIED)
+    , (dataSCP,              NONE)
+    , (dataNewSNode,         SATISFIED)
+    , (installSNode,         SATISFIED)
+    , (serviceCentralSwitch, SATISFIED)
+    , (detSLoc,              SATISFIED)
+    , (serviceInSCP,         NONE)]
+
 
 -- -------------------------------------------------------------------- [ Test ]
+partial
 runTest : IO ()
 runTest = do
-  putStrLn $ prettyModel amyotModel
+  putStrLn "Strategy 1:"
+  doTest amyotModel strategy1 strategy1ExpectedResults
+
+  putStrLn "Strategy 2:"
+  doTest amyotModel strategy2 strategy2ExpectedResults
 
 -- --------------------------------------------------------------------- [ EOF ]

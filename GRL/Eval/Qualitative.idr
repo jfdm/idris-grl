@@ -19,7 +19,7 @@ import GRL.Model
 instance [andSN] Cast SValue Nat where
   cast DENIED    = cast 0
   cast CONFLICT  = cast 1
-  cast UNKNOWN   = cast 1
+  cast UNDECIDED = cast 1
   cast WEAKDEN   = cast 2
   cast NONE      = cast 3
   cast WEAKSATIS = cast 4
@@ -27,12 +27,12 @@ instance [andSN] Cast SValue Nat where
 
 instance [andNS] Cast Nat SValue where
   cast Z                     = DENIED
-  cast (S Z)                 = UNKNOWN
+  cast (S Z)                 = UNDECIDED
   cast (S (S Z))             = WEAKDEN
   cast (S (S (S Z)))         = NONE
   cast (S (S (S (S Z))))     = WEAKSATIS
   cast (S (S (S (S (S Z))))) = SATISFIED
-  cast _                     = UNKNOWN
+  cast _                     = UNDECIDED
 
 
 ||| Calculate AND decomposition
@@ -48,7 +48,7 @@ instance [orSN] Cast SValue Nat where
   cast NONE      = cast 2
   cast WEAKSATIS = cast 3
   cast CONFLICT  = cast 4
-  cast UNKNOWN   = cast 4
+  cast UNDECIDED = cast 4
   cast SATISFIED = cast 5
 
 instance [orNS] Cast Nat SValue where
@@ -56,9 +56,9 @@ instance [orNS] Cast Nat SValue where
   cast (S Z)                 = WEAKDEN
   cast (S (S Z))             = NONE
   cast (S (S (S Z)))         = WEAKSATIS
-  cast (S (S (S (S Z))))     = UNKNOWN
+  cast (S (S (S (S Z))))     = UNDECIDED
   cast (S (S (S (S (S Z))))) = SATISFIED
-  cast _                     = UNKNOWN
+  cast _                     = UNDECIDED
 
 
 ||| Calculate IOR decomposition.
@@ -94,66 +94,68 @@ adJustCount SATISFIED cnt = record {noSatis  = (S (noSatis cnt))} cnt
 adJustCount DENIED    cnt = record {noDenied = (S (noDenied cnt))} cnt
 adJustCount WEAKSATIS cnt = record {noWeakS  = (S (noWeakS cnt))} cnt
 adJustCount WEAKDEN   cnt = record {noWeakD  = (S (noWeakD cnt))} cnt
-adJustCount UNKNOWN   cnt = record {noUndec  = (S (noUndec cnt))} cnt
+adJustCount UNDECIDED cnt = record {noUndec  = (S (noUndec cnt))} cnt
 adJustCount _         cnt = cnt
 
 ||| Implementation of `AdjustContributionCounters` for a list of values.
 adjustCounts : List SValue -> ContribCount
 adjustCounts es = foldl (flip $ adJustCount) defCCount es
 
+
 ||| Implementation of the `WeightedContribution` look up table.
 weightedContrib : SValue -> CValue -> SValue
-weightedContrib  DENIED    MAKE    = DENIED
-weightedContrib  DENIED    HELPS   = WEAKDEN
-weightedContrib  DENIED    SOMEPOS = WEAKDEN
-weightedContrib  DENIED    UNKNOWN    = NONE
-weightedContrib  DENIED    SOMENEG = WEAKSATIS
-weightedContrib  DENIED    HURT    = WEAKSATIS
-weightedContrib  DENIED    BREAK   = SATISFIED
-weightedContrib  WEAKDEN   MAKE    = WEAKDEN
-weightedContrib  WEAKDEN   HELPS   = WEAKDEN
-weightedContrib  WEAKDEN   SOMEPOS = WEAKDEN
-weightedContrib  WEAKDEN   UNKNOWN    = NONE
-weightedContrib  WEAKDEN   SOMENEG = WEAKSATIS
-weightedContrib  WEAKDEN   HURT    = WEAKSATIS
-weightedContrib  WEAKDEN   BREAK   = WEAKSATIS
-weightedContrib  WEAKSATIS MAKE    = WEAKSATIS
-weightedContrib  WEAKSATIS HELPS    = WEAKSATIS
-weightedContrib  WEAKSATIS SOMEPOS = WEAKSATIS
-weightedContrib  WEAKSATIS UNKNOWN    = NONE
-weightedContrib  WEAKSATIS SOMENEG = WEAKDEN
-weightedContrib  WEAKSATIS HURT    = WEAKDEN
-weightedContrib  WEAKSATIS BREAK   = WEAKDEN
-weightedContrib  SATISFIED MAKE    = SATISFIED
-weightedContrib  SATISFIED HELPS   = WEAKSATIS
-weightedContrib  SATISFIED SOMEPOS = WEAKSATIS
-weightedContrib  SATISFIED UNKNOWN    = NONE
-weightedContrib  SATISFIED SOMENEG = WEAKDEN
-weightedContrib  SATISFIED HURT    = WEAKDEN
-weightedContrib  SATISFIED BREAK   = DENIED
-weightedContrib  CONFLICT  MAKE    = UNKNOWN
-weightedContrib  CONFLICT  HELPS   = UNKNOWN
-weightedContrib  CONFLICT  SOMEPOS = UNKNOWN
-weightedContrib  CONFLICT  UNKNOWN    = UNKNOWN
-weightedContrib  CONFLICT  SOMENEG = UNKNOWN
-weightedContrib  CONFLICT  HURT    = UNKNOWN
-weightedContrib  CONFLICT  BREAK   = UNKNOWN
-weightedContrib  UNKNOWN MAKE    = UNKNOWN
-weightedContrib  UNKNOWN HELPS   = UNKNOWN
-weightedContrib  UNKNOWN SOMEPOS = UNKNOWN
-weightedContrib  UNKNOWN UNKNOWN    = UNKNOWN
-weightedContrib  UNKNOWN SOMENEG = UNKNOWN
-weightedContrib  UNKNOWN HURT    = UNKNOWN
-weightedContrib  UNKNOWN BREAK   = UNKNOWN
-weightedContrib  NONE      MAKE    = NONE
-weightedContrib  NONE      HELPS   = NONE
-weightedContrib  NONE      SOMEPOS = NONE
-weightedContrib  NONE      UNKNOWN    = NONE
-weightedContrib  NONE      SOMENEG = NONE
-weightedContrib  NONE      HURT    = NONE
-weightedContrib  NONE      BREAK   = NONE
-weightedContrib  _         _       = NONE
-
+weightedContrib x y = foldl (\res,(x',y',r') => if x == x' && y == y' then r' else res) NONE table
+  where
+    table : List (SValue, CValue, SValue)
+    table = [ (DENIED   , MAKES  ,  DENIED   )
+            , (DENIED   , HELPS  ,  WEAKDEN  )
+            , (DENIED   , SOMEPOS,  WEAKDEN  )
+            , (DENIED   , UNKNOWN,  NONE     )
+            , (DENIED   , SOMENEG,  WEAKSATIS)
+            , (DENIED   , HURTS  ,  WEAKSATIS)
+            , (DENIED   , BREAK  ,  SATISFIED)
+            , (WEAKDEN  , MAKES  ,  WEAKDEN  )
+            , (WEAKDEN  , HELPS  ,  WEAKDEN  )
+            , (WEAKDEN  , SOMEPOS,  WEAKDEN  )
+            , (WEAKDEN  , UNKNOWN,  NONE     )
+            , (WEAKDEN  , SOMENEG,  WEAKSATIS)
+            , (WEAKDEN  , HURTS  ,  WEAKSATIS)
+            , (WEAKDEN  , BREAK  ,  WEAKSATIS)
+            , (WEAKSATIS, MAKES  ,  WEAKSATIS)
+            , (WEAKSATIS, HELPS  ,  WEAKSATIS)
+            , (WEAKSATIS, SOMEPOS,  WEAKSATIS)
+            , (WEAKSATIS, UNKNOWN,  NONE     )
+            , (WEAKSATIS, SOMENEG,  WEAKDEN  )
+            , (WEAKSATIS, HURTS  ,  WEAKDEN  )
+            , (WEAKSATIS, BREAK  ,  WEAKDEN  )
+            , (SATISFIED, MAKES  ,  SATISFIED)
+            , (SATISFIED, HELPS  ,  WEAKSATIS)
+            , (SATISFIED, SOMEPOS,  WEAKSATIS)
+            , (SATISFIED, UNKNOWN,  NONE     )
+            , (SATISFIED, SOMENEG,  WEAKDEN  )
+            , (SATISFIED, HURTS  ,  WEAKDEN  )
+            , (SATISFIED, BREAK  ,  DENIED   )
+            , (CONFLICT , MAKES  ,  UNDECIDED)
+            , (CONFLICT , HELPS  ,  UNDECIDED)
+            , (CONFLICT , SOMEPOS,  UNDECIDED)
+            , (CONFLICT , UNKNOWN,  UNDECIDED)
+            , (CONFLICT , SOMENEG,  UNDECIDED)
+            , (CONFLICT , HURTS  ,  UNDECIDED)
+            , (CONFLICT , BREAK  ,  UNDECIDED)
+            , (UNDECIDED, MAKES  ,  UNDECIDED)
+            , (UNDECIDED, HELPS  ,  UNDECIDED)
+            , (UNDECIDED, SOMEPOS,  UNDECIDED)
+            , (UNDECIDED, UNKNOWN,  UNDECIDED)
+            , (UNDECIDED, SOMENEG,  UNDECIDED)
+            , (UNDECIDED, HURTS  ,  UNDECIDED)
+            , (UNDECIDED, BREAK  ,  UNDECIDED)
+            , (NONE     , MAKES  ,  NONE     )
+            , (NONE     , HELPS  ,  NONE     )
+            , (NONE     , SOMEPOS,  NONE     )
+            , (NONE     , UNKNOWN,  NONE     )
+            , (NONE     , SOMENEG,  NONE     )
+            , (NONE     , HURTS  ,  NONE     )
+            , (NONE     , BREAK  ,  NONE     )]
 
 ||| Implementation of the `CompareSatisfiedAndDenied`  resolution
 cmpSatAndDen : ContribCount -> SValue
@@ -177,32 +179,27 @@ cmpWSandWD cnt =
       then WEAKDEN
       else if noWeakD cnt == noWeakS cnt
         then NONE
-        else UNKNOWN
+        else NONE
 
-
-{-
-  noSatis  : Nat
-  noWeakS  : Nat
-  noWeakD  : Nat
-  noDenied : Nat
-  noUndec  : Nat
-
--}
 ||| Implementation of the `CombineContributionutions` function
-%inline
-combineContribs : SValue -> SValue -> SValue
-combineContribs WEAKDEN   DENIED    = DENIED
-combineContribs WEAKDEN   SATISFIED = WEAKSATIS
-combineContribs WEAKDEN   CONFLICT  = CONFLICT
-combineContribs WEAKDEN   NONE      = WEAKDEN
-combineContribs WEAKSATIS DENIED    = WEAKDEN
-combineContribs WEAKSATIS SATISFIED = SATISFIED
-combineContribs WEAKSATIS CONFLICT  = CONFLICT
-combineContribs WEAKSATIS NONE      = WEAKSATIS
-combineContribs NONE      DENIED    = DENIED
-combineContribs NONE      SATISFIED = SATISFIED
-combineContribs NONE      CONFLICT  = CONFLICT
-combineContribs NONE      NONE      = NONE
-combineContribs _         _         = UNKNOWN
+combineContribs : ContribCount -> SValue
+combineContribs c = doCombine (cmpWSandWD c) (cmpSatAndDen c)
+  where
+    table : List (SValue, SValue, SValue)
+    table =[ (WEAKDEN  , DENIED   , DENIED   )
+           , (WEAKDEN  , SATISFIED, WEAKSATIS)
+           , (WEAKDEN  , CONFLICT , CONFLICT )
+           , (WEAKDEN  , NONE     , WEAKDEN  )
+           , (WEAKSATIS, DENIED   , WEAKDEN  )
+           , (WEAKSATIS, SATISFIED, SATISFIED)
+           , (WEAKSATIS, CONFLICT , CONFLICT )
+           , (WEAKSATIS, NONE     , WEAKSATIS)
+           , (NONE     , DENIED   , DENIED   )
+           , (NONE     , SATISFIED, SATISFIED)
+           , (NONE     , CONFLICT , CONFLICT )
+           , (NONE     , NONE     , NONE     )]
+
+    doCombine : SValue -> SValue -> SValue
+    doCombine x y = foldl (\res,(x',y',r') => if x == x' && y == y' then r' else res) NONE table
 
 -- --------------------------------------------------------------------- [ EOF ]
