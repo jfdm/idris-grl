@@ -143,6 +143,32 @@ strategy2ExpectedResults = buildStrategy
     , (detSLoc,              SATISFIED)
     , (serviceInSCP,         NONE)]
 
+-- ---------------------------------------------------------------- [ Strategy ]
+
+strategy4 : Strategy
+strategy4 = buildStrategy
+    [ (maxHardware, WEAKSATIS)
+    , (dataSCP, SATISFIED)
+    , (serviceInSCP, SATISFIED)]
+
+strategy4ExpectedResults : Strategy
+strategy4ExpectedResults = buildStrategy
+    [ (lowCost,              WEAKSATIS)
+    , (minChange,            WEAKSATIS)
+    , (detDataLoc,           SATISFIED)
+    , (highPerf,             NONE)
+    , (maxHardware,          WEAKSATIS)
+    , (highThrough,          NONE)
+    , (minMsgEx,             WEAKDEN)
+    , (minSwitch,            SATISFIED)
+    , (dataSCP,              SATISFIED)
+    , (dataNewSNode,         NONE)
+    , (installSNode,         NONE)
+    , (serviceCentralSwitch, NONE)
+    , (detSLoc,              SATISFIED)
+    , (serviceInSCP,         SATISFIED)]
+
+
 
 -- -------------------------------------------------------------------- [ Test ]
 partial
@@ -153,5 +179,14 @@ runTest = do
 
   putStrLn "Strategy 2:"
   doTest amyotModel strategy2 strategy2ExpectedResults
+
+  putStrLn "Strategy 3: Not Cannot be replicated"
+
+  putStrLn "Strategy 4:"
+  doTest amyotModel strategy4 strategy4ExpectedResults
+
+  putStrLn "Strategy 5: Not Cannot be replicated"
+  putStrLn "Strategy 6: Not Cannot be replicated"
+
 
 -- --------------------------------------------------------------------- [ EOF ]
