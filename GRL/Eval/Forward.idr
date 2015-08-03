@@ -75,24 +75,28 @@ calcWeightedContrib (id, Just (Contribution x))  g = getWeightedContrib id x g
 calcWeightedContrib (id, Just (Correlation  x))  g = getWeightedContrib id x g
 calcWeightedContrib _                            _ = Nothing
 
-calcContrib : Maybe SValue -> NodeID -> GModel -> Eff SValue MEvalEffs
-calcContrib dval id g = do
-   let cedges   = getEdgesByID id g
-   let children = filter (\x => not (isDeCompEdge $ snd x)) cedges
-   let wsat     = catMaybes $ map (\e => calcWeightedContrib e g) children
-   let vs       = case dval of
-       Nothing => wsat
-       Just x  => x::wsat
-   let count'   = adjustCounts vs
-   if (noUndec count' > 0)
-     then pure UNDECIDED
-     else pure $ combineContribs count'
+calcContrib : Maybe SValue -> NodeID -> GModel -> SValue
+calcContrib dval id g =
+   if (noUndec count > 0)
+     then UNDECIDED
+     else combineContribs count
+  where
+    children : List (DemiEdge GoalEdge)
+    children = filter (\x => not (isDeCompEdge $ snd x)) (getEdgesByID id g)
 
-evalElem : NodeID -> GModel -> Eff SValue MEvalEffs
-evalElem e g = do
-  let decompValue  = calcDecomp e g
-  contribValue <- calcContrib decompValue e g
-  pure contribValue
+    wsat : List SValue
+    wsat = catMaybes $ map (\e => calcWeightedContrib e g) children
+
+    vals : List SValue
+    vals = case dval of
+      Nothing => wsat
+      Just x  => x :: wsat
+
+    count : ContribCount
+    count = adjustCounts vals
+
+evalElem : NodeID -> GModel -> SValue
+evalElem e g = calcContrib (calcDecomp e g) e g
 
 -- -------------------------------------------------------------- [ Init Check ]
 
@@ -137,7 +141,7 @@ doEval g = do
                   let children = getValuesByID (map fst childIDs) g
                   if and $ map (\x => isJust $ getSValue x) children
                     then do
-                      eval <- evalElem c g
+                      let eval = evalElem c g
                       let newG = updateNodeValueByIDUsing c (\x => record {getSValue = Just eval} x) g
                       doEval newG
                     else do
