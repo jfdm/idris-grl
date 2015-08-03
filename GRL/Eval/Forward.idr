@@ -25,6 +25,12 @@ import Debug.Trace
 
 %access public
 
+-- ------------------------------------------------------------- [ Eval Result ]
+
+data EvalResult : Type where
+  Result   : List GoalNode  -> EvalResult
+  BadModel : EvalResult
+
 -- ----------------------------------------------------- [ Forward Propagation ]
 
 ||| The effects used in a BFS.
@@ -140,24 +146,24 @@ doEval g = do
 
 private
 partial
-runEval : GModel -> List (GoalNode)
+runEval : GModel -> EvalResult
 runEval g = with Effects
     runPureInit [pushQThings (verticesID g) mkQueue]
                 (wrapper g)
   where
-    wrapper : GModel -> Eff (List GoalNode) MEvalEffs
+    wrapper : GModel -> Eff EvalResult MEvalEffs
     wrapper g =
       case validityCheck g of
         True => do
               newG <- doEval g
-              pure (vertices newG)
+              pure $ Result (vertices newG)
         False => do
               let g' = initGraph g
               case validityCheck g' of
                 True => do
                   newG <- doEval g'
-                  pure (vertices newG)
-                False => pure Nil
+                  pure $ Result (vertices newG)
+                False => pure BadModel
 
 ||| Evaluate a model with or without a given strategy.
 |||
@@ -166,7 +172,7 @@ runEval g = with Effects
 partial
 evalModel : (g : GModel)
          -> Maybe Strategy
-         -> List (GoalNode)
+         -> EvalResult -- List (GoalNode)
 evalModel g Nothing  = runEval g
 evalModel g (Just s) = runEval $ fst (deployStrategy g s)
 -- --------------------------------------------------------------------- [ EOF ]

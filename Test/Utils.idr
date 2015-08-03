@@ -41,8 +41,8 @@ partial
 execTest : GModel -> Strategy -> Strategy -> TestResults
 execTest m s es =
     case (evalModel m (Just s)) of
-      Nil  => BadModel
-      xs   => case collectResults xs es of
+      BadModel   => BadModel
+      Result res => case collectResults res es of
         Nil  => ValidResults
         xs   => BadResults xs
 
