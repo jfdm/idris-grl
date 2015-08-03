@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="jfdm" created="July 3, 2015 6:02:10 PM BST" modified="August 2, 2015 7:46:33 PM BST" specVersion="20" urnVersion="1.27" nextGlobalID="119">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="jfdm" created="July 3, 2015 6:02:10 PM BST" modified="August 3, 2015 8:54:48 AM BST" specVersion="21" urnVersion="1.27" nextGlobalID="121">
   <ucmspec>
     <scenarioGroups name="ScenarioGroup5" id="5">
       <scenarios name="ScenarioDef6" id="6"/>
@@ -11,12 +11,12 @@
       <metadata name="_qualEval" value="None"/>
     </intElements>
     <intElements name="Low Cost" id="13" linksDest="37" refs="14">
-      <metadata name="_numEval" value="0"/>
-      <metadata name="_qualEval" value="None"/>
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
     </intElements>
     <intElements name="Minimum Changes to Infrastructure" id="15" linksDest="38 66 67" linksSrc="37" refs="16">
-      <metadata name="_numEval" value="0"/>
-      <metadata name="_qualEval" value="None"/>
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
     </intElements>
     <intElements name="Maximum Hardware Utilisation" id="17" linksSrc="34 38" refs="18">
       <metadata name="_numEval" value="50"/>
@@ -27,12 +27,12 @@
       <metadata name="_qualEval" value="None"/>
     </intElements>
     <intElements name="Minimum Switch Load" id="21" linksDest="70 71" linksSrc="39" refs="22">
-      <metadata name="_numEval" value="-100"/>
-      <metadata name="_qualEval" value="Denied"/>
-    </intElements>
-    <intElements name="Minimum Message Exchange" id="23" linksDest="68 69" linksSrc="40" refs="24">
       <metadata name="_numEval" value="100"/>
       <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <intElements name="Minimum Message Exchange" id="23" linksDest="68 69" linksSrc="40" refs="24">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
     </intElements>
     <intElements name="Determine Data Location" id="42" linksDest="63 64" type="Goal" decompositionType="Or" refs="43">
       <metadata name="_numEval" value="100"/>
@@ -43,28 +43,28 @@
       <metadata name="_qualEval" value="Satisfied"/>
     </intElements>
     <intElements name="Data in Service Control Point" id="48" linksSrc="63 66" type="Task" refs="49">
-      <metadata name="_numEval" value="0"/>
-      <metadata name="_qualEval" value="None"/>
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
     </intElements>
     <intElements name="Data in New Service Node" id="50" linksDest="118" linksSrc="64 67" type="Task" refs="51">
-      <metadata name="_numEval" value="100"/>
-      <metadata name="_qualEval" value="Satisfied"/>
-    </intElements>
-    <intElements name="Service in Central Switch" id="54" linksSrc="61 68 70" type="Task" refs="55">
-      <metadata name="_numEval" value="100"/>
-      <metadata name="_qualEval" value="Satisfied"/>
-    </intElements>
-    <intElements name="Service in Service Control Point" id="56" linksSrc="60 69 71" type="Task" refs="57">
       <metadata name="_numEval" value="0"/>
       <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Service in Central Switch" id="54" linksSrc="61 68 70" type="Task" refs="55">
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
+    </intElements>
+    <intElements name="Service in Service Control Point" id="56" linksSrc="60 69 71" type="Task" refs="57">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
     </intElements>
     <intElements name="Task86" id="86" type="Task">
       <metadata name="_numEval" value="0"/>
       <metadata name="_qualEval" value="None"/>
     </intElements>
     <intElements name="Install Service Node" id="112" linksSrc="118" type="Task" refs="113">
-      <metadata name="_numEval" value="100"/>
-      <metadata name="_qualEval" value="Satisfied"/>
+      <metadata name="_numEval" value="0"/>
+      <metadata name="_qualEval" value="None"/>
     </intElements>
     <links xsi:type="grl:Decomposition" name="Decomposition34" id="34" refs="//@urndef/@specDiagrams.0/@connections.0" dest="11" src="17"/>
     <links xsi:type="grl:Decomposition" name="Decomposition35" id="35" refs="//@urndef/@specDiagrams.0/@connections.1" dest="11" src="19"/>
@@ -83,7 +83,7 @@
     <links xsi:type="grl:Contribution" name="Contribution70" id="70" refs="//@urndef/@specDiagrams.0/@connections.14" dest="21" src="54" contribution="Break" quantitativeContribution="-100" correlation="true"/>
     <links xsi:type="grl:Contribution" name="Contribution71" id="71" refs="//@urndef/@specDiagrams.0/@connections.15" dest="21" src="56" contribution="Make" quantitativeContribution="100" correlation="true"/>
     <links xsi:type="grl:Decomposition" name="Decomposition118" id="118" refs="//@urndef/@specDiagrams.0/@connections.16" dest="50" src="112"/>
-    <groups name="StrategiesGroup3" id="3" strategies="4 76"/>
+    <groups name="StrategiesGroup3" id="3" strategies="4 76 121"/>
     <strategies name="EvaluationStrategy4" id="4" author="jfdm" group="3">
       <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="48">
         <kpiEvalValueSet/>
@@ -106,6 +106,23 @@
         <kpiEvalValueSet/>
       </evaluations>
       <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="112">
+        <kpiEvalValueSet/>
+      </evaluations>
+    </strategies>
+    <strategies name="EvaluationStrategy121" id="121" author="jfdm" group="3">
+      <evaluations evaluation="50" qualitativeEvaluation="WeaklySatisfied" intElement="17">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations intElement="54">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations intElement="112">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="48">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="56">
         <kpiEvalValueSet/>
       </evaluations>
     </strategies>

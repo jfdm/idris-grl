@@ -8,6 +8,10 @@ import Debug.Trace
 %default total
 %access public
 
+data TestResults : Type where
+  BadModel     : TestResults
+  BadResults   : List (GoalNode, SValue, SValue) -> TestResults
+  ValidResults : TestResults
 
 getResult : GoalNode -> Strategy -> Maybe (GoalNode, SValue, SValue)
 getResult n es =
@@ -34,8 +38,13 @@ collectResults (g::gs) ss =
     Just x  => x :: collectResults gs ss
 
 partial
-execTest : GModel -> Strategy -> Strategy -> List (GoalNode, SValue, SValue)
-execTest m s es = collectResults (evalModel m (Just s)) es
+execTest : GModel -> Strategy -> Strategy -> TestResults
+execTest m s es =
+    case (evalModel m (Just s)) of
+      Nil  => BadModel
+      xs   => case collectResults xs es of
+        Nil  => ValidResults
+        xs   => BadResults xs
 
 partial
 printResults : List (GoalNode, SValue, SValue) -> IO ()
@@ -48,9 +57,9 @@ printResults ((n,g,e)::xs) = do
 partial
 doTest : GModel -> Strategy -> Strategy -> IO ()
 doTest m s es = do
-  let res = execTest m s es
-  case res of
-    Nil => printLn "Test Passed"
-    xs  => do
+  case execTest m s es of
+    BadModel      => printLn "Bad Model Evaluation"
+    ValidResults  => printLn "Test Passed"
+    BadResults xs => do
       putStrLn "Tests Failed"
       printResults xs

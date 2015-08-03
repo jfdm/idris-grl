@@ -174,6 +174,8 @@ strategy4ExpectedResults = buildStrategy
 partial
 runTest : IO ()
 runTest = do
+  putStrLn "--> Amyot 2010 gem"
+
   putStrLn "Strategy 1:"
   doTest amyotModel strategy1 strategy1ExpectedResults
 

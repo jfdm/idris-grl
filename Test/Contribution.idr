@@ -10,6 +10,8 @@ module Test.Contribution
 import GRL.Lang.GLang
 import GRL.Eval
 
+import Test.Utils
+
 %access public
 %default total
 
@@ -37,30 +39,42 @@ model = emptyModel
 -- ---------------------------------------------------------- [ IOR Strategies ]
 
 a : Strategy
-a = buildStrategy [(lan, NONE), (wireless, WEAKSATIS), (internet, WEAKDEN)]
+a = buildStrategy
+    [ (lan, NONE)
+    , (wireless, WEAKSATIS)
+    , (internet, WEAKDEN)]
+
+aExpRes : Strategy
+aExpRes = buildStrategy
+    [ (conn, NONE)
+    , (lan, NONE)
+    , (wireless, WEAKSATIS)
+    , (internet, WEAKDEN)]
 
 b : Strategy
-b = buildStrategy [(lan, NONE), (wireless, WEAKSATIS), (internet, WEAKSATIS)]
+b = buildStrategy
+    [ (lan, NONE)
+    , (wireless, WEAKSATIS)
+    , (internet, WEAKSATIS)]
+
+bExpRes : Strategy
+bExpRes = buildStrategy
+    [ (lan, NONE)
+    , (wireless, WEAKSATIS)
+    , (internet, WEAKSATIS)
+    , (conn, WEAKSATIS)]
 
 -- -------------------------------------------------------------------- [ Test ]
-
-partial
-doTest : GModel -> Maybe Strategy -> IO ()
-doTest m s = do
-  let res = evalModel m s
-  case List.find (\x => getNodeTitle x == "Increase Mobility") res of
-    Nothing => printLn "oopsie"
-    Just x  => printLn $ getSValue x
 
 partial
 runTest : IO ()
 runTest = do
   putStrLn "--> Composition Tests"
 
-  putStrLn "Strategy A: expecting None"
-  doTest model (Just a)
+  putStrLn "Strategy A:"
+  doTest model a aExpRes
 
-  putStrLn "Strategy B: expected Weakly Satisfied"
-  doTest model (Just b)
+  putStrLn "Strategy B:"
+  doTest model b bExpRes
 
 -- --------------------------------------------------------------------- [ EOF ]

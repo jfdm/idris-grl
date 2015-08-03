@@ -110,33 +110,6 @@ initGraph g = foldl (doUp) g (leaves)
                               (\x => n)
                               m
 
--- -------------------------------------------------------------- [ Evaluation ]
--- private
--- partial
--- doEval' : GModel -> Eff GModel MEvalEffs
--- doEval' g = do
---   s <- 'next :- get
---   case popS' s of
---     Nothing           => pure g
---     Just (curr, newS) => do
---       'next :- put newS
---       vs <- 'seen :- get
---       if elem curr vs
---         then doEval' g
---         else do
---           let ns = getEdgesByID curr g
---           if isNil ns
---             then do
---               'seen :- update (\xs => [curr] ++ xs)
---               doEval' g
---             else do
---               let childIDs = map fst ns
---               let children = catMaybes $ map (\x => getValueByID x g) childIDs
---               eval <- evalElem curr g
---               let newG = updateNodeValueByIDUsing curr (\x => record {getSValue = Just eval} x) g
---               'seen :- update (\xs => [curr] ++ xs)
---               doEval' newG
-
 partial
 doEval : GModel -> Eff GModel MEvalEffs
 doEval g = do
@@ -185,9 +158,6 @@ runEval g = with Effects
                   newG <- doEval g'
                   pure (vertices newG)
                 False => pure Nil
-
-
-
 
 ||| Evaluate a model with or without a given strategy.
 |||
