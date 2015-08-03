@@ -44,23 +44,24 @@ getSat' id g =
     Nothing => Nothing
     Just v  => getSValue v
 
-calcDecomp : NodeID -> GModel -> Eff (Maybe SValue) MEvalEffs
-calcDecomp id g = do
+calcDecomp : NodeID -> GModel -> Maybe SValue
+calcDecomp id g =
     case getValueByID id g of
-      Nothing => pure Nothing
+      Nothing  => Nothing
       Just val =>
         case getStructTy val of
-          Nothing   => pure Nothing
-          Just dval => do
-            let cedges   = getEdgesByID id g
-            let children = map fst $ filter (\x => isDeCompEdge $ snd x) cedges
-            let csat     = catMaybes $ map (\x => getSat' x g) children
-            let res = case dval of
-                      ANDty => getDecompAnd csat
-                      XORty => getDecompXOR csat
-                      IORty => getDecompIOR csat
-            pure $ Just res
+          Nothing   => Nothing
+          Just dval =>
+            case dval of
+              ANDty => Just $ getDecompAnd csat
+              XORty => Just $ getDecompXOR csat
+              IORty => Just $ getDecompIOR csat
+  where
+    children : List NodeID
+    children = map fst $ filter (\x => isDeCompEdge $ snd x) (getEdgesByID id g)
 
+    csat : List SValue
+    csat = catMaybes $ map (\x => getSat' x g) children
 
 
 getWeightedContrib : NodeID -> CValue -> GModel -> Maybe SValue
@@ -68,8 +69,7 @@ getWeightedContrib id y g = case getSat' id g of
   Nothing => Nothing
   Just x  => Just $ weightedContrib x y
 
-private
-%inline
+
 calcWeightedContrib : DemiEdge GoalEdge -> GModel -> Maybe SValue
 calcWeightedContrib (id, Just (Contribution x))  g = getWeightedContrib id x g
 calcWeightedContrib (id, Just (Correlation  x))  g = getWeightedContrib id x g
@@ -90,7 +90,7 @@ calcContrib dval id g = do
 
 evalElem : NodeID -> GModel -> Eff SValue MEvalEffs
 evalElem e g = do
-  decompValue  <- calcDecomp e g
+  let decompValue  = calcDecomp e g
   contribValue <- calcContrib decompValue e g
   pure contribValue
 
