@@ -33,10 +33,6 @@ data EvalResult : Type where
 
 -- ----------------------------------------------------- [ Forward Propagation ]
 
-||| The effects used in a BFS.
-MEvalEffs : List EFFECT
-MEvalEffs = [STATE (Queue NodeID)]
-
 private
 getSat' : NodeID -> GModel -> Maybe SValue
 getSat' id g =
@@ -77,9 +73,9 @@ calcWeightedContrib _                            _ = Nothing
 
 calcContrib : Maybe SValue -> NodeID -> GModel -> SValue
 calcContrib dval id g =
-   if (noUndec count > 0)
-     then UNDECIDED
-     else combineContribs count
+    if (noUndec count > 0)
+      then UNDECIDED
+      else combineContribs count
   where
     children : List (DemiEdge GoalEdge)
     children = filter (\x => not (isDeCompEdge $ snd x)) (getEdgesByID id g)
@@ -96,7 +92,10 @@ calcContrib dval id g =
     count = adjustCounts vals
 
 evalElem : NodeID -> GModel -> SValue
-evalElem e g = calcContrib (calcDecomp e g) e g
+evalElem e g = calcContrib dVal e g
+  where
+    dVal : Maybe SValue
+    dVal = (calcDecomp e g)
 
 -- -------------------------------------------------------------- [ Init Check ]
 
@@ -119,6 +118,11 @@ initGraph g = foldl (doUp) g (leaves)
     doUp m n = updateGoalNode (\x => getNodeTitle n == getNodeTitle x)
                               (\x => n)
                               m
+
+-- ------------------------------------------------------- [ Forward Algorithm ]
+||| The effects used in a BFS.
+MEvalEffs : List EFFECT
+MEvalEffs = [STATE (Queue NodeID)]
 
 partial
 doEval : GModel -> Eff GModel MEvalEffs
