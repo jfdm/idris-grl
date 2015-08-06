@@ -17,7 +17,6 @@ import public GRL.Pretty
 %default total
 
 ||| The original unadulterated version of the GRL.
-abstract
 data GLang : GTy -> Type where
     ||| Make a Goal node.
     MkGoal : String -> Maybe SValue -> GLang ELEM
@@ -65,17 +64,17 @@ mkRes : String -> GLang ELEM
 mkRes t = MkRes t Nothing
 
 
-mkSatGoal : String -> Maybe SValue -> GLang ELEM
-mkSatGoal = MkGoal
+mkSatGoal : String -> SValue -> GLang ELEM
+mkSatGoal t s = MkGoal t (Just s)
 
-mkSatSoft : String -> Maybe SValue -> GLang ELEM
-mkSatSoft = MkSoft
+mkSatSoft : String -> SValue -> GLang ELEM
+mkSatSoft t s = MkSoft t (Just s)
 
-mkSatTask : String -> Maybe SValue -> GLang ELEM
-mkSatTask = MkTask
+mkSatTask : String -> SValue -> GLang ELEM
+mkSatTask t s = MkTask t (Just s)
 
-mkSatRes : String -> Maybe SValue -> GLang ELEM
-mkSatRes = MkRes
+mkSatRes : String -> SValue -> GLang ELEM
+mkSatRes t s = MkRes t (Just s)
 
 
 mkImpacts : CValue -> GLang ELEM -> GLang ELEM -> GLang INTENT
