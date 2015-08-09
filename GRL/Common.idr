@@ -9,6 +9,8 @@ module GRL.Common
 
 import public Decidable.Equality
 
+%default total
+
 data Importance = HIGH | MEDIUM | LOW | NO
 
 -- data SValue = DENIED | WEAKDEN | WEAKSATIS | SATISFIED | CONFLICT | UNKNOWN | NONE | UNDECIDED
@@ -30,6 +32,12 @@ namespace Qualiative
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
     NONE : SValue
 
+invertEval : SValue -> SValue
+invertEval DENIED = SATISFIED
+invertEval WEAKDEN = WEAKSATIS
+invertEval WEAKSATIS = WEAKDEN
+invertEval SATISFIED = DENIED
+invertEval x         = x
 
 --  data CValue = MAKES | HELPS | SOMEPOS | UNKNOWN | SOMENEG | BREAK | HURTS
 
@@ -49,6 +57,15 @@ namespace Contributions
     BREAK : CValue
     ||| The contribution is negative but not sufficient.
     HURTS : CValue
+
+invertContrib : CValue -> CValue
+invertContrib MAKES = HURTS
+invertContrib HELPS = BREAK
+invertContrib SOMEPOS = SOMENEG
+invertContrib UNKNOWN = UNKNOWN
+invertContrib SOMENEG = SOMEPOS
+invertContrib BREAK = HELPS
+invertContrib HURTS = MAKES
 
 -- ------------------------------------------------------------------- [ Types ]
 
