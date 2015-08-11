@@ -20,23 +20,11 @@ import GRL.Model
 
 import GRL.Eval.Qualitative
 import GRL.Eval.Strategy
+import GRL.Eval.Common
 
 import Debug.Trace
 
 %access public
-
--- ------------------------------------------------------------- [ Eval Result ]
-
-data EvalResult : Type where
-  Result   : List GoalNode  -> EvalResult
-  BadModel : EvalResult
-
-instance Show EvalResult where
-  show BadModel    = "Bad Model"
-  show (Result xs) = unlines $ map (mkPretty) xs
-     where
-       mkPretty : GoalNode -> String
-       mkPretty x = unwords [getNodeTitle x, show (fromMaybe NONE (getSValue x)), "\n"]
 
 -- ----------------------------------------------------- [ Forward Propagation ]
 

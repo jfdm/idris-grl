@@ -16,6 +16,7 @@ modules = GRL.Common
 
         , GRL.Eval
         , GRL.Eval.Forward
+        , GRL.Eval.Common
         , GRL.Eval.Qualitative
         , GRL.Eval.Strategy
 
