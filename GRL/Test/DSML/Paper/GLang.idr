@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| Example paper modelling using the GRL.
-module Test.DSML.Paper.GLang
+module GRL.Test.DSML.Paper.GLang
 
 import GRL.Lang.GLang
 

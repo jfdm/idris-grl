@@ -20,26 +20,28 @@ modules = GRL.Common
         , GRL.Eval.Qualitative
         , GRL.Eval.Strategy
 
-        , Test.Utils
+        , GRL.Test.Utils
 
-        , Test.Decomposition
-        , Test.Contribution
-        , Test.Amyot
+        , GRL.Test.Decomposition
+        , GRL.Test.Contribution
+        , GRL.Test.Amyot
 
-        , Test.DSML.TODO.ReSkin
-        , Test.DSML.TODO.Abstract
+        , GRL.Test.DSML.TODO.ReSkin
+        , GRL.Test.DSML.TODO.Abstract
 
-        , Test.DSML.Paper.Abstract
-        , Test.DSML.Paper.ReSkin
-        , Test.DSML.Paper.GLang
+        , GRL.Test.DSML.Paper.Abstract
+        , GRL.Test.DSML.Paper.ReSkin
+        , GRL.Test.DSML.Paper.GLang
+        , GRL.Test.Sif
 
 tests =
-       Test.Decomposition.runTest
-     , Test.Contribution.runTest
-     , Test.Amyot.runTest
---      , Test.DSML.TODO.Abstract.runTest
---      , Test.DSML.TODO.ReSkin.runTest
+       GRL.Test.Decomposition.runTest
+     , GRL.Test.Contribution.runTest
+     , GRL.Test.Amyot.runTest
+     , GRL.Test.Sif.runTest
+--      , GRL.Test.DSML.TODO.Abstract.runTest
+--      , GRL.Test.DSML.TODO.ReSkin.runTest
 
---      , Test.DSML.Paper.ReSkin.runTest
---      , Test.DSML.Paper.GLang.runTest
---      , Test.DSML.Paper.Abstract.runTest
+--      , GRL.Test.DSML.Paper.ReSkin.runTest
+--      , GRL.Test.DSML.Paper.GLang.runTest
+--      , GRL.Test.DSML.Paper.Abstract.runTest

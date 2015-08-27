@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| Example DSML through reSkinning the GRL.
-module Test.DSML.Paper.ReSkin
+module GRL.Test.DSML.Paper.ReSkin
 
 import public GRL.Common
 import public GRL.IR

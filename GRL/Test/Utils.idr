@@ -1,4 +1,4 @@
-module Test.Utils
+module GRL.Test.Utils
 
 import GRL.Lang.GLang
 import GRL.Eval
@@ -38,9 +38,9 @@ collectResults (g::gs) ss =
     Just x  => x :: collectResults gs ss
 
 partial
-execTest : GModel -> Strategy -> Strategy -> TestResults
+execTest : GModel -> Maybe Strategy -> Strategy -> TestResults
 execTest m s es =
-    case (evalModel m (Just s)) of
+    case (evalModel m s) of
       BadModel   => BadModel
       Result res => case collectResults res es of
         Nil  => ValidResults
@@ -57,9 +57,16 @@ printResults ((n,g,e)::xs) = do
 partial
 doTest : GModel -> Strategy -> Strategy -> IO ()
 doTest m s es = do
-  case execTest m s es of
+  case execTest m (Just s) es of
     BadModel      => printLn "Bad Model Evaluation"
     ValidResults  => printLn "Test Passed"
     BadResults xs => do
       putStrLn "Tests Failed"
       printResults xs
+
+partial
+runEval : GModel -> Maybe Strategy -> IO ()
+runEval m s = do
+    putStrLn "Results"
+    let res = evalModel m s
+    putStrLn $ fromMaybe "Nout" $ toString res (\x => show x)

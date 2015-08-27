@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| TODO List using abstract interpretation
-module Test.DSML.TODO.Abstract
+module GRL.Test.DSML.TODO.Abstract
 
 import GRL.Lang.GLang
 

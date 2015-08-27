@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| TODO list achieved through reskinning the GRL.
-module Test.DSML.TODO.ReSkin
+module GRL.Test.DSML.TODO.ReSkin
 
 import public GRL.Common
 import public GRL.IR

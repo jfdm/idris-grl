@@ -5,12 +5,12 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| Testing IOR contribution evaluation
-module Test.Decomposition
+module GRL.Test.Decomposition
 
 import GRL.Lang.GLang
 import GRL.Eval
 
-import Test.Utils
+import GRL.Test.Utils
 
 %access public
 %default total

@@ -5,12 +5,12 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| The example from Amyot
-module Test.Amyot
+module GRL.Test.Amyot
 
 import GRL.Lang.GLang
 import GRL.Eval
 
-import Test.Utils
+import GRL.Test.Utils
 
 %default total
 %access public

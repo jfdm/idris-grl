@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| A DSML based on the GRL implemented using Types as Abstract Interpreters.
-module Test.DSML.Paper.AbstractPrime
+module GRL.Test.DSML.Paper.AbstractPrime
 
 import GRL.Lang.GLang
 import public Data.Sigma.DList
