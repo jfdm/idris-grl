@@ -28,6 +28,7 @@ import GRL.Model
 import GRL.IR
 import GRL.Common
 
+%default total
 %access public
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
@@ -71,7 +72,7 @@ SEffs = [ 'next ::: STATE (Stack NodeID)
         , 'res  ::: STATE Bool]
 
 private
-partial
+%assert_total
 doComputeSpan : NodeID -> GModel -> Eff () SEffs
 doComputeSpan id g = do
   s <- 'next :- get
@@ -114,6 +115,7 @@ computeSpan (SLink ty (Elem ty' t s) ds) m =
     ds' : List (NodeID)
     ds' = catMaybes $ map (\x => getGoalIDByTitle (getTitle x) m) ds
 
+    %assert_total
     runSpan : Maybe NodeID -> List (NodeID) -> Bool
     runSpan Nothing   _  = False
     runSpan (Just id) is = with Effects

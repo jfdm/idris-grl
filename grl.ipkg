@@ -12,6 +12,7 @@ modules = GRL.Common
         , GRL.Property.Intention
 
         , GRL.Lang.GLang
+        , GRL.Lang.GLang.Pretty
         , GRL.Lang.GLangPlus
 
         , GRL.Eval

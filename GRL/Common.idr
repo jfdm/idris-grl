@@ -156,10 +156,10 @@ data GStructTy : Type where
 -- -------------------------------------------------------------------- [ Show ]
 
 instance Show GElemTy where
-  show GOALty = "GOALTy"
-  show SOFTty = "SOFTTy"
-  show TASKty = "TASKTy"
-  show RESty  = "RESOURCETy"
+  show GOALty = "Goal"
+  show SOFTty = "Soft"
+  show TASKty = "Task"
+  show RESty  = "Res"
 
 instance Show GIntentTy where
   show IMPACTSty = "CONTRIBUTION"

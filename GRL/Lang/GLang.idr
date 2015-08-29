@@ -12,6 +12,7 @@ import public GRL.IR
 import public GRL.Model
 import public GRL.Builder
 import public GRL.Pretty
+import public GRL.Lang.GLang.Pretty
 
 %access public
 %default total
@@ -238,5 +239,8 @@ instance GRL GLang where
     mkStruct (MkAnd a bs) = SLink ANDty (mkElem a) (map mkElem bs)
     mkStruct (MkXor a bs) = SLink XORty (mkElem a) (map mkElem bs)
     mkStruct (MkIor a bs) = SLink IORty (mkElem a) (map mkElem bs)
+
+
+-- ---------------------------------------------------------------- [ toString ]
 
 -- --------------------------------------------------------------------- [ EOF ]

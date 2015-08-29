@@ -1,0 +1,8 @@
+package glang
+
+opts = "-p effects -p containers -p lightyear -p grl --typeintype"
+
+executable = grlc
+main = GRL.Lang.GLang.Main
+
+modules = GRL.Lang.GLang.Main
