@@ -111,11 +111,21 @@ getGroups xs = DList.foldr doGrouping (DGroup Nil Nil Nil) xs
     doGrouping {ty=STRUCT} x g = record {strus = x :: (strus g)} g
 
 private
-recoverList : DeclGroups -> (ss ** DList GTy GLang ss)
+recoverList : DeclGroups -> (xs ** DList GTy GLang xs)
 recoverList (DGroup es is ss) =
-       (_ ** getProof (fromList es)
-          ++ (getProof (fromList is))
-          ++ (getProof (fromList ss)))
+       (_ ** (getProof es')
+          ++ (getProof is')
+          ++ (getProof ss'))
+  where
+    es' : (xs ** DList GTy GLang xs)
+    es' = fromList es
+
+    is' : (ys ** DList GTy GLang ys)
+    is' = fromList is
+
+    ss' : (zs ** DList GTy GLang zs)
+    ss' = fromList ss
+
 
 groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
 groupDecls xs = recoverList $ getGroups xs
