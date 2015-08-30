@@ -12,12 +12,22 @@
 |||
 module GRL.Eval
 
-import public Effects
-import public Effect.State
-import public Effect.Exception
-import public Effect.StdIO
+import GRL.Common
+import GRL.Model
 
 import public GRL.Eval.Qualitative
 import public GRL.Eval.Forward
 import public GRL.Eval.Strategy
 import public GRL.Eval.Common
+
+data EvalAlgo = FORWARD | HYBRID | BACKWARDS
+
+evalModel : GModel -> Maybe Strategy -> EvalResult
+evalModel g s = forwardEval s g
+
+evaluate : EvalAlgo -> Maybe Strategy -> GModel -> EvalResult
+evaluate FORWARD   s g = forwardEval s g
+evaluate BACKWARDS s g = forwardEval s g
+evaluate HYBRID    s g = forwardEval s g
+
+-- --------------------------------------------------------------------- [ EOF ]

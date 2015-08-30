@@ -6,9 +6,6 @@
 
 module GRL.Eval.Forward
 
-import Effects
-import Effect.State
-
 import Data.AVL.Dict
 import Data.AVL.Graph
 import Data.Stack
@@ -22,8 +19,7 @@ import GRL.Eval.Qualitative
 import GRL.Eval.Strategy
 import GRL.Eval.Common
 
-import Debug.Trace
-
+%default partial
 %access public
 
 -- ----------------------------------------------------- [ Forward Propagation ]
@@ -49,7 +45,7 @@ calcDecomp id g =
               IORty => Just $ getDecompIOR csat
   where
     children : List NodeID
-    children = map fst $ filter (\x => isDeCompEdge $ snd x) (getEdgesByID id g)
+    children = map fst $ getDeCompEdges id g
 
     csat : List SValue
     csat = catMaybes $ map (\x => getSat' x g) children
@@ -73,15 +69,13 @@ calcContrib dval id g =
       else combineContribs count
   where
     children : List (DemiEdge GoalEdge)
-    children = filter (\x => not (isDeCompEdge $ snd x)) (getEdgesByID id g)
+    children = getIntentEdges id g
 
     wsat : List SValue
     wsat = catMaybes $ map (\e => calcWeightedContrib e g) children
 
     vals : List SValue
-    vals = case dval of
-      Nothing => wsat
-      Just x  => x :: wsat
+    vals = case dval of {Nothing => wsat; Just x  => x :: wsat}
 
     count : ContribCount
     count = adjustCounts vals
@@ -115,67 +109,62 @@ initGraph g = foldl (doUp) g (leaves)
                               m
 
 -- ------------------------------------------------------- [ Forward Algorithm ]
-||| The effects used in a BFS.
-MEvalEffs : List EFFECT
-MEvalEffs = [STATE (Queue NodeID)]
 
 partial
-doEval : GModel -> Eff GModel MEvalEffs
-doEval g = do
-  q <- get
-  case popQ' q of
-    Nothing        => pure g
-    Just (c, newQ) => do
-      put newQ
-      case getValueByID c g of --- if node doesn't exist
-        Nothing => pure g
-        Just c' => do
-          if isJust $ getSValue c' --- if satisfied then move on
-            then doEval g
-            else do
-              let childIDs = getEdgesByID c g
-              if isNil childIDs --- if leaf node
-                then pure g
-                else do
-                  let children = getValuesByID (map fst childIDs) g
-                  if and $ map (\x => isJust $ getSValue x) children
-                    then do
-                      let eval = evalElem c g
-                      let newG = updateNodeValueByIDUsing c (\x => record {getSValue = Just eval} x) g
-                      doEval newG
-                    else do
-                      update (\xs => pushQ c xs)
-                      doEval g
+doEval : GModel -> (Queue NodeID) -> GModel
+doEval g q =
+    case popQ' q of
+      Nothing        => g
+      Just (c, newQ) => --  TODO
+        case getValueByID c g of --- if node doesn't exist
+          Nothing => g
+          Just c' =>
+            if isJust $ getSValue c' --- if satisfied then move on
+              then doEval g newQ
+              else let cs = children c in
+                if isNil cs --- if leaf node
+                  then g
+                  else do
+                    if and $ map (\x => isJust $ getSValue x) cs
+                      then doEval (newG c) newQ
+                      else doEval g        (pushQ c newQ)
+  where
+    childrenIDs : NodeID -> List (DemiEdge GoalEdge)
+    childrenIDs n = (getEdgesByID n g)
+
+    children : NodeID -> List GoalNode
+    children n = getValuesByID (map fst $ childrenIDs n) g
+
+    newG : NodeID -> GModel
+    newG n = updateNodeValueByIDUsing
+                   n
+                   (\x => record {getSValue = Just (evalElem n g)} x)
+                   g
 
 private
 partial
 runEval : GModel -> EvalResult
-runEval g = with Effects
-    runPureInit [pushQThings (verticesID g) mkQueue]
-                (wrapper g)
+runEval g =
+    if validityCheck g
+        then Result (vertices (doEval g (defQueue g)))
+        else let newG = getNewG g in
+             let theQ = defQueue newG in
+          if validityCheck newG
+            then Result (vertices (doEval newG theQ))
+            else BadModel
   where
-    wrapper : GModel -> Eff EvalResult MEvalEffs
-    wrapper g =
-      case validityCheck g of
-        True => do
-              newG <- doEval g
-              pure $ Result (vertices newG)
-        False => do
-              let g' = initGraph g
-              case validityCheck g' of
-                True => do
-                  newG <- doEval g'
-                  pure $ Result (vertices newG)
-                False => pure BadModel
+    getNewG : GModel -> GModel
+    getNewG m = initGraph m
+
+    defQueue : GModel -> Queue NodeID
+    defQueue m = (pushQThings (verticesID m) mkQueue)
 
 ||| Evaluate a model with or without a given strategy.
 |||
 ||| This function will deploy the strategy if it is given. Using this
 ||| code with a predeployed strategy may give unexpected results.
 partial
-evalModel : (g : GModel)
-         -> Maybe Strategy
-         -> EvalResult -- List (GoalNode)
-evalModel g Nothing  = runEval g
-evalModel g (Just s) = runEval $ fst (deployStrategy g s)
+forwardEval : Maybe Strategy -> GModel -> EvalResult
+forwardEval Nothing  g = runEval g
+forwardEval (Just s) g = runEval $ fst (deployStrategy g s)
 -- --------------------------------------------------------------------- [ EOF ]

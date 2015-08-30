@@ -114,12 +114,7 @@ decls = (_ **
 partial
 runTest : IO ()
 runTest = do
-  putStrLn "Strategy 1:"
-  putStrLn (showDList show (getProof decls))
-  putStrLn "Strategy 1:"
   let (_ ** ds) = groupDecls (getProof decls)
   putStrLn "Strategy 1:"
-  putStrLn (showDList show ds)
   let m = (insertMany' ds model)
-  putStrLn $ prettyModel m
   runEval m Nothing

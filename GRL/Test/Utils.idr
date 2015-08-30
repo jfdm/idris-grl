@@ -40,7 +40,7 @@ collectResults (g::gs) ss =
 partial
 execTest : GModel -> Maybe Strategy -> Strategy -> TestResults
 execTest m s es =
-    case (evalModel m s) of
+    case (evaluate FORWARD s m) of
       BadModel   => BadModel
       Result res => case collectResults res es of
         Nil  => ValidResults
@@ -68,5 +68,5 @@ partial
 runEval : GModel -> Maybe Strategy -> IO ()
 runEval m s = do
     putStrLn "Results"
-    let res = evalModel m s
+    let res = evaluate FORWARD s m
     putStrLn $ fromMaybe "Nout" $ toString res (\x => show x)

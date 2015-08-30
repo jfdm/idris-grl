@@ -15,11 +15,6 @@
 |||
 module GRL.Property.Structure
 
-import public Decidable.Equality
-
-import Effects
-import Effect.State
-
 import public Data.AVL.Graph
 import public Data.List
 import public Data.Stack
@@ -28,7 +23,7 @@ import GRL.Model
 import GRL.IR
 import GRL.Common
 
-%default total
+%default partial
 %access public
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
@@ -64,50 +59,50 @@ validDTy (Elem ty t s) dty m =
 
 -- -------------------------------------------------------------- [ Evaluation ]
 
-||| The effects used in a BFS.
-private
-SEffs : List EFFECT
-SEffs = [ 'next ::: STATE (Stack NodeID)
-        , 'seen ::: STATE (List NodeID)
-        , 'res  ::: STATE Bool]
+record ComputeState where
+  constructor MkState
+  next : Stack NodeID
+  seen : List NodeID
+
+defState : List NodeID -> ComputeState
+defState is = MkState (pushSThings is mkStack) (List.Nil)
 
 private
-%assert_total
-doComputeSpan : NodeID -> GModel -> Eff () SEffs
-doComputeSpan id g = do
-  s <- 'next :- get
-  case popS' s of
-    Nothing           => pure ()
-    Just (curr, newS) => do
-      'next :- put newS
-      ss <- 'seen :- get
-      case elem curr ss || curr == id || elem id ss of
-        True => do  -- If encountered cycle
-          'res :- put False
-          pure ()
-        False => do  -- If no cycle
-          let cs' = getEdgesByID curr g
-          let cs  = filter (\(y,l) => isDeCompEdge l) cs'
-          case isNil cs of
-            True => do -- If No Children
-              'res :- update (\x => x && True)
-              doComputeSpan id g
-            False => do
-              case lookup id cs of
-                Just _ => do -- If thing is in children
-                  'res :- put False
-                  pure ()
-                Nothing => do -- if keep on searching
-                  let cIDs = map fst cs
-                  'seen :- update (\xs => [curr] ++ xs )
-                  'next :- update (\xs => xs ++ cIDs)
-                  'res :- update (\x => x && True)
-                  doComputeSpan id g
+cycleCheck : NodeID -> NodeID -> List NodeID -> Bool
+cycleCheck id curr seen = elem curr seen || curr == id || elem id seen
+
+partial
+doComputeSpan : (id    : NodeID)
+              -> (model : GModel)
+              -> (st    : ComputeState)
+              -> Bool
+doComputeSpan id g st =
+    case popS' (next st) of
+      Nothing          => True
+      Just (curr, newS) =>  -- TODO
+        if cycleCheck id curr (seen st)
+          then False
+          else let cs = children curr in
+              if isNil cs
+                then True && doComputeSpan id g
+                                 (record { next = newS} st)
+                else
+                  if elem id cs
+                    then False -- If thing is in children
+                    else True && doComputeSpan id g
+                        (record { seen = curr :: (seen st)
+                                , next = newS ++ cs} st)
+  where
+    children : NodeID -> List NodeID
+    children n = map fst $ getDeCompEdges n g
+
 
 %assert_total
 computeSpan : GExpr STRUCT -> GModel -> Bool
 computeSpan (SLink ty (Elem ty' t s) ds) m =
-    runSpan initID ds'
+    case initID of
+      Nothing => False
+      Just id => doComputeSpan id m (defState ds')
   where
     initID : Maybe NodeID
     initID = getGoalIDByTitle t m
@@ -115,19 +110,7 @@ computeSpan (SLink ty (Elem ty' t s) ds) m =
     ds' : List (NodeID)
     ds' = catMaybes $ map (\x => getGoalIDByTitle (getTitle x) m) ds
 
-    %assert_total
-    runSpan : Maybe NodeID -> List (NodeID) -> Bool
-    runSpan Nothing   _  = False
-    runSpan (Just id) is = with Effects
-      runPureInit [ 'next := pushSThings is mkStack
-                  , 'seen := List.Nil
-                  , 'res  := True] $ do
-        doComputeSpan id m
-        r <- 'res :- get
-        pure r
-
-
-%hint
+partial
 checkStructBool : GExpr STRUCT -> GModel -> Bool
 checkStructBool l@(SLink ty src ds) m =
     length ds >= 1

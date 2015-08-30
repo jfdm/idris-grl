@@ -8,7 +8,6 @@ module GRL.Eval.Common
 import GRL.Common
 import GRL.Model
 
-
 -- ------------------------------------------------------------- [ Eval Result ]
 
 namespace EvalResult
@@ -31,3 +30,5 @@ namespace EvalResult
       mkString : List GoalNode -> List String
       mkString Nil     = Nil
       mkString (x::xs) = f x :: mkString xs
+
+-- --------------------------------------------------------------------- [ EOF ]

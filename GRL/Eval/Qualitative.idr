@@ -7,10 +7,6 @@
 ||| Qualitative evaluations for
 module GRL.Eval.Qualitative
 
-import public Effects
-import public Effect.State
-import public Effect.Exception
-
 import GRL.Common
 import GRL.Model
 

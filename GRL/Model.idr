@@ -94,4 +94,15 @@ updateGoalNode f u m =
       Nothing  => m
       Just val => updateNodeValueUsing val u m
 
+getDeCompEdges : NodeID -> GModel -> List (DemiEdge GoalEdge)
+getDeCompEdges n m = filter (\(y,l) => isDeCompEdge l) cs
+  where
+    cs : List (DemiEdge GoalEdge)
+    cs = getEdgesByID n m
+
+getIntentEdges : NodeID -> GModel -> List (DemiEdge GoalEdge)
+getIntentEdges n m = filter (\(y,l) => not (isDeCompEdge l)) cs
+  where
+    cs : List (DemiEdge GoalEdge)
+    cs = getEdgesByID n m
 -- --------------------------------------------------------------------- [ EOF ]

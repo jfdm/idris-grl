@@ -322,12 +322,12 @@ prettyResult g = unwords
     , "\t<=="
     , getNodeTitle g]
 
-evalModelE : GModel -> Maybe String -> Eff EvalResult GEffs
-evalModelE m Nothing       = pure $ evalModel m Nothing
-evalModelE m (Just sfname) = do
+evaluateE : GModel -> Maybe String -> Eff EvalResult GEffs
+evaluateE m Nothing       = pure $ evaluate FORWARD Nothing m
+evaluateE m (Just sfname) = do
     strat <- readGRLFile gstrategy sfname
     strat' <- buildStrategyE strat
-    pure $ evalModel m (Just strat')
+    pure $ evaluate FORWARD (Just strat') m
 
 -- ------------------------------------------------------------------ [ Pretty ]
 
@@ -345,7 +345,7 @@ eMain = do
     (mfname, sfname) <- processArgs as
     (_ ** ast) <- readGRLFile glang mfname
     m <- buildModel ast emptyModel
-    res <- evalModelE m sfname
+    res <- evaluateE m sfname
     showRes res
     putStrLn $ toString m
 
