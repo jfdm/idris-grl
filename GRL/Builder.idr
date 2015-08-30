@@ -112,9 +112,11 @@ insertStruct decl@(SLink ty x ys) model =
              prettyModel model]
       else newModel
   where
+    doInsert : GModel -> GExpr ELEM -> GModel
+    doInsert m y = insertLink x y (Just $ (convExpr (SLink ty x ys))) m
+
     model' : GModel
-    model' = foldl (\m, y => insertLink x y (Just $ (convExpr (SLink ty x ys))) m)
-                   model ys
+    model' = foldl doInsert model ys
 
     newModel : GModel
     newModel = updateGoalNode (\n => getTitle x == getNodeTitle n)
@@ -136,15 +138,25 @@ insertMany : GRL expr => List (expr ty)
                       -> GModel
                       -> GModel
 insertMany Nil model = model
-insertMany ds model = with List foldl (flip $ insert) model ds
+insertMany ds model = foldl doInsert model ds
+  where
+    doInsert : GRL expr => GModel
+                        -> expr ty
+                        -> GModel
+    doInsert m x = insert x m
+
 
 ||| Insert many different declarations into the model.
 insertMany' : GRL expr => DList GTy expr ts
                        -> GModel
                        -> GModel
 insertMany' Nil model = model
-insertMany' ds model = with DList foldl (flip $ insert) model ds
-
+insertMany' ds model = DList.foldl doInsert model ds
+  where
+    doInsert : GRL expr => GModel
+                        -> expr ty
+                        -> GModel
+    doInsert m x = insert x m
 
 infixl 4 \=
 
