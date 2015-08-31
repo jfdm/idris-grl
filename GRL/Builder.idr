@@ -88,13 +88,13 @@ insertIntent : (i : GExpr INTENT)
 --            -> ValidInsert i m
             -> GModel
 insertIntent decl@(ILink ty val x y) model =
-  if not $ checkIntentBool decl model
-      then error $ with List unwords
+  case not $ checkIntentBool decl model of
+      True => error $ with List unwords
              ["Bad Intent arises from trying to insert\n\n\t"
              , show decl
              , "\n\ninto\n\n\t"
              , prettyModel model]
-      else insertLink y x (Just (convExpr decl)) model
+      False => insertLink y x (Just (convExpr decl)) model
 
 -- --------------------------------------------------------------- [ Structure ]
 ||| Do structure insertion.
@@ -104,13 +104,13 @@ insertStruct : (s : GExpr STRUCT)
 --            -> ValidInsert s m
             -> GModel
 insertStruct decl@(SLink ty x ys) model =
-    if not $ checkStructBool decl model
-      then error $ with List unwords
+    case not $ checkStructBool decl model of
+      True => error $ with List unwords
              ["Bad Structure arises from trying to insert\n\n\t"
              , show decl
              , "\n\ninto\n\n\t",
              prettyModel model]
-      else newModel
+      False => newModel
   where
     doInsert : GModel -> GExpr ELEM -> GModel
     doInsert m y = insertLink x y (Just $ (convExpr (SLink ty x ys))) m
