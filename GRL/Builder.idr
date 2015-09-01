@@ -133,6 +133,7 @@ insert {ty=ELEM}   decl model = insertElem   (mkElem decl)   model
 insert {ty=INTENT} decl model = insertIntent (mkIntent decl) model
 insert {ty=STRUCT} decl model = insertStruct (mkStruct decl) model
 
+
 ||| Insert many declarations of the same type into the model.
 insertMany : GRL expr => List (expr ty)
                       -> GModel
@@ -144,6 +145,15 @@ insertMany ds model = foldl doInsert model ds
                         -> expr ty
                         -> GModel
     doInsert m x = insert x m
+
+insertGroup : GRL expr => List (expr ELEM)
+                       -> List (expr STRUCT)
+                       -> List (expr INTENT)
+                       -> GModel
+                       -> GModel
+insertGroup es ss is model =
+    insertMany is (insertMany ss (insertMany es model))
+
 
 
 ||| Insert many different declarations into the model.

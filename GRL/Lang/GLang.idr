@@ -93,6 +93,23 @@ mkIor = MkIor
 mkXor : GLang ELEM -> List (GLang ELEM) -> GLang STRUCT
 mkXor = MkXor
 
+
+-- --------------------------------------------------------------------- [ GRL ]
+
+instance GRL GLang where
+    mkElem (MkGoal s v) = Elem GOALty s v
+    mkElem (MkSoft s v) = Elem SOFTty s v
+    mkElem (MkTask s v) = Elem TASKty s v
+    mkElem (MkRes  s v) = Elem RESty  s v
+
+    mkIntent (MkImpacts c a b) = ILink IMPACTSty c (mkElem a) (mkElem b)
+    mkIntent (MkEffects c a b) = ILink AFFECTSty c (mkElem a) (mkElem b)
+
+    mkStruct (MkAnd a bs) = SLink ANDty (mkElem a) (map mkElem bs)
+    mkStruct (MkXor a bs) = SLink XORty (mkElem a) (map mkElem bs)
+    mkStruct (MkIor a bs) = SLink IORty (mkElem a) (map mkElem bs)
+
+
 -- -------------------------------------------------------------------- [ Sort ]
 private
 record DeclGroups where
@@ -129,6 +146,19 @@ recoverList (DGroup es is ss) =
 
 groupDecls : DList GTy GLang gs -> (gs' ** DList GTy GLang gs')
 groupDecls xs = recoverList $ getGroups xs
+
+insertDecls : DList GTy GLang gs -> GModel -> GModel
+insertDecls ds m = doInsert (getGroups ds) m
+  where
+    doInsert' : List (GLang ELEM)
+             -> List (GLang STRUCT)
+             -> List (GLang INTENT)
+             -> GModel
+             -> GModel
+    doInsert' es ss is m = insertGroup es ss is m
+
+    doInsert : DeclGroups -> GModel -> GModel
+    doInsert (DGroup es is ss) m = doInsert' es ss is m
 
 -- -------------------------------------------------------------------- [ Show ]
 
@@ -234,22 +264,6 @@ syntax [a] "~~>" [b] "|" [c] = mkEffects c a b
 syntax [a] "&=" [b] = mkAnd a b
 syntax [a] "X=" [b] = mkXor a b
 syntax [a] "|=" [b] = mkIor a b
-
--- --------------------------------------------------------------------- [ GRL ]
-
-instance GRL GLang where
-    mkElem (MkGoal s v) = Elem GOALty s v
-    mkElem (MkSoft s v) = Elem SOFTty s v
-    mkElem (MkTask s v) = Elem TASKty s v
-    mkElem (MkRes  s v) = Elem RESty  s v
-
-    mkIntent (MkImpacts c a b) = ILink IMPACTSty c (mkElem a) (mkElem b)
-    mkIntent (MkEffects c a b) = ILink AFFECTSty c (mkElem a) (mkElem b)
-
-    mkStruct (MkAnd a bs) = SLink ANDty (mkElem a) (map mkElem bs)
-    mkStruct (MkXor a bs) = SLink XORty (mkElem a) (map mkElem bs)
-    mkStruct (MkIor a bs) = SLink IORty (mkElem a) (map mkElem bs)
-
 
 -- ---------------------------------------------------------------- [ toString ]
 
