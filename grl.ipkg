@@ -1,6 +1,6 @@
 package grl
 
-opts = "-p containers --warnreach"
+opts = "-p containers -p graphviz --warnreach"
 
 modules = GRL.Common
         , GRL.IR
@@ -10,6 +10,8 @@ modules = GRL.Common
         , GRL.Property.Element
         , GRL.Property.Structure
         , GRL.Property.Intention
+
+        , GRL.Utils
 
         , GRL.Lang.GLang
         , GRL.Lang.GLang.Pretty
