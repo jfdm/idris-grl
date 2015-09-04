@@ -24,9 +24,15 @@ toSimpleDot g = Digraph (nodes (verticesID g)) (edges' (edges g))
 
     convEdge : Edge GoalEdge -> SimpleDot EDGE
     convEdge (x,y, Nothing)     = Edge (y) (x) Nil
-    convEdge (x,y, Just Decomp) = Edge (y) (x) [("label", "Decomp FIX")]
-    convEdge (x,y, Just (Contribution l)) = Edge (x) (y) [("label", "Impacts " ++ show l)]
-    convEdge (x,y, Just (Correlation  l)) = Edge (x) (y) [("label", "Affects " ++ show l)]
+
+    convEdge (x,y, Just Decomp) =
+        Edge (y) (x) [("label", "Decomp FIX")]
+
+    convEdge (x,y, Just (Contribution l)) =
+        Edge (x) (y) [("label", "Impacts " ++ show l)]
+
+    convEdge (x,y, Just (Correlation  l)) =
+        Edge (x) (y) [("label", "Affects " ++ show l)]
 
     edges' : List (Edge GoalEdge) -> List (SimpleDot EDGE)
     edges' es = map (convEdge) es
