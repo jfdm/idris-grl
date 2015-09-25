@@ -76,7 +76,7 @@ paperPlan = emptyModel
   \= paper
   \= abst   \= wabs   \= rabs
   \= bib    \= wbib   \= rbib
-  \= intro  \= wIntro \= rIntro
+  \= GLang.intro  \= wIntro \= rIntro
   \= meth   \= wMeth  \= rMeth
   \= res    \= wRes   \= rRes
   \= disc   \= wDis   \= rDis
