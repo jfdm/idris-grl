@@ -18,7 +18,9 @@ import Effect.File
 import Data.AVL.Dict
 
 import Lightyear
+import Lightyear.Char
 import Lightyear.Strings
+import Lightyear.StringFile
 
 import GRL.Lang.GLang
 import GRL.Eval
@@ -54,42 +56,19 @@ instance Show GError where
   show (NoSuchIdentError ident) = unwords ["No such identifier:", show ident]
   show (BadModelError)          = "Bad Model"
 
--- ------------------------------------------------------------ [ Parser Utils ]
-manyTill : Monad m => ParserT m String a
-                   -> ParserT m String b
-                   -> ParserT m String (List a)
-manyTill p end = scan
-  where
-    scan : Monad m => ParserT m String (List a)
-    scan = do { end; return List.Nil } <|>
-           do { x <- p; xs <- scan; return (x::xs)}
-
-eol : Parser Char
-eol = char '\n'
-
-anyChar : Parser Char
-anyChar = satisfy (const True)
-
-literalLR : Char -> Char -> Parser String
-literalLR l r =
-    map pack $ between (lexeme $ char l) (lexeme $ char r) (some (satisfy (/= r)))
-
-literal : Char -> Parser String
-literal c = literalLR c c
-
 -- ------------------------------------------------------ [ Parsing Lang Utils ]
 
 comment : String -> String -> String -> Parser ()
 comment l b e = (line l    *> pure ())
             <|> (block b e *> pure ())
-            <|> space
+            <|> spaces
             <?> "Comment"
     where
       line : String -> Parser String
       line l = do
           token l
-          doc <- manyTill anyChar eol
-          space
+          doc <- manyTill anyChar endOfLine
+          spaces
           pure $ pack doc
         <?> "Line comment"
 
@@ -97,14 +76,14 @@ comment l b e = (line l    *> pure ())
       block b e = do
           token b
           doc <- manyTill anyChar (token e)
-          space
+          spaces
           pure $ pack doc
         <?> "Block Comment"
 
 keyword : String -> Parser ()
 keyword s = do
     string s
-    space
+    spaces
     pure ()
   <?> "Keywords"
 
@@ -112,10 +91,8 @@ ident : Parser String
 ident = lexeme (map pack $ some identChar) <?> "Identity"
   where
     identChar : Parser Char
-    identChar = (satisfy isAlphaNum) <?> "Ident Char"
+    identChar = alphaNum <?> "Ident Char"
 
-quoted : Parser String
-quoted = literal '"' <?> "Quoted String"
 -- ------------------------------------------------------------ [ GLang Parser ]
 
 gComment : Parser ()
@@ -164,7 +141,7 @@ node = do
     n <- ident
     keyword "<-"
     ty <- nodeTy
-    t <- quoted
+    t <- quoted '"'
     sval <- opt $ keyword "is" *> sValue
     gComment
     pure (MkNode n ty t sval)
@@ -231,46 +208,39 @@ gstrategy = do
 GEffs : List EFFECT
 GEffs = [SYSTEM, FILE_IO (), STDIO, STATE GEnv, EXCEPTION GError]
 
+GRL : Type -> Type
+GRL rTy = Eff rTy GEffs
 
 readGRLFile : Parser a
            -> String
-           -> Eff a GEffs
+           -> GRL a
 readGRLFile p f = do
-    case !(open f Read) of
-      True => do
-        src <- readAcc ""
-        close
-        case parse p src of
-          Left err  => raise (ParserError f err)
-          Right res => pure res
-      False => raise (NoSuchFileError f)
-  where
-    readAcc : String -> Eff String [FILE_IO (OpenFile Read)]
-    readAcc acc = if (not !(eof))
-                     then readAcc (acc ++ !(readLine))
-                     else pure acc
+    res <- parseFile NoSuchFileError ParserError p f
+    case res of
+      Left err  => raise err
+      Right res => pure res
 
 
-buildElem : GElemTy -> String -> Eff (GLang ELEM) GEffs
+buildElem : GElemTy -> String -> GRL (GLang ELEM)
 buildElem GOALty t = pure $ mkGoal t
 buildElem SOFTty t = pure $ mkSoft t
 buildElem TASKty t = pure $ mkTask t
 buildElem RESty  t = pure $ mkRes  t
 
-buildElemSat : GElemTy -> String -> SValue -> Eff (GLang ELEM) GEffs
+buildElemSat : GElemTy -> String -> SValue -> GRL (GLang ELEM)
 buildElemSat GOALty t s = pure $ mkSatGoal t s
 buildElemSat SOFTty t s = pure $ mkSatSoft t s
 buildElemSat TASKty t s = pure $ mkSatTask t s
 buildElemSat RESty  t s = pure $ mkSatRes  t s
 
-fetchElem : String -> Eff (GLang ELEM) GEffs
+fetchElem : String -> GRL (GLang ELEM)
 fetchElem id = do
   env <- get
   case (lookup id env) of
     Nothing => raise $ NoSuchIdentError id
     Just e  => pure e
 
-insertE : GLangAST ty -> GModel -> Eff GModel GEffs
+insertE : GLangAST ty -> GModel -> GRL GModel
 insertE (MkNode i ty t Nothing) m = do
     g <- buildElem ty t
     update (\env => insert i g env)
@@ -296,20 +266,20 @@ insertE (MkStruct ty x ys) m = do
       XORty => pure $ insert (x' X= ys') m
       IORty => pure $ insert (x' |= ys') m
 
-buildModel : DList GTy GLangAST ds -> GModel -> Eff GModel GEffs
+buildModel : DList GTy GLangAST ds -> GModel -> GRL GModel
 buildModel Nil     m = pure m
 buildModel (d::ds) m = buildModel ds !(insertE d m)
 
-buildStrategyE : List (String, SValue) -> Eff Strategy GEffs
+buildStrategyE : List (String, SValue) -> GRL Strategy
 buildStrategyE is = do
     is' <- mapE (\x => doConv x) is
     pure $ buildStrategy is'
   where
-    doConv : (String,SValue) -> Eff (GLang ELEM, SValue) GEffs
+    doConv : (String,SValue) -> GRL (GLang ELEM, SValue)
     doConv (i,sval) = pure (!(fetchElem i), sval)
 
 covering
-processArgs : List String -> Eff (String, Maybe String) GEffs
+processArgs : List String -> GRL (String, Maybe String)
 processArgs Nil           = raise NoFileError
 processArgs [x]           = raise NoFileError
 processArgs [x,y]         = pure (y, Nothing)
@@ -322,7 +292,7 @@ prettyResult g = unwords
     , "\t<=="
     , getNodeTitle g]
 
-evaluateE : GModel -> Maybe String -> Eff EvalResult GEffs
+evaluateE : GModel -> Maybe String -> GRL EvalResult
 evaluateE m Nothing       = pure $ evaluate FORWARD Nothing m
 evaluateE m (Just sfname) = do
     strat <- readGRLFile gstrategy sfname
@@ -331,15 +301,14 @@ evaluateE m (Just sfname) = do
 
 -- ------------------------------------------------------------------ [ Pretty ]
 
-
-showRes : EvalResult -> Eff () GEffs
+showRes : EvalResult -> GRL ()
 showRes res =
     case toString res prettyResult of
       Nothing  => raise BadModelError
       Just res => putStrLn res
 
 covering
-eMain : Eff () GEffs
+eMain : GRL ()
 eMain = do
     as <- getArgs
     (mfname, sfname) <- processArgs as

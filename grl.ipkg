@@ -1,6 +1,8 @@
 package grl
 
-opts = "-p containers -p graphviz --warnreach"
+pkgs = containers, graphviz
+
+opts = "--warnreach"
 
 modules = GRL.Common
         , GRL.IR
