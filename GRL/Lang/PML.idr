@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| Example DSML through reSkinning the GRL.
-module GRL.Test.DSML.Paper.ReSkin
+module GRL.Test.DSML.PML
 
 import public GRL.Common
 import public GRL.IR
@@ -87,96 +87,4 @@ WRITING = PML (ElemTy AuthTy) ELEM
 REVIEW : Type
 REVIEW = PML (ElemTy RevTy) ELEM
 
--- ---------------------------------------------------------------- [ Elements ]
-paper : PAPER
-paper = MkPaper "My First Paper"
-
-abst : ABSTRACT
-abst = MkAbs
-
-bib : BIB
-bib = MkBib
-
-intro : SECT
-intro = MkSect "Introduction"
-
-meth : SECT
-meth = MkSect "Methodology"
-
-res : SECT
-res = MkSect "Results"
-
-disc : SECT
-disc = MkSect "Discussion"
-
-wabs : WRITING
-wabs = MkAuth "Abstract" SATISFIED
-
-rabs : REVIEW
-rabs = MkRev "Abstract" WEAKSATIS
-
-wbib : WRITING
-wbib = MkAuth "Bib" WEAKSATIS
-
-rbib : REVIEW
-rbib = MkRev "Bib" WEAKSATIS
-
-wIntro : WRITING
-wIntro = MkAuth "Intro" DENIED
-
-rIntro : REVIEW
-rIntro = MkRev "Intro" DENIED
-
-wMeth : WRITING
-wMeth = MkAuth "Meth" DENIED
-
-rMeth : REVIEW
-rMeth = MkRev "Meth" DENIED
-
-wRes : WRITING
-wRes = MkAuth "Res" DENIED
-
-rRes : REVIEW
-rRes = MkRev "Res" DENIED
-
-wDis : WRITING
-wDis = MkAuth "Dis" DENIED
-
-rDis : REVIEW
-rDis = MkRev "Dis" DENIED
-
--- ------------------------------------------------------------------- [ Model ]
-paperPlan : GModel
-paperPlan = emptyModel
-  \= paper
-  \= abst  \= wabs   \= rabs
-  \= bib   \= wbib   \= rbib
-  \= ReSkin.intro \= wIntro \= rIntro
-  \= meth  \= wMeth  \= rMeth
-  \= res   \= wRes   \= rRes
-  \= disc  \= wDis   \= rDis
-  \= (paper &= abst)
-  \= (paper &= bib)
-  \= (paper &= intro)
-  \= (paper &= meth)
-  \= (paper &= res)
-  \= (paper &= disc)
-  \= (wabs  ==> abst)
-  \= (wbib  ==> bib)
-  \= (wIntro ==> intro)
-  \= (wMeth ==> meth)
-  \= (wRes  ==> res)
-  \= (wDis  ==> disc)
-  \= (rabs  ==> abst)
-  \= (rbib  ==> bib)
-  \= (rIntro ==> intro)
-  \= (rMeth ==> meth)
-  \= (rRes  ==> res)
-  \= (rDis  ==> disc)
-
--- -------------------------------------------------------------------- [ Test ]
-
-runTest : IO ()
-runTest = do
-    putStrLn $ prettyModel paperPlan
 -- --------------------------------------------------------------------- [ EOF ]

@@ -1,18 +1,14 @@
--- ------------------------------------------------------------ [ Abstract.idr ]
--- Module    : Abstract.idr
+-- --------------------------------------------------------------- [ PTODO.idr ]
+-- Module    : PTODO.idr
 -- Copyright : (c) Jan de Muijnck-Hughes
 -- License   : see LICENSE
 -- --------------------------------------------------------------------- [ EOH ]
+module GRL.Test.DSML.PTODO
 
-||| A DSML based on the GRL implemented using Types as Abstract Interpreters.
-module GRL.Test.DSML.Paper.AbstractPrime
-
+import Data.Sigma.DList
 import GRL.Lang.GLang
-import public Data.Sigma.DList
 
-%access public
-
--- ------------------------------------------------------------------- [ Types ]
+-- -------------------------------------------------------------- [ Meta Types ]
 
 data Ty = PAPERty | ITEMty | COMPty
 
@@ -33,7 +29,8 @@ interpPaper : String
            -> InterpRes COMPty
            -> List (InterpRes COMPty)
            -> InterpRes PAPERty
-interpPaper s (ResComp a) (ResComp b) es = ResPaper $ insert (pelem &= es') m
+interpPaper s (ResComp a) (ResComp b) es =
+    ResPaper $ insert (pelem &= es') m
   where
     pelem : GLang ELEM
     pelem = mkGoal s
@@ -42,14 +39,16 @@ interpPaper s (ResComp a) (ResComp b) es = ResPaper $ insert (pelem &= es') m
     es' = map (\(ResComp e) => e) es
 
     m : GModel
-    m = insert pelem $ insert a $ insert b $ insertMany es' emptyModel
+    m = insertMany (pelem::a::b::es') emptyModel
 
-interpTODO : String -> SValue -> InterpRes COMPty -> InterpRes ITEMty
+interpTODO : String
+          -> SValue
+          -> InterpRes COMPty
+          -> InterpRes ITEMty
 interpTODO d s (ResComp a) = ResITEM rtask (rtask ==> a | MAKES)
   where
     rtask : GLang ELEM
     rtask = mkSatTask (d ++ getElemTitle a) s
-
 
 interpTODOS : InterpRes PAPERty
            -> List (InterpRes ITEMty)
@@ -62,7 +61,7 @@ interpTODOS (ResPaper m) es' = insertMany is $ insertMany es m
     es : List (GLang ELEM)
     es = map (\(ResITEM e _) => e) es'
 
--- ---------------------------------------------------------------- [ The DSML ]
+-- ------------------------------------------------------------- [ Definitions ]
 
 data Comp : InterpRes COMPty -> CTy -> Type where
   Sect : (t:String) -> Comp (interpComp t         ) STy
@@ -77,12 +76,18 @@ data Paper : InterpRes PAPERty -> Type where
          -> Paper (interpPaper t a b ss)
 
 data TODO : InterpRes ITEMty -> Type where
-  Review : (c : Comp a ty) -> (s : SValue) -> TODO (interpTODO "Review " s a)
-  Write  : (c : Comp a ty) -> (s : SValue) -> TODO (interpTODO "Writing "s a)
+  Review : (c : Comp a ty)
+        -> (s : SValue)
+        -> TODO (interpTODO "Review " s a)
 
-data PaperToDos : GModel -> Type where
-  MkTODO : Paper m
+  Write  : (c : Comp a ty)
+        -> (s : SValue)
+        -> TODO (interpTODO "Writing "s a)
+
+data TODOList : GModel -> Type where
+  MyList : String
+        -> Paper m
         -> DList (InterpRes ITEMty) TODO ts
-        -> PaperToDos (interpTODOS m ts)
+        -> TODOList (interpTODOS m ts)
 
 -- --------------------------------------------------------------------- [ EOF ]

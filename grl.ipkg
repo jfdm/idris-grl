@@ -18,6 +18,8 @@ modules = GRL.Common
         , GRL.Lang.GLang
         , GRL.Lang.GLang.Pretty
         , GRL.Lang.GLangPlus
+        , GRL.Lang.PML
+        , GRL.Lang.TLang
 
         , GRL.Eval
         , GRL.Eval.Forward
@@ -31,12 +33,14 @@ modules = GRL.Common
         , GRL.Test.Contribution
         , GRL.Test.Amyot
 
-        , GRL.Test.DSML.TODO.ReSkin
-        , GRL.Test.DSML.TODO.Abstract
+        , GRL.Test.Examples.GLang
+        , GRL.Test.Examples.TLang
+        , GRL.Test.Examples.PML
 
-        , GRL.Test.DSML.Paper.Abstract
-        , GRL.Test.DSML.Paper.ReSkin
-        , GRL.Test.DSML.Paper.GLang
+        , GRL.Test.DSML.PTODO
+        , GRL.Test.DSML.TODO
+        , GRL.Test.DSML.OldTODO
+
         , GRL.Test.Sif
 
 tests =
@@ -44,9 +48,9 @@ tests =
      , GRL.Test.Contribution.runTest
      , GRL.Test.Amyot.runTest
      , GRL.Test.Sif.runTest
---      , GRL.Test.DSML.TODO.Abstract.runTest
---      , GRL.Test.DSML.TODO.ReSkin.runTest
 
---      , GRL.Test.DSML.Paper.ReSkin.runTest
---      , GRL.Test.DSML.Paper.GLang.runTest
---      , GRL.Test.DSML.Paper.Abstract.runTest
+     , GRL.Test.Examples.TLang.runTest
+     , GRL.Test.Examples.PML.runTest
+     , GRL.Test.Examples.GLang.runTest
+
+ ----------------------------------------------------------------------- [ EOF ]

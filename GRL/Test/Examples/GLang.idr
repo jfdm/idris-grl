@@ -1,17 +1,12 @@
--- -------------------------------------------------------- [ GLang.idr<Paper> ]
--- Module    : GLang.idr<Paper>
+-- ------------------------------------------------------------ [ PaperGRL.idr ]
+-- Module    : PaperGRL.idr
 -- Copyright : (c) Jan de Muijnck-Hughes
 -- License   : see LICENSE
 -- --------------------------------------------------------------------- [ EOH ]
-
-||| Example paper modelling using the GRL.
-module GRL.Test.DSML.Paper.GLang
+module GRL.Test.Examples.GLang
 
 import GRL.Lang.GLang
 
-%access public
-
--- ---------------------------------------------------------------- [ Elements ]
 paper : GOAL
 paper = mkGoal "My First Paper"
 
@@ -21,8 +16,8 @@ abst = mkGoal "Abstract"
 bib : GOAL
 bib = mkGoal "Bibliography"
 
-intro : GOAL
-intro = mkGoal "Intro"
+intr : GOAL
+intr = mkGoal "Intro"
 
 meth : GOAL
 meth = mkGoal "Methodology"
@@ -69,30 +64,21 @@ wDis = mkSatTask "Write Discussion" (DENIED)
 rDis : TASK
 rDis = mkSatTask "Review Discussion" (DENIED)
 
--- --------------------------------------------------------------- [ Model Def ]
-
 paperPlan : GModel
 paperPlan = emptyModel
-  \= paper
-  \= abst   \= wabs   \= rabs
-  \= bib    \= wbib   \= rbib
-  \= GLang.intro  \= wIntro \= rIntro
-  \= meth   \= wMeth  \= rMeth
-  \= res    \= wRes   \= rRes
-  \= disc   \= wDis   \= rDis
-  \= (paper &= [bib,abst,intro,meth,res,disc])
-  \= (wabs   ==> abst  | MAKES)
-  \= (wbib   ==> bib   | MAKES)
-  \= (wIntro ==> intro | MAKES)
-  \= (wMeth  ==> meth  | MAKES)
-  \= (wRes   ==> res   | MAKES)
-  \= (wDis   ==> disc  | MAKES)
-  \= (rabs   ==> abst  | MAKES)
-  \= (rbib   ==> bib   | MAKES)
-  \= (rIntro ==> intro | MAKES)
-  \= (rMeth  ==> meth  | MAKES)
-  \= (rRes   ==> res   | MAKES)
-  \= (rDis   ==> disc  | MAKES)
+ \= paper
+ \= abst   \= wabs   \= rabs   \= bib    \= wbib   \= rbib
+ \= intr   \= wIntro \= rIntro \= meth   \= wMeth  \= rMeth
+ \= res    \= wRes   \= rRes   \= disc   \= wDis   \= rDis
+
+ \= (paper &= [bib,abst,intr,meth,res,disc])
+
+ \= (wabs   ==> abst  | MAKES)  \= (rabs   ==> abst  | MAKES)
+ \= (wbib   ==> bib   | MAKES)  \= (rbib   ==> bib   | MAKES)
+ \= (wIntro ==> intr  | MAKES)  \= (rIntro ==> intr  | MAKES)
+ \= (wMeth  ==> meth  | MAKES)  \= (rMeth  ==> meth  | MAKES)
+ \= (wRes   ==> res   | MAKES)  \= (rRes   ==> res   | MAKES)
+ \= (wDis   ==> disc  | MAKES)  \= (rDis   ==> disc  | MAKES)
 
 -- -------------------------------------------------------------------- [ Test ]
 runTest : IO ()

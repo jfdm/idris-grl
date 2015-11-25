@@ -3,9 +3,8 @@
 -- Copyright : (c) Jan de Muijnck-Hughes
 -- License   : see LICENSE
 -- --------------------------------------------------------------------- [ EOH ]
-
 ||| TODO list achieved through reskinning the GRL.
-module GRL.Test.DSML.TODO.ReSkin
+module GRL.Test.DSML.TLang
 
 import public GRL.Common
 import public GRL.IR
@@ -62,32 +61,4 @@ SUBTASK = TLang (ElemTy STaskTy) ELEM
 ACTION : Type
 ACTION = TLang (ElemTy ActionTy) ELEM
 
--- ------------------------------------------------------------ [ Sample Model ]
-gpcePaper : TASK
-gpcePaper = MkTask "Write GPCE paper"
-
-gpceAbstract : SUBTASK
-gpceAbstract = MkSTask "Write the abstract"
-
-writePaper : SUBTASK
-writePaper = MkSTask "Write the paper"
-
-doWriting : ACTION
-doWriting = MkAction "Do writing"
-
-paperPlan : GModel
-paperPlan = emptyModel
-  \= gpcePaper
-  \= gpceAbstract
-  \= writePaper
-  \= doWriting
-  \= (gpcePaper &= gpceAbstract)
-  \= (gpcePaper &= writePaper)
-  \= (doWriting ==> writePaper   | MAKES)
-  \= (doWriting ==> gpceAbstract | MAKES)
-
--- -------------------------------------------------------------------- [ Test ]
-runTest : IO ()
-runTest = do
-    putStrLn $ prettyModel paperPlan
 -- --------------------------------------------------------------------- [ EOF ]
