@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="jfdm" created="November 1, 2015 11:34:13 AM GMT" modified="November 1, 2015 12:48:00 PM GMT" specVersion="9" urnVersion="1.27" nextGlobalID="106">
+  <ucmspec>
+    <scenarioGroups name="ScenarioGroup5" id="5">
+      <scenarios name="ScenarioDef6" id="6"/>
+    </scenarioGroups>
+  </ucmspec>
+  <grlspec>
+    <intElements name="Information Secrecy" id="12" linksDest="44 45 46 49 50 51" type="Goal" refs="13">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Recipient Confidentiality" id="22" linksDest="96 102" linksSrc="45" type="Goal" refs="23">
+      <metadata name="_numEval" value="-50"/>
+      <metadata name="_qualEval" value="WeaklyDenied"/>
+    </intElements>
+    <intElements name="Data Confidentiality" id="24" linksDest="97 103" linksSrc="44" type="Goal" refs="25">
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
+    </intElements>
+    <intElements name="Suitable Security Level" id="32" linksDest="105" linksSrc="46" type="Goal" refs="33">
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
+    </intElements>
+    <intElements name="Minimal Workflow Disruption" id="34" linksDest="98" linksSrc="49" type="Goal" refs="35">
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
+    </intElements>
+    <intElements name="Suitable Performance" id="36" linksDest="100 101" linksSrc="50" type="Goal" refs="37">
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
+    </intElements>
+    <intElements name="Secure Implementation" id="40" linksDest="99" linksSrc="51" type="Goal" refs="41">
+      <metadata name="_numEval" value="50"/>
+      <metadata name="_qualEval" value="WeaklySatisfied"/>
+    </intElements>
+    <intElements name="Symmetric Algorithm" id="53" linksSrc="101 105" type="Task" refs="54">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <intElements name="Algorithm Implementation" id="55" linksSrc="98 99 100" type="Task" refs="56">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <intElements name="Symmetric Key" id="57" linksSrc="102 103" type="Task" refs="58">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <intElements name="Mathematical Description" id="76" linksSrc="96 97" type="Task" refs="77">
+      <metadata name="_numEval" value="100"/>
+      <metadata name="_qualEval" value="Satisfied"/>
+    </intElements>
+    <links xsi:type="grl:Decomposition" name="Decomposition44" id="44" refs="//@urndef/@specDiagrams.1/@connections.0" dest="12" src="24"/>
+    <links xsi:type="grl:Decomposition" name="Decomposition45" id="45" refs="//@urndef/@specDiagrams.1/@connections.1" dest="12" src="22"/>
+    <links xsi:type="grl:Decomposition" name="Decomposition46" id="46" refs="//@urndef/@specDiagrams.1/@connections.2" dest="12" src="32"/>
+    <links xsi:type="grl:Decomposition" name="Decomposition49" id="49" refs="//@urndef/@specDiagrams.1/@connections.3" dest="12" src="34"/>
+    <links xsi:type="grl:Decomposition" name="Decomposition50" id="50" refs="//@urndef/@specDiagrams.1/@connections.4" dest="12" src="36"/>
+    <links xsi:type="grl:Decomposition" name="Decomposition51" id="51" refs="//@urndef/@specDiagrams.1/@connections.5" dest="12" src="40"/>
+    <links xsi:type="grl:Contribution" name="Contribution96" id="96" refs="//@urndef/@specDiagrams.1/@connections.6" dest="22" src="76" contribution="SomeNegative" quantitativeContribution="-75"/>
+    <links xsi:type="grl:Contribution" name="Contribution97" id="97" refs="//@urndef/@specDiagrams.1/@connections.7" dest="24" src="76"/>
+    <links xsi:type="grl:Contribution" name="Contribution98" id="98" refs="//@urndef/@specDiagrams.1/@connections.8" dest="34" src="55"/>
+    <links xsi:type="grl:Contribution" name="Contribution99" id="99" refs="//@urndef/@specDiagrams.1/@connections.9" dest="40" src="55"/>
+    <links xsi:type="grl:Contribution" name="Contribution100" id="100" refs="//@urndef/@specDiagrams.1/@connections.10" dest="36" src="55"/>
+    <links xsi:type="grl:Contribution" name="Contribution101" id="101" refs="//@urndef/@specDiagrams.1/@connections.11" dest="36" src="53"/>
+    <links xsi:type="grl:Contribution" name="Contribution102" id="102" refs="//@urndef/@specDiagrams.1/@connections.12" dest="22" src="57" contribution="SomeNegative" quantitativeContribution="-75"/>
+    <links xsi:type="grl:Contribution" name="Contribution103" id="103" refs="//@urndef/@specDiagrams.1/@connections.13" dest="24" src="57"/>
+    <links xsi:type="grl:Contribution" name="Contribution105" id="105" refs="//@urndef/@specDiagrams.1/@connections.14" dest="32" src="53"/>
+    <groups name="StrategiesGroup3" id="3" strategies="4"/>
+    <strategies name="EvaluationStrategy4" id="4" author="jfdm" group="3">
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="76">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="55">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="57">
+        <kpiEvalValueSet/>
+      </evaluations>
+      <evaluations evaluation="100" qualitativeEvaluation="Satisfied" intElement="53">
+        <kpiEvalValueSet/>
+      </evaluations>
+    </strategies>
+    <impactModel/>
+    <indicatorGroup name="Time" id="7" isRedesignCategory="true"/>
+    <indicatorGroup name="Cost" id="8" isRedesignCategory="true"/>
+    <indicatorGroup name="Quality" id="9" isRedesignCategory="true"/>
+    <indicatorGroup name="Flexibility" id="10" isRedesignCategory="true"/>
+    <featureModel/>
+  </grlspec>
+  <urndef>
+    <specDiagrams xsi:type="ucm.map:UCMmap" name="UCMmap2" id="2"/>
+    <specDiagrams xsi:type="grl:GRLGraph" name="GRLGraph11" id="11">
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef13" id="13" x="447" y="102" pred="//@urndef/@specDiagrams.1/@connections.0 //@urndef/@specDiagrams.1/@connections.1 //@urndef/@specDiagrams.1/@connections.2 //@urndef/@specDiagrams.1/@connections.3 //@urndef/@specDiagrams.1/@connections.4 //@urndef/@specDiagrams.1/@connections.5" def="12">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef23" id="23" x="197" y="245" succ="//@urndef/@specDiagrams.1/@connections.1" pred="//@urndef/@specDiagrams.1/@connections.6 //@urndef/@specDiagrams.1/@connections.12" def="22">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef25" id="25" x="27" y="245" succ="//@urndef/@specDiagrams.1/@connections.0" pred="//@urndef/@specDiagrams.1/@connections.7 //@urndef/@specDiagrams.1/@connections.13" def="24">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef33" id="33" x="367" y="245" succ="//@urndef/@specDiagrams.1/@connections.2" pred="//@urndef/@specDiagrams.1/@connections.14" def="32">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef35" id="35" x="537" y="245" succ="//@urndef/@specDiagrams.1/@connections.3" pred="//@urndef/@specDiagrams.1/@connections.8" def="34">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef37" id="37" x="879" y="245" succ="//@urndef/@specDiagrams.1/@connections.4" pred="//@urndef/@specDiagrams.1/@connections.10 //@urndef/@specDiagrams.1/@connections.11" def="36">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef41" id="41" x="707" y="245" succ="//@urndef/@specDiagrams.1/@connections.5" pred="//@urndef/@specDiagrams.1/@connections.9" def="40">
+        <metadata name="_height" value="65"/>
+        <metadata name="_width" value="124"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef54" id="54" x="311" y="450" succ="//@urndef/@specDiagrams.1/@connections.11 //@urndef/@specDiagrams.1/@connections.14" def="53">
+        <metadata name="_height" value="56"/>
+        <metadata name="_width" value="134"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef56" id="56" x="771" y="451" succ="//@urndef/@specDiagrams.1/@connections.8 //@urndef/@specDiagrams.1/@connections.9 //@urndef/@specDiagrams.1/@connections.10" def="55">
+        <metadata name="_height" value="56"/>
+        <metadata name="_width" value="134"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef58" id="58" x="554" y="451" succ="//@urndef/@specDiagrams.1/@connections.12 //@urndef/@specDiagrams.1/@connections.13" def="57">
+        <metadata name="_height" value="56"/>
+        <metadata name="_width" value="134"/>
+      </nodes>
+      <nodes xsi:type="grl:IntentionalElementRef" name="IntentionalElementRef77" id="77" x="96" y="449" succ="//@urndef/@specDiagrams.1/@connections.6 //@urndef/@specDiagrams.1/@connections.7" def="76">
+        <metadata name="_height" value="55"/>
+        <metadata name="_width" value="127"/>
+      </nodes>
+      <connections xsi:type="grl:LinkRef" source="25" target="13" link="44"/>
+      <connections xsi:type="grl:LinkRef" source="23" target="13" link="45"/>
+      <connections xsi:type="grl:LinkRef" source="33" target="13" link="46"/>
+      <connections xsi:type="grl:LinkRef" source="35" target="13" link="49"/>
+      <connections xsi:type="grl:LinkRef" source="37" target="13" link="50"/>
+      <connections xsi:type="grl:LinkRef" source="41" target="13" link="51"/>
+      <connections xsi:type="grl:LinkRef" source="77" target="23" link="96">
+        <label deltaX="-24" deltaY="-72"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="77" target="25" link="97">
+        <label deltaX="28" deltaY="-74"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="56" target="35" link="98">
+        <label deltaX="30" deltaY="-30"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="56" target="41" link="99">
+        <label deltaX="30" deltaY="-30"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="56" target="37" link="100">
+        <label deltaX="30" deltaY="-30"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="54" target="37" link="101">
+        <label deltaX="30" deltaY="-30"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="58" target="23" link="102">
+        <label deltaX="15" deltaY="-19"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="58" target="25" link="103">
+        <label deltaX="18" deltaY="-38"/>
+      </connections>
+      <connections xsi:type="grl:LinkRef" source="54" target="33" link="105">
+        <label deltaX="-33" deltaY="-19"/>
+      </connections>
+    </specDiagrams>
+  </urndef>
+  <metadata name="_Use0to100EvaluationRange" value="false"/>
+</urn:URNspec>
