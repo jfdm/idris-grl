@@ -9,6 +9,8 @@ module GRL.Pretty
 
 import GRL.Model
 
+%access export
+
 ||| Pretty models
 prettyModel : GModel -> String
 prettyModel g = (foldl (\res,x => show x ++ "\n" ++ res) "" (vertices g)) ++ "\n" ++

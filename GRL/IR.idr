@@ -9,11 +9,12 @@ module DSL.IR
 
 import GRL.Common
 
-%access public
+%access export
 -- ---------------------------------------------------------- [ AST Definition ]
 
 ||| An IR to aid in converting DSL language constructs into Goal Graph
 ||| objects.
+public export
 data GExpr : GTy -> Type where
   Elem  : GElemTy -> String -> Maybe SValue -> GExpr ELEM
   ILink : GIntentTy -> CValue -> GExpr ELEM -> GExpr ELEM -> GExpr INTENT
@@ -39,12 +40,13 @@ shGExprS (SLink ty x ys) = with List unwords ["[Structure", show ty, shGExprE x,
     show' : List (GExpr ELEM) -> String
     show' ys = "[" ++ (unwords $ intersperse "," (map shGExprE ys)) ++ "]"
 
+private
 shGExpr : {ty : GTy} -> GExpr ty -> String
 shGExpr {ty=ELEM}   x = shGExprE x
 shGExpr {ty=INTENT} x = shGExprI x
 shGExpr {ty=STRUCT} x = shGExprS x
 
-instance Show (GExpr ty) where
+Show (GExpr ty) where
   show x = shGExpr x
 
 -- ------------------------------------------------------------- [ Eq Instance ]
@@ -70,20 +72,22 @@ eqGExprS (SLink xty xa (xbs)) (SLink yty ya (ybs)) =
           else False
       eqGExprList _       _       = False
 
+export
 eqGExpr : GExpr a -> GExpr b -> Bool
 eqGExpr {a=ELEM}   {b=ELEM}   x y = eqGExprE x y
 eqGExpr {a=INTENT} {b=INTENT} x y = eqGExprI x y
 eqGExpr {a=STRUCT} {b=STRUCT} x y = eqGExprS x y
 eqGExpr _          _          = False
 
-instance Eq (GExpr ty) where
+Eq (GExpr ty) where
   (==) x y = eqGExpr x y
 
 ||| The GRL Class for allowing DSL designers to instruct the Goal
 ||| Graph builder how to convert expressions in the DSL to the IR.
 |||
 ||| @a The DSL which is indexed by `GTy` type.
-class GRL (a : GTy -> Type) where
+public export
+interface GRL (a : GTy -> Type) where
   ||| Instruct the interpreter to construct a goal node.
   mkElem   : a ELEM   -> GExpr ELEM
   ||| Intruct the interpreter to construct a intent link.

@@ -6,7 +6,6 @@ import GRL.Eval
 import GRL.Test.Utils
 
 %default total
-%access public
 
 g1 : GOAL
 g1 = mkGoal "[Goal Requirement: Suitable Security Level Nothing ]"
@@ -111,6 +110,7 @@ decls = (_ **
      mkAnd t5 [t19 , t20 , t21]
      ])
 
+export
 partial
 runTest : IO ()
 runTest = do

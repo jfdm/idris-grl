@@ -10,6 +10,7 @@ module GRL.Common
 import public Decidable.Equality
 
 %default total
+%access public export
 
 data Importance = HIGH | MEDIUM | LOW | NO
 
@@ -32,6 +33,7 @@ namespace Qualiative
     ||| The intentional element or indicator is neither satisfied nor dissatisfied.
     NONE : SValue
 
+export
 invertEval : SValue -> SValue
 invertEval DENIED = SATISFIED
 invertEval WEAKDEN = WEAKSATIS
@@ -58,6 +60,7 @@ namespace Contributions
     ||| The contribution is negative but not sufficient.
     HURTS : CValue
 
+export
 invertContrib : CValue -> CValue
 invertContrib MAKES = HURTS
 invertContrib HELPS = BREAK
@@ -155,54 +158,54 @@ data GStructTy : Type where
 
 -- -------------------------------------------------------------------- [ Show ]
 
-instance Show GElemTy where
+implementation Show GElemTy where
   show GOALty = "Goal"
   show SOFTty = "Soft"
   show TASKty = "Task"
   show RESty  = "Res"
 
-instance Show GIntentTy where
+implementation Show GIntentTy where
   show IMPACTSty = "CONTRIBUTION"
   show AFFECTSty = "CORRELATION"
 
-instance Show GStructTy where
+implementation Show GStructTy where
   show ANDty  = "ANDTy"
   show XORty  = "XORTy"
   show IORty  = "IORTy"
 
-instance Show GTy where
+implementation Show GTy where
   show ELEM   = "ELEM"
   show INTENT = "INTENT"
   show STRUCT = "STRUCT"
 
 -- ---------------------------------------------------------------------- [ Eq ]
 
-instance Eq GElemTy where
+implementation Eq GElemTy where
   (==) GOALty GOALty = True
   (==) SOFTty SOFTty = True
   (==) TASKty TASKty = True
   (==) RESty  RESty  = True
   (==) _        _    = False
 
-instance Eq GIntentTy where
+implementation Eq GIntentTy where
   (==) IMPACTSty IMPACTSty = True
   (==) AFFECTSty AFFECTSty = True
   (==) _         _         = False
 
-instance Eq GStructTy where
+implementation Eq GStructTy where
   (==) ANDty ANDty = True
   (==) XORty XORty = True
   (==) IORty IORty = True
   (==) _     _     = False
 
-instance Eq GTy where
+implementation Eq GTy where
   (==) ELEM   ELEM   = True
   (==) INTENT INTENT = True
   (==) STRUCT STRUCT = True
   (==) _      _      = False
 
 -- --------------------------------------------------------------- [ Orderable ]
-instance Ord GTy where
+implementation Ord GTy where
   compare ELEM   ELEM   = EQ
   compare INTENT INTENT = EQ
   compare STRUCT STRUCT = EQ
@@ -215,7 +218,7 @@ instance Ord GTy where
 
 -- -------------------------------------------------------------------- [ Show ]
 
-instance Show SValue where
+implementation Show SValue where
   show SATISFIED = "SATISFIED"
   show WEAKSATIS = "WEAKSATIS"
   show WEAKDEN   = "WEAKDEN"
@@ -224,7 +227,7 @@ instance Show SValue where
   show UNDECIDED = "UNDECIDED"
   show NONE      = "NONE"
 
-instance Eq SValue where
+implementation Eq SValue where
   (==) SATISFIED SATISFIED = True
   (==) WEAKSATIS WEAKSATIS = True
   (==) WEAKDEN   WEAKDEN   = True
@@ -234,7 +237,7 @@ instance Eq SValue where
   (==) NONE      NONE      = True
   (==) _         _         = False
 
-instance Show CValue where
+implementation Show CValue where
   show MAKES   = "MAKES"
   show HELPS   = "HELPS"
   show SOMEPOS = "SOMEPOS"
@@ -243,7 +246,7 @@ instance Show CValue where
   show HURTS   = "HURTS"
   show BREAK   = "BREAKS"
 
-instance Eq CValue where
+implementation Eq CValue where
   (==) MAKES   MAKES   = True
   (==) HELPS   HELPS   = True
   (==) SOMEPOS SOMEPOS = True
@@ -253,7 +256,7 @@ instance Eq CValue where
   (==) BREAK   BREAK   = True
   (==) _       _       = False
 
-instance Cast CValue String where
+implementation Cast CValue String where
   cast MAKES   = "MAKES"
   cast HELPS   = "HELPS"
   cast SOMEPOS = "SOMEPOS"
@@ -263,7 +266,7 @@ instance Cast CValue String where
   cast BREAK   = "BREAKS"
 
 
-instance Cast SValue String where
+implementation Cast SValue String where
   cast SATISFIED = "SATISFIED"
   cast WEAKSATIS = "WEAKSATIS"
   cast WEAKDEN   = "WEAKDEN"
@@ -272,7 +275,7 @@ instance Cast SValue String where
   cast UNDECIDED = "UNDECIDED"
   cast NONE      = "NONE"
 
-instance Cast String CValue where
+implementation Cast String CValue where
   cast "MAKES"   = MAKES
   cast "HELPS"   = HELPS
   cast "SOMEPOS" = SOMEPOS
@@ -282,7 +285,7 @@ instance Cast String CValue where
   cast "BREAKS"  = BREAK
   cast _         = UNKNOWN
 
-instance Cast String SValue where
+implementation Cast String SValue where
   cast "SATISFIED"   = SATISFIED
   cast "WEAKSATIS"   = WEAKSATIS
   cast "WEAKDEN"     = WEAKDEN

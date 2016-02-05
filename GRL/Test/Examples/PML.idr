@@ -86,6 +86,7 @@ paperPlan = emptyModel
  \= (paper &= disc)  \= (wDis  ==> disc)  \= (rDis  ==> disc)
 
  -- -------------------------------------------------------------------- [ Test ]
+export
 runTest : IO ()
 runTest = do
     putStrLn $ prettyModel paperPlan

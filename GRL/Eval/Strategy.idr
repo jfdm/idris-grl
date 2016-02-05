@@ -13,13 +13,16 @@ import GRL.Builder
 import GRL.Model
 
 ||| Strategies are just list of node evaluation pairings.
+public export
 Strategy : Type
 Strategy = List (GoalNode, SValue)
 
+export
 buildStrategy : GRL expr => List (expr ELEM, SValue) -> Strategy
 buildStrategy es = map (\(e,v) => ((convExpr . mkElem) e, v)) es
 
 ||| Deploy Strategy being careful not to override default values, returning a pairing of the modified model, and original.
+export
 deployStrategy : GModel -> Strategy -> (GModel, GModel)
 deployStrategy oldG ss = (newG, oldG)
   where

@@ -13,7 +13,7 @@ import public GRL.Model
 import public GRL.Builder
 import public GRL.Pretty
 
-%access public
+%access public export
 
 -- ------------------------------------------------------------- [ Type System ]
 

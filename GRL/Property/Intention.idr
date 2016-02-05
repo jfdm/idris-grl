@@ -23,7 +23,7 @@ import GRL.Model
 import GRL.IR
 import GRL.Common
 
-%access public
+%access export
 
 -- ---------------------------------------------- [ Intentional Link Insertion ]
 examineLink : GExpr INTENT -> Bool

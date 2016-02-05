@@ -6,7 +6,7 @@ import GRL.Eval
 import Debug.Trace
 
 %default total
-%access public
+%access public export
 
 data TestResults : Type where
   BadModel     : TestResults

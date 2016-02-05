@@ -10,6 +10,8 @@ import Data.GraphViz.SimpleDot
 import GRL.Common
 import GRL.Model
 
+%access export
+
 toSimpleDot : GModel -> SimpleDot GRAPH
 toSimpleDot g = Digraph (nodes (verticesID g)) (edges' (edges g))
   where

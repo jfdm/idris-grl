@@ -20,7 +20,7 @@ import GRL.Eval.Strategy
 import GRL.Eval.Common
 
 %default partial
-%access public
+%access private
 
 -- ----------------------------------------------------- [ Forward Propagation ]
 
@@ -111,6 +111,7 @@ initGraph g = foldl (doUp) g (leaves)
 -- ------------------------------------------------------- [ Forward Algorithm ]
 
 partial
+export
 doEval : GModel -> (Queue NodeID) -> GModel
 doEval g q =
     case popQ' q of
@@ -164,6 +165,7 @@ runEval g =
 ||| This function will deploy the strategy if it is given. Using this
 ||| code with a predeployed strategy may give unexpected results.
 partial
+export
 forwardEval : Maybe Strategy -> GModel -> EvalResult
 forwardEval Nothing  g = runEval g
 forwardEval (Just s) g = runEval $ fst (deployStrategy g s)

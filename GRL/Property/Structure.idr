@@ -24,7 +24,8 @@ import GRL.IR
 import GRL.Common
 
 %default partial
-%access public
+%access export
+
 -- ----------------------------------------------- [ Structural Link Insertion ]
 
 ||| No loops and all different children.
@@ -58,12 +59,13 @@ validDTy (Elem ty t s) dty m =
 
 
 -- -------------------------------------------------------------- [ Evaluation ]
-
+private
 record ComputeState where
   constructor MkState
   next : Stack NodeID
   seen : List NodeID
 
+private
 defState : List NodeID -> ComputeState
 defState is = MkState (pushSThings is mkStack) (List.Nil)
 
@@ -72,6 +74,7 @@ cycleCheck : NodeID -> NodeID -> List NodeID -> Bool
 cycleCheck id curr seen = elem curr seen || curr == id || elem id seen
 
 partial
+private
 doComputeSpan : (id    : NodeID)
               -> (model : GModel)
               -> (st    : ComputeState)

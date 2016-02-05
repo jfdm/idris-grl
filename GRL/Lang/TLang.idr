@@ -12,7 +12,7 @@ import public GRL.Model
 import public GRL.Builder
 import public GRL.Pretty
 
-%access public
+%access public export
 
 -- --------------------------------------------------------- [ DSML Definition ]
 
@@ -38,7 +38,7 @@ data TLang : TTy -> GTy -> Type where
             -> TLang (ElemTy STaskTy) ELEM
             -> TLang SubLinkTy STRUCT
 
-instance GRL (\x => TLang ty x) where
+GRL (\x => TLang ty x) where
   mkElem (MkTask s)   = Elem GOALty s Nothing
   mkElem (MkSTask s)  = Elem GOALty s Nothing
   mkElem (MkAction s) = Elem TASKty s (Just SATISFIED)

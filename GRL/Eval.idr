@@ -20,11 +20,16 @@ import public GRL.Eval.Forward
 import public GRL.Eval.Strategy
 import public GRL.Eval.Common
 
+public export
 data EvalAlgo = FORWARD | HYBRID | BACKWARDS
 
+
+export
 evalModel : GModel -> Maybe Strategy -> EvalResult
 evalModel g s = forwardEval s g
 
+
+export
 evaluate : EvalAlgo -> Maybe Strategy -> GModel -> EvalResult
 evaluate FORWARD   s g = forwardEval s g
 evaluate BACKWARDS s g = forwardEval s g

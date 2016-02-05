@@ -14,7 +14,7 @@ import public GRL.Builder
 import public GRL.Pretty
 import public GRL.Lang.GLang.Pretty
 
-%access public
+%access export
 %default total
 
 ||| The original unadulterated version of the GRL.
@@ -96,7 +96,7 @@ mkXor = MkXor
 
 -- --------------------------------------------------------------------- [ GRL ]
 
-instance GRL GLang where
+GRL GLang where
     mkElem (MkGoal s v) = Elem GOALty s v
     mkElem (MkSoft s v) = Elem SOFTty s v
     mkElem (MkTask s v) = Elem TASKty s v
@@ -190,7 +190,7 @@ showLang {ty=ELEM}   x = showElem x
 showLang {ty=INTENT} x = showIntent x
 showLang {ty=STRUCT} x = showStruct x
 
-instance Show (GLang ty) where
+Show (GLang ty) where
     show x = showLang x
 
 -- ---------------------------------------------------------------------- [ Eq ]
@@ -226,13 +226,14 @@ mutual
         else False
   eqGLangList _       _       = False
 
+private
 eqGLang : GLang a -> GLang b -> Bool
 eqGLang {a=ELEM}   {b=ELEM}   x y = eqGLangE x y
 eqGLang {a=INTENT} {b=INTENT} x y = eqGLangI x y
 eqGLang {a=STRUCT} {b=STRUCT} x y = eqGLangS x y
 eqGLang _          _              = False
 
-instance Eq (GLang ty) where
+Eq (GLang ty) where
   (==) = eqGLang
 
 -- -------------------------------------------------------------- [ Comparable ]
@@ -240,20 +241,23 @@ instance Eq (GLang ty) where
 cmpGLang : GLang x -> GLang y -> Ordering
 cmpGLang {x} {y} _ _ = compare x y
 
-instance Ord (GLang ty) where
+Ord (GLang ty) where
   compare x y = cmpGLang x y
 
 -- ---------------------------------------------------------------- [ Synonyms ]
-
+public export
 GOAL : Type
 GOAL = GLang ELEM
 
+public export
 SOFT : Type
 SOFT = GLang ELEM
 
+public export
 TASK : Type
 TASK = GLang ELEM
 
+public export
 RES : Type
 RES = GLang ELEM
 

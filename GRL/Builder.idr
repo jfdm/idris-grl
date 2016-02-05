@@ -9,7 +9,7 @@
 module GRL.Builder
 
 import public Data.AVL.Graph
-import public Data.Sigma.DList
+import public Data.DList
 import public Data.List
 
 import GRL.Model
@@ -23,7 +23,7 @@ import GRL.Pretty
 import Debug.Error
 import Debug.Trace
 
-%access public
+%access export
 %default total
 
 -- ---------------------------------------------------- [ Allowed Constructors ]
@@ -35,6 +35,7 @@ emptyModel = mkEmptyGraph
 -- ------------------------------------------------------------- [ Interpreter ]
 
 |||  Interpt the IR types to get Goal Graph Types.
+public export
 interpTy : GTy -> Type
 interpTy ELEM   = GoalNode
 interpTy INTENT = GoalEdge
@@ -48,6 +49,7 @@ convExpr (ILink AFFECTSty cTy _ _) = Correlation  cTy
 convExpr (SLink _ _ _)             = Decomp
 
 -- --------------------------------------------------------------- [ Insertion ]
+private
 data ValidInsert : {ty : GTy} -> GExpr ty -> GModel -> Type where
   IsValidInsert : ValidInsert decl model
 

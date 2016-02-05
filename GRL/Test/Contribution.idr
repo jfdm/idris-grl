@@ -12,7 +12,6 @@ import GRL.Eval
 
 import GRL.Test.Utils
 
-%access public
 %default total
 
 -- -------------------------------------------------------- [ Model Definition ]
@@ -66,7 +65,7 @@ bExpRes = buildStrategy
 
 -- -------------------------------------------------------------------- [ Test ]
 
-partial
+export partial
 runTest : IO ()
 runTest = do
   putStrLn "--> Composition Tests"

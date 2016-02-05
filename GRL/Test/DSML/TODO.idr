@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 module GRL.Test.DSML.TODO
 
-import Data.Sigma.DList
+import Data.DList
 import GRL.Lang.GLang
 
 -- ------------------------------------------------------------------- [ Types ]
@@ -19,13 +19,14 @@ data IRes : Ty -> Type where
   IResTask : GLang ELEM -> GLang INTENT -> IRes TyTASK
 
 interpItem : String -> Maybe SValue -> IRes TyITEM
-interpItem title sval = IResItem $ MkGoal title sval
+interpItem title Nothing     = IResItem $ mkGoal title
+interpItem title (Just sval) = IResItem $ mkSatGoal title sval
 
 interpTask : String -> SValue -> IRes TyITEM -> IRes TyTASK
 interpTask t s (IResItem to) = IResTask elem link
   where
     elem : GLang ELEM
-    elem = MkTask t (Just s)
+    elem = mkSatTask t s
 
     link : GLang INTENT
     link = (elem ==> to | MAKES)
@@ -36,7 +37,7 @@ buildModel : String
 buildModel n is ts = insertMany tis $ insertMany tes m
   where
     root : GLang ELEM
-    root = MkGoal n Nothing
+    root = mkGoal n
 
     es : List (GLang ELEM)
     es = map (\(IResItem x) => x) is

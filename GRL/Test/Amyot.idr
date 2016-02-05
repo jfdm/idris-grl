@@ -13,7 +13,6 @@ import GRL.Eval
 import GRL.Test.Utils
 
 %default total
-%access public
 
 -- ------------------------------------------------------------------- [ Nodes ]
 
@@ -171,7 +170,7 @@ strategy4ExpectedResults = buildStrategy
 
 
 -- -------------------------------------------------------------------- [ Test ]
-partial
+export partial
 runTest : IO ()
 runTest = do
   putStrLn "--> Amyot 2010 gem"

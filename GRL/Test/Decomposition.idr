@@ -12,7 +12,6 @@ import GRL.Eval
 
 import GRL.Test.Utils
 
-%access public
 %default total
 
 -- -------------------------------------------------------- [ Model Definition ]
@@ -95,7 +94,7 @@ and_d' = buildStrategy [(conn,DENIED), (lan, CONFLICT), (wireless, WEAKSATIS), (
 
 -- -------------------------------------------------------------------- [ Test ]
 
-partial
+export partial
 runTest : IO ()
 runTest = do
   putStrLn "--> Decomposition Tests"

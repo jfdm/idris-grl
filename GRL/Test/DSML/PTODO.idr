@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 module GRL.Test.DSML.PTODO
 
-import Data.Sigma.DList
+import Data.DList
 import GRL.Lang.GLang
 
 -- -------------------------------------------------------------- [ Meta Types ]

@@ -10,9 +10,9 @@ module GRL.Eval.Qualitative
 import GRL.Common
 import GRL.Model
 
-%access public
+%access public export
 
-instance [andSN] Cast SValue Nat where
+implementation [andSN] Cast SValue Nat where
   cast DENIED    = cast 0
   cast CONFLICT  = cast 1
   cast UNDECIDED = cast 1
@@ -21,7 +21,7 @@ instance [andSN] Cast SValue Nat where
   cast WEAKSATIS = cast 4
   cast SATISFIED = cast 5
 
-instance [andNS] Cast Nat SValue where
+implementation [andNS] Cast Nat SValue where
   cast Z                     = DENIED
   cast (S Z)                 = UNDECIDED
   cast (S (S Z))             = WEAKDEN
@@ -38,7 +38,7 @@ getDecompAnd ss = cast @{andNS} $ foldl (\olds,s => min (toNat s) olds) (cast 5)
     toNat : SValue -> Nat
     toNat sv = cast @{andSN} sv
 
-instance [orSN] Cast SValue Nat where
+implementation [orSN] Cast SValue Nat where
   cast DENIED    = cast 0
   cast WEAKDEN   = cast 1
   cast NONE      = cast 2
@@ -47,7 +47,7 @@ instance [orSN] Cast SValue Nat where
   cast UNDECIDED = cast 4
   cast SATISFIED = cast 5
 
-instance [orNS] Cast Nat SValue where
+implementation [orNS] Cast Nat SValue where
   cast Z                     = DENIED
   cast (S Z)                 = WEAKDEN
   cast (S (S Z))             = NONE

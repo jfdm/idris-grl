@@ -32,6 +32,7 @@ paperPlan = emptyModel
   \= (doWriting ==> gpceAbstract | MAKES)
 
 -- -------------------------------------------------------------------- [ Test ]
+export
 runTest : IO ()
 runTest = do
     putStrLn $ prettyModel paperPlan

@@ -13,11 +13,12 @@ import public Data.List
 import GRL.Common
 import Debug.Trace
 
-%access public
+%access export
 
 -- ------------------------------------------------------------------- [ Nodes ]
 
 ||| Nodes in the Goal Graph
+public export
 record GoalNode where
   constructor GNode
   getNodeTy    : GElemTy
@@ -25,10 +26,10 @@ record GoalNode where
   getSValue    : Maybe SValue
   getStructTy  : Maybe GStructTy
 
-instance Show GoalNode where
+Show GoalNode where
   show (GNode ty n s d) = with List unwords ["[GNode", show ty, n, show s, show d, "]"]
 
-instance Eq GoalNode where
+Eq GoalNode where
   (==) (GNode xty x xs xd) (GNode yty y ys yd) =
       xty == yty &&
       x   == y   &&
@@ -37,17 +38,18 @@ instance Eq GoalNode where
 
 -- ------------------------------------------------------------------- [ Edges ]
 
+public export
 data GoalEdge  : Type where
   Contribution : CValue -> GoalEdge
   Correlation  : CValue -> GoalEdge
   Decomp       : GoalEdge
 
-instance Show GoalEdge where
+Show GoalEdge where
   show (Contribution ty) = with List unwords ["[Contrib", show ty, "]"]
   show (Correlation ty)  = with List unwords ["[Correl", show ty, "]"]
   show Decomp            = with List unwords ["[Decomp]"]
 
-instance Eq GoalEdge where
+Eq GoalEdge where
   (==) (Contribution x) (Contribution y) = x == y
   (==) (Correlation x)  (Correlation y)  = x == y
   (==) Decomp           Decomp           = True
@@ -55,6 +57,7 @@ instance Eq GoalEdge where
 
 -- ---------------------------------------------------------------- [ Synonyms ]
 
+public export
 GModel : Type
 GModel = Graph (GoalNode) (GoalEdge)
 

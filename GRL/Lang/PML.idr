@@ -13,7 +13,7 @@ import public GRL.Model
 import public GRL.Builder
 import public GRL.Pretty
 
-%access public
+%access public export
 
 -- ---------------------------------------------------------------- [ DSML Def ]
 data ETy = PaperTy | SecTy | AuthTy | RevTy | BibTy | AbsTy
@@ -51,7 +51,7 @@ data PML : PTy -> GTy -> Type where
            -> {auto prf : ValidAction x y}
            -> PML ALinkTy INTENT
 
-instance GRL (\x => PML ty x) where
+GRL (\x => PML ty x) where
   mkElem (MkPaper t) = Elem GOALty t Nothing
   mkElem (MkSect  t) = Elem GOALty t Nothing
   mkElem (MkBib)     = Elem GOALty "Bibliography" Nothing

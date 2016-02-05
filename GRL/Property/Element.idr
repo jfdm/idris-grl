@@ -25,7 +25,7 @@ import GRL.Model
 import GRL.IR
 import GRL.Common
 
-%access public
+%access export
 -- ------------------------------------------------------- [ Element Insertion ]
 
 ||| Check to see if the element is unique.

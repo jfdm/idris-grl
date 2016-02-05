@@ -9,7 +9,7 @@ import public GRL.Common
 import public GRL.IR
 import public GRL.Model
 
-%access public
+%access public export
 %default total
 
 data GLangAST : GTy -> Type where
@@ -30,7 +30,7 @@ showIntent op cval x y = unwords [x, op, y, "|", show cval]
 showStruct : String -> String -> List String -> String
 showStruct op x ys = unwords [x, op, "[", listIDs ys, "]" ]
 
-instance Show (GLangAST ty) where
+Show (GLangAST ty) where
   show (MkNode id ty t sval) = unwords [id, "<-", show ty, show t, showSValue sval]
   show (MkIntent ty cval x y) =
       case ty of

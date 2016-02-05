@@ -8,14 +8,17 @@ module GRL.Eval.Common
 import GRL.Common
 import GRL.Model
 
+%access export
 -- ------------------------------------------------------------- [ Eval Result ]
 
 namespace EvalResult
+  public export
   data EvalResult : Type where
     Result   : List GoalNode  -> EvalResult
     BadModel : EvalResult
 
-  instance Show EvalResult where
+  public export
+  implementation Show EvalResult where
     show BadModel    = "Bad Model"
     show (Result xs) = unlines $ map (mkPretty) xs
        where
