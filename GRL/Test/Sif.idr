@@ -114,7 +114,7 @@ export
 partial
 runTest : IO ()
 runTest = do
-  let (_ ** ds) = groupDecls (getProof decls)
+  let (_ ** ds) = groupDecls (snd decls)
   putStrLn "Strategy 1:"
   let m = (insertMany' ds model)
   runEval m Nothing

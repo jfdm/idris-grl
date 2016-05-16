@@ -85,7 +85,7 @@ AND = GLang S STRUCT
 
 -- --------------------------------------------------------------------- [ GRL ]
 
-instance GRL (\x => GLang ty x) where
+implementation GRL (\x => GLang ty x) where
     mkElem (MkGoal s e) = Elem GOALty s e
     mkElem (MkSoft s e) = Elem SOFTty s e
     mkElem (MkTask s e) = Elem TASKty s e

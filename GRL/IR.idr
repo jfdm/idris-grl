@@ -5,7 +5,7 @@
 -- --------------------------------------------------------------------- [ EOH ]
 
 ||| The intermediate representation for GRL-Derived Languages.
-module DSL.IR
+module GRL.IR
 
 import GRL.Common
 
@@ -16,9 +16,14 @@ import GRL.Common
 ||| objects.
 public export
 data GExpr : GTy -> Type where
-  Elem  : GElemTy -> String -> Maybe SValue -> GExpr ELEM
-  ILink : GIntentTy -> CValue -> GExpr ELEM -> GExpr ELEM -> GExpr INTENT
-  SLink : GStructTy -> GExpr ELEM -> List (GExpr ELEM) -> GExpr STRUCT
+  Elem  : GElemTy -> String
+       -> Maybe SValue -> GExpr ELEM
+
+  ILink : GIntentTy -> CValue
+       -> GExpr ELEM -> GExpr ELEM -> GExpr INTENT
+
+  SLink : GStructTy -> GExpr ELEM
+        -> List (GExpr ELEM) -> GExpr STRUCT
 
 getTitle : GExpr ELEM -> String
 getTitle (Elem ty t s) = t
