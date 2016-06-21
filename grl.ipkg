@@ -33,9 +33,9 @@ modules = GRL.Common
         , GRL.Test.Contribution
         , GRL.Test.Amyot
 
-        , GRL.Test.Examples.GLang
-        , GRL.Test.Examples.TLang
-        , GRL.Test.Examples.PML
+        , GRL.Lang.Test.GLang
+        , GRL.Lang.Test.TLang
+        , GRL.Lang.Test.PML
 
         , GRL.Test.DSML.PTODO
         , GRL.Test.DSML.TODO
@@ -49,8 +49,8 @@ tests =
      , GRL.Test.Amyot.runTest
      , GRL.Test.Sif.runTest
 
-     , GRL.Test.Examples.TLang.runTest
-     , GRL.Test.Examples.PML.runTest
-     , GRL.Test.Examples.GLang.runTest
+     , GRL.Lang.Test.TLang.runTest
+     , GRL.Lang.Test.PML.runTest
+     , GRL.Lang.Test.GLang.runTest
 
  ----------------------------------------------------------------------- [ EOF ]

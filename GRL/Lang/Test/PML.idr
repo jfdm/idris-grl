@@ -4,7 +4,7 @@
 -- License   : see LICENSE
 -- --------------------------------------------------------------------- [ EOH ]
 ||| Example of using PML to model a paper.
-module GRL.Test.Examples.PML
+module GRL.Lang.Test.PML
 
 import GRL.Lang.PML
 

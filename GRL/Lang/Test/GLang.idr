@@ -3,7 +3,7 @@
 -- Copyright : (c) Jan de Muijnck-Hughes
 -- License   : see LICENSE
 -- --------------------------------------------------------------------- [ EOH ]
-module GRL.Test.Examples.GLang
+module GRL.Lang.Test.GLang
 
 import GRL.Lang.GLang
 
