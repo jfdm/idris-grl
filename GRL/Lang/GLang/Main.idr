@@ -23,79 +23,20 @@ import Lightyear.Strings
 import Lightyear.StringFile
 
 import GRL.Lang.GLang
+
+import GRL.Lang.GLang.Pretty
+import GRL.Lang.Common.Error
+import GRL.Lang.Common.Parser
+import GRL.Lang.Common.Effs
+import GRL.Lang.Common.Utils
+
 import GRL.Eval
 
--- -------------------------------------------------------------- [ Directives ]
 
-%default partial
+GLangE : Type -> Type
+GLangE ty = Lang (GLang ELEM) ty
 
--- ----------------------------------------------------------------- [ Helpers ]
-
-||| The 'context' environment
-GEnv : Type
-GEnv = Dict String (GLang ELEM)
-
-instance Default GEnv where
-  default = empty
-
-
--- ------------------------------------------------------------------ [ Errors ]
-
-data GError : Type where
-  NoFileError      : GError
-  NoSuchFileError  : String -> GError
-  ParserError      : String -> String -> GError
-  NoSuchIdentError : String -> GError
-  BadModelError    : GError
-
-instance Show GError where
-  show (NoFileError)            = "File Must Be specified"
-  show (NoSuchFileError fn)     = unwords ["No such file:", show fn]
-  show (ParserError fn err)     = unlines [unwords ["Unable to parse", show fn, "because:"], err]
-  show (NoSuchIdentError ident) = unwords ["No such identifier:", show ident]
-  show (BadModelError)          = "Bad Model"
-
--- ------------------------------------------------------ [ Parsing Lang Utils ]
-
-comment : String -> String -> String -> Parser ()
-comment l b e = (line l    *> pure ())
-            <|> (block b e *> pure ())
-            <|> spaces
-            <?> "Comment"
-    where
-      line : String -> Parser String
-      line l = do
-          token l
-          doc <- manyTill anyChar endOfLine
-          spaces
-          pure $ pack doc
-        <?> "Line comment"
-
-      block : String -> String -> Parser String
-      block b e = do
-          token b
-          doc <- manyTill anyChar (token e)
-          spaces
-          pure $ pack doc
-        <?> "Block Comment"
-
-keyword : String -> Parser ()
-keyword s = do
-    string s
-    spaces
-    pure ()
-  <?> "Keywords"
-
-ident : Parser String
-ident = lexeme (map pack $ some identChar) <?> "Identity"
-  where
-    identChar : Parser Char
-    identChar = alphaNum <?> "Ident Char"
-
--- ------------------------------------------------------------ [ GLang Parser ]
-
-gComment : Parser ()
-gComment = comment "--" "{-" "-}" <?> "Comment"
+-- ------------------------------------------------------------------- [ Types ]
 
 nodeTy : Parser GElemTy
 nodeTy = (keyword "Goal" *> return GOALty)
@@ -115,25 +56,7 @@ structTy = (keyword "&=" *> return ANDty)
        <|> (keyword "X=" *> return XORty)
        <?> "Struct Type"
 
-cValue : Parser CValue
-cValue = (keyword "Makes"   *> return MAKES)
-     <|> (keyword "Helps"   *> return HELPS)
-     <|> (keyword "SomePos" *> return SOMEPOS)
-     <|> (keyword "Unknown" *> return UNKNOWN)
-     <|> (keyword "SomeNeg" *> return SOMENEG)
-     <|> (keyword "Breaks"  *> return BREAK)
-     <|> (keyword "Hurts"   *> return HURTS)
-     <?> "CValue"
-
-sValue : Parser SValue
-sValue = (keyword "Denied"    *> return DENIED)
-     <|> (keyword "WeakDen"   *> return WEAKDEN)
-     <|> (keyword "WeakSatis" *> return WEAKSATIS)
-     <|> (keyword "Satisfied" *> return SATISFIED)
-     <|> (keyword "Undecided" *> return UNDECIDED)
-     <|> (keyword "None"      *> return NONE)
-     <?> "Trait Type"
-
+-- --------------------------------------------------------- [ Data Structures ]
 
 node : Parser (GLangAST ELEM)
 node = do
@@ -166,6 +89,8 @@ struct = do
     pure (MkStruct ty x ys)
   <?> "Struct"
 
+-- ------------------------------------------------------- [ Model description ]
+
 glang : Parser (ts ** DList GTy GLangAST ts)
 glang = do
     gComment
@@ -180,10 +105,12 @@ glang = do
     let ss' = DList.fromList ss
     let is' = DList.fromList is
 
-    pure (_ ** (getProof ns')
-            ++ (getProof ss')
-            ++ (getProof is'))
+    pure (_ ** (snd ns')
+            ++ (snd ss')
+            ++ (snd is'))
   <?> "GRL Model"
+
+-- ----------------------------------------------------------- [ Strategy File ]
 
 gstrategy : Parser $ List (String, SValue)
 gstrategy = do
@@ -202,44 +129,22 @@ gstrategy = do
         sval <- sValue
         gComment
         pure (i,sval)
+
 -- --------------------------------------------------------- [ Effectful Stuff ]
 
-GEffs : List EFFECT
-GEffs = [SYSTEM, FILE_IO (), STDIO, STATE GEnv, EXCEPTION GError]
-
-GRL : Type -> Type
-GRL rTy = Eff rTy GEffs
-
-readGRLFile : Parser a
-           -> String
-           -> GRL a
-readGRLFile p f = do
-    res <- parseFile NoSuchFileError ParserError p f
-    case res of
-      Left err  => raise err
-      Right res => pure res
-
-
-buildElem : GElemTy -> String -> GRL (GLang ELEM)
+buildElem : GElemTy -> String -> GLangE (GLang ELEM)
 buildElem GOALty t = pure $ mkGoal t
 buildElem SOFTty t = pure $ mkSoft t
 buildElem TASKty t = pure $ mkTask t
 buildElem RESty  t = pure $ mkRes  t
 
-buildElemSat : GElemTy -> String -> SValue -> GRL (GLang ELEM)
+buildElemSat : GElemTy -> String -> SValue -> GLangE (GLang ELEM)
 buildElemSat GOALty t s = pure $ mkSatGoal t s
 buildElemSat SOFTty t s = pure $ mkSatSoft t s
 buildElemSat TASKty t s = pure $ mkSatTask t s
 buildElemSat RESty  t s = pure $ mkSatRes  t s
 
-fetchElem : String -> GRL (GLang ELEM)
-fetchElem id = do
-  env <- get
-  case (lookup id env) of
-    Nothing => raise $ NoSuchIdentError id
-    Just e  => pure e
-
-insertE : GLangAST ty -> GModel -> GRL GModel
+insertE : GLangAST ty -> GModel -> GLangE GModel
 insertE (MkNode i ty t Nothing) m = do
     g <- buildElem ty t
     update (\env => insert i g env)
@@ -251,70 +156,52 @@ insertE (MkNode i ty t (Just sval)) m = do
     pure (insert g m)
 
 insertE (MkIntent ty cval x y) m = do
-    x' <- fetchElem x
-    y' <- fetchElem y
+    x' <- getElem x
+    y' <- getElem y
     case ty of
       IMPACTSty => pure $ insert (x' ==> y' | cval) m
       AFFECTSty => pure $ insert (x' ~~> y' | cval) m
 
 insertE (MkStruct ty x ys) m = do
-    x' <- fetchElem x
-    ys' <- mapE (\y => fetchElem y) ys
+    x' <- getElem x
+    ys' <- mapE (\y => getElem y) ys
     case ty of
       ANDty => pure $ insert (x' &= ys') m
       XORty => pure $ insert (x' X= ys') m
       IORty => pure $ insert (x' |= ys') m
 
-buildModel : DList GTy GLangAST ds -> GModel -> GRL GModel
+buildModel : DList GTy GLangAST ds -> GModel -> GLangE GModel
 buildModel Nil     m = pure m
 buildModel (d::ds) m = buildModel ds !(insertE d m)
 
-buildStrategyE : List (String, SValue) -> GRL Strategy
+buildStrategyE : List (String, SValue) -> GLangE Strategy
 buildStrategyE is = do
     is' <- mapE (\x => doConv x) is
     pure $ buildStrategy is'
   where
-    doConv : (String,SValue) -> GRL (GLang ELEM, SValue)
-    doConv (i,sval) = pure (!(fetchElem i), sval)
+    doConv : (String,SValue) -> GLangE (GLang ELEM, SValue)
+    doConv (i,sval) = pure (!(getElem i), sval)
 
-covering
-processArgs : List String -> GRL (String, Maybe String)
-processArgs Nil           = raise NoFileError
-processArgs [x]           = raise NoFileError
-processArgs [x,y]         = pure (y, Nothing)
-processArgs (x::y::z::xs) = pure (y, Just z)
-
-prettyResult : GoalNode -> String
-prettyResult g = unwords
-    [ "Result:"
-    , show (fromMaybe NONE (getSValue g))
-    , "\t<=="
-    , getNodeTitle g]
-
-evaluateE : GModel -> Maybe String -> GRL EvalResult
-evaluateE m Nothing       = pure $ evaluate FORWARD Nothing m
-evaluateE m (Just sfname) = do
-    strat <- readGRLFile gstrategy sfname
+doEvaluateE : GModel
+         -> Maybe String
+         -> GLangE EvalResult
+doEvaluateE m Nothing       = evaluateE m Nothing
+doEvaluateE m (Just sfname) = do
+    strat <- readLangFile gstrategy sfname
     strat' <- buildStrategyE strat
-    pure $ evaluate FORWARD (Just strat') m
+    evaluateE m (Just strat')
 
 -- ------------------------------------------------------------------ [ Pretty ]
 
-showRes : EvalResult -> GRL ()
-showRes res =
-    case toString res prettyResult of
-      Nothing  => raise BadModelError
-      Just res => putStrLn res
-
 covering
-eMain : GRL ()
+eMain : GLangE ()
 eMain = do
     as <- getArgs
     (mfname, sfname) <- processArgs as
-    (_ ** ast) <- readGRLFile glang mfname
+    (_ ** ast) <- readLangFile glang mfname
     m <- buildModel ast emptyModel
-    res <- evaluateE m sfname
-    showRes res
+    res <- doEvaluateE m sfname
+    showRes prettyResult res
     putStrLn $ toString m
 
 main : IO ()

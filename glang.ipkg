@@ -3,9 +3,11 @@ package glang
 pkgs = effects
      , containers
      , lightyear
-     , grl
+	 , grl
+     , grlDSLCommon
 
-executable = grlc
+executable = gLangEval
+
 main = GRL.Lang.GLang.Main
 
 modules = GRL.Lang.GLang.Main

@@ -1,0 +1,11 @@
+package grlDSLCommon
+
+pkgs = lightyear
+	 , effects
+	 , containers
+	 , grl
+
+modules = GRL.Lang.Common.Error
+		, GRL.Lang.Common.Parser
+		, GRL.Lang.Common.Effs
+		, GRL.Lang.Common.Utils

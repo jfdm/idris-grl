@@ -141,5 +141,4 @@ namespace GLang
       ss : List (Maybe String)
       ss = map (\n => prettyStructs n ids m) (verticesID m)
 
-
 -- --------------------------------------------------------------------- [ EOF ]

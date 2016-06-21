@@ -27,3 +27,6 @@ test: clean
 
 doc:
 	${IDRIS} --mkdoc ${LIB}.ipkg
+
+glang:
+	${IDRIS} --build glang.ipkg
